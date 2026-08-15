@@ -1,7 +1,12 @@
-import { TypeObject } from "rokay/data/type"
+import { TypeADT, TypeNumber, TypeObject } from "rokay/data/type"
 
 import { V } from "../maths/types"
 
 
 export const
-  Unicorn = TypeObject({ pos: V })
+  UnicornState = TypeADT({
+    idle: {},
+    moveTo: { pos: V, speed: TypeNumber() },
+  }),
+
+  Unicorn = TypeObject({ pos: V, state: UnicornState })
