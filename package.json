@@ -1,0 +1,38 @@
+{
+  "author": "",
+  "description": "JS13K 2026: Unicorns & Rainbows",
+  "dependencies": {
+    "@types/pg": "^8.21.0",
+    "okay-site-login": "^0.0.21",
+    "pg": "^8.23.0",
+    "rokay": "^0.2.0",
+    "tslib": "^2.8.1",
+    "typescript": "^5.9.3"
+  },
+  "license": "ISC",
+  "main": "_dist/server/unicorn.js",
+  "name": "unicorn",
+  "rokay": {
+    "port": 7024,
+    "theme": "#dde",
+    "title": "Unicorn",
+    "version": 5
+  },
+  "scripts": {
+    "build": "rokay build",
+    "start": "rokay server:run",
+    "watch": "rokay watch",
+    "zip": "npm run zip:html && npm run zip:rollup && npm run zip:zip && npm run zip:size",
+    "zip:final": "npm run zip:rollup && cp static/unicorn.min.js static/unicorn.js && npm run zip:zip && npm run zip:size",
+    "zip:html": "curl localhost:7024 -H 'Accept: text/html' > static/index.html",
+    "zip:rollup": "rollup --input static/unicorn.js --file static/unicorn.js --format cjs --plugin terser",
+    "zip:size": "ls -al static/build.zip | awk '{print $5}'",
+    "zip:zip": "cd static && rm -f build.zip && zip build.zip art/*.png art/icons/16.png index.html unicorn.css unicorn.js manifest.json"
+  },
+  "type": "module",
+  "version": "1.0.0",
+  "devDependencies": {
+    "@rollup/plugin-terser": "^1.0.0",
+    "rollup": "^4.62.4"
+  }
+}

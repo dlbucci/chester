@@ -1,0 +1,10 @@
+_dist/
+.rpt2_cache/
+.vscode/
+node_modules/
+static/**/*.css
+static/**/*.js
+static/**/*.map
+.env
+tsconfig.json
+*.gen.ts

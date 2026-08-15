@@ -1,0 +1,17 @@
+{
+  "background_color": "#dde",
+  "description": "JS13K 2026: Unicorns & Rainbows",
+  "icons": [],
+  "lang": "en-US",
+  "name": "Unicorn",
+  "orientation": "any",
+  "related_applications": [
+    {
+      "platform": "web"
+    }
+  ],
+  "scope": "/",
+  "short_name": "Unicorn",
+  "start_url": ".",
+  "theme_color": "#dde"
+}
