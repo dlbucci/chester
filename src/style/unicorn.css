@@ -8,6 +8,7 @@ body {
   background-color: #dde;
 }
 
-canvas {
+canvas,
+img {
   image-rendering: pixelated;
 }

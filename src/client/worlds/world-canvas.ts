@@ -1,15 +1,20 @@
 import { canvas } from "rokay/browser/elt"
 import { withCtx } from "rokay/browser/game/danvas"
+import { $ } from "rokay/browser/prop"
+import { backgroundColor } from "rokay/browser/style"
 
-import { World } from "../../shared/worlds/types.gen"
 import { AppClient } from "../app"
+
+import { WorldFM } from "./form-models.gen"
 
 
 export const
-  WorldCanvas = (app: AppClient, world: World) => {
-    const { unicorn } = world
+  LEVEL_COLORS = ["red", "orange", "yellow", "green", "blue", "indigo", "violet"],
 
-    return canvas(withCtx((ctx) => {
+  WorldCanvas = (app: AppClient, world: WorldFM) => {
+    const { level, unicorn } = world
+
+    return canvas($(level, (_level) => backgroundColor(LEVEL_COLORS[_level])), withCtx((ctx) => {
       const
         draw = () => {
           ctx.drawImage(app.assets.unicorn, unicorn.pos.x, unicorn.pos.y)
