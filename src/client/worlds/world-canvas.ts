@@ -23,7 +23,13 @@ export const
     const
       { unicorn } = world,
       getCameraOffset = (unicorn: Unicorn, level: Level, size: GameSize) => {
-        return V(0, -Math.min(unicorn.pos.y, size.cell.y * level.size.y - size.size.y))
+        return V(
+          0,
+          -Math.min(
+            unicorn.pos.y - size.cell.y * size.board.y / 2,
+            size.cell.y * level.size.y - size.size.y,
+          ),
+        )
       },
       level = derive(world.level, (_level) => {
         const

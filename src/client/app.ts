@@ -6,11 +6,29 @@ import { Assets } from "./assets.js"
 
 
 export type GameSize = {
+  /**
+   * the size of the board in cells
+   **/
   board: V
+  /**
+   * the size of a cell in pixels
+   **/
   cell: V
+  /**
+   * the size of the board in pixels
+   **/
   size: V
+  /**
+   * the size of the window
+   **/
   window: V
+  /**
+   * the zoom for the board
+   **/
   zoom: number
+  /**
+   * the size of the board * zoom in pixels
+   **/
   zoomedSize: V
 }
 
