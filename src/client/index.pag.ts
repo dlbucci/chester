@@ -1,3 +1,6 @@
+import { apd } from "rokay/browser/core"
+import { div } from "rokay/browser/elt"
+import { border } from "rokay/browser/style"
 import { VZ } from "rokay/math/v"
 
 import { Unicorn } from "../shared/unicorns/types.gen"
@@ -11,5 +14,5 @@ export const
   IndexPage = (app: AppClient) => {
     const world = WorldFM(0, Unicorn(VZ))
 
-    return WorldCanvas(app, world)
+    return div(border("1px solid #000"), apd(WorldCanvas(app, world)))
   }

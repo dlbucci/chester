@@ -4,7 +4,7 @@ import { mount } from "rokay/browser/mount"
 import { $ } from "rokay/browser/prop"
 import { BrowserRouter } from "rokay/browser/router"
 import { position, size as sizeStyle, transform } from "rokay/browser/style"
-import { Visible } from "rokay/browser/visible"
+import { VisibleProp } from "rokay/browser/visible"
 import { WindowSize } from "rokay/browser/window"
 import { divideComponents, floor_, scale, scaleComponents, V } from "rokay/math/v"
 import { mix } from "rokay/mix"
@@ -51,7 +51,7 @@ mount(document.body, () => {
         assets,
         router,
         size,
-        visible: Visible(),
+        visible: VisibleProp(),
       }
 
       return div($s100, apd(router.match(IndexPages({ app }), (_else) =>

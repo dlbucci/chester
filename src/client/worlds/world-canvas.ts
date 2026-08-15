@@ -1,15 +1,17 @@
 import { canvas } from "rokay/browser/elt"
 import { withCtx } from "rokay/browser/game/danvas"
+import { onPointerdown } from "rokay/browser/on"
 import { $ } from "rokay/browser/prop"
-import { backgroundColor, border } from "rokay/browser/style"
+import { backgroundColor } from "rokay/browser/style"
+import { rafLoop } from "rokay/browser/visible"
 import { tab2d } from "rokay/data/array"
 import { pick } from "rokay/math/random"
-import { scaleComponents_, V } from "rokay/math/v"
+import { divide_, divideComponents_, floor_, minus_, scaleComponents, scaleComponents_, V } from "rokay/math/v"
 import { derive } from "rokay/prop/derive"
 
 import { Level } from "../../shared/levels/types.gen"
 import { Unicorn } from "../../shared/unicorns/types.gen"
-import { AppClient } from "../app"
+import { AppClient, GameSize } from "../app"
 
 import { WorldFM } from "./form-models.gen"
 
@@ -20,6 +22,9 @@ export const
   WorldCanvas = (app: AppClient, world: WorldFM) => {
     const
       { unicorn } = world,
+      getCameraOffset = (unicorn: Unicorn, level: Level, size: GameSize) => {
+        return V(0, -Math.min(unicorn.pos.y, size.cell.y * level.size.y - size.size.y))
+      },
       level = derive(world.level, (_level) => {
         const
           _size = app.size.get(),
@@ -31,15 +36,31 @@ export const
       })
 
     return canvas(
-      border("1px solid #000"),
       $(world.level, (_level) => backgroundColor(LEVEL_COLORS[_level])),
+      onPointerdown(
+        (el, ev) => {
+          const _size = app.size.get()
+          const pos = minus_(
+            floor_(divide_(
+              minus_(V(ev.clientX, ev.clientY), el.getBoundingClientRect()),
+              _size.zoom,
+            )),
+            getCameraOffset(unicorn, level.get(), _size),
+          )
+          const cell = floor_(divideComponents_(pos, _size.cell))
+          unicorn.pos = scaleComponents(cell, _size.cell)
+        },
+      ),
       withCtx((ctx) => {
         const
           draw = () => {
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
             const
               _level = level.get(),
               _size = app.size.get()
-            ctx.translate(0, -Math.min(unicorn.pos.y, _size.cell.y * _level.size.y - _size.size.y))
+            ctx.save()
+            const offset = getCameraOffset(unicorn, _level, _size)
+            ctx.translate(offset.x, offset.y)
             ctx.fillStyle = "rgba(0, 0, 0, .125)"
             level.get().data.forEach((row, _r) => {
               row.forEach((_col, _c) => {
@@ -49,6 +70,7 @@ export const
               })
             })
             ctx.drawImage(app.assets.unicorn, unicorn.pos.x, unicorn.pos.y)
+            ctx.restore()
           },
           step = () => {}
 
@@ -59,7 +81,7 @@ export const
           draw()
         })
 
-        app.visible.raf(() => {
+        rafLoop(app.visible, () => {
           step()
           draw()
         })
