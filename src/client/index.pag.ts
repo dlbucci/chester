@@ -1,6 +1,6 @@
 import { VZ } from "rokay/math/v"
 
-import { Unicorn } from "../shared/unicorn/types.gen"
+import { Unicorn } from "../shared/unicorns/types.gen"
 
 import { AppClient } from "./app"
 import { WorldFM } from "./worlds/form-models.gen"

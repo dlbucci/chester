@@ -1,6 +1,6 @@
 import { edit, TypeInt, TypeObject } from "rokay/data/type"
 
-import { Unicorn } from "../unicorn/types"
+import { Unicorn } from "../unicorns/types"
 
 
 export const
