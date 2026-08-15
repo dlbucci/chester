@@ -1,14 +1,13 @@
 import { MixArgs } from "rokay/mix"
-import { charset, lang } from "rokay/server/attr"
+import { async, charset, lang, src } from "rokay/server/attr"
 import { apd, Elt } from "rokay/server/core"
-import { body, head, html, meta, title, _meta } from "rokay/server/elt"
+import { _meta, body, head, html, link, meta, script, title } from "rokay/server/elt"
 
 import { AppServer } from "./app.js"
-import { staticFiles } from "./static.gen"
 
 
 export const
-  HTML = ({ cspNonce, user }: AppServer, ...args: MixArgs<Elt>) =>
+  HTML = (_app: AppServer, ...args: MixArgs<Elt>) =>
     html(lang("en"), apd(
       head(apd(
         title(apd("Unicorn")),
@@ -19,7 +18,14 @@ export const
         meta("theme-color", "#dde"),
         meta("viewport", "initial-scale=1,user-scalable=no,width=device-width"),
 
-        ...staticFiles(cspNonce, { user: user.get() }),
+        // ...staticFiles(cspNonce, { user: user.get() }),
+        link("apple-touch-icon", "/art/icons/16.png"),
+        link("icon", "/art/icons/16.png"),
+        link("manifest", "/manifest.json"),
+        link("stylesheet", "/unicorn.css"),
+
+        // script(nonce(cspNonce), apd(`const SERVER_DATA = ${JSON.stringify(serverData)}`)),
+        script(async, src("/unicorn.js")),
       )),
-      body(...args)
+      body(...args),
     ))
