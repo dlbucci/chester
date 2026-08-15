@@ -1,10 +1,9 @@
-import { getUserAsink } from "okay-site-login/client/users/service"
 import { apd } from "rokay/browser/core"
 import { div } from "rokay/browser/elt"
 import { mount } from "rokay/browser/mount"
 import { $ } from "rokay/browser/prop"
 import { BrowserRouter } from "rokay/browser/router"
-import { display, flexDirection, position, size as sizeStyle, transform, transformOrigin } from "rokay/browser/style"
+import { position, size as sizeStyle, transform } from "rokay/browser/style"
 import { Visible } from "rokay/browser/visible"
 import { WindowSize } from "rokay/browser/window"
 import { divideComponents, floor_, scale, scaleComponents, V } from "rokay/math/v"
@@ -16,6 +15,7 @@ import { AppClient } from "./app.js"
 import { load } from "./assets.js"
 import { Loader } from "./elts/loader.syn.js"
 import { IndexPages } from "./pages.gen.js"
+import { $flexCenter, $s100 } from "./style/utils.gen.js"
 
 
 mount(document.body, () => {
@@ -41,23 +41,20 @@ mount(document.body, () => {
     })
 
   return apd(div(
-    display("flex"),
-    flexDirection("column"),
+    $flexCenter,
     position("relative"),
     $(size, ({ size: { x, y }, zoom }) =>
-      mix(sizeStyle(x + "px", y + "px"), transform(`scale(${zoom})`))
+      mix(sizeStyle((x + 2) + "px", (y + 2) + "px"), transform(`scale(${zoom})`))
     ),
-    transformOrigin("top left"),
     apd(Loader(assets, (assets) => {
       const app: AppClient = {
         assets,
         router,
-        user: getUserAsink(),
         size,
         visible: Visible(),
       }
 
-      return div(sizeStyle("100%"), apd(router.match(IndexPages({ app }), (_else) =>
+      return div($s100, apd(router.match(IndexPages({ app }), (_else) =>
         div(apd("Uh, where ya goin', bruv?"))
       )))
     })),
