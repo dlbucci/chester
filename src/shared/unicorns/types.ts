@@ -9,4 +9,8 @@ export const
     moveTo: { pos: V, speed: TypeNumber() },
   }),
 
-  Unicorn = TypeObject({ pos: V, state: UnicornState })
+  Unicorn = TypeObject({
+    pos: V,
+    scale: V,
+    state: UnicornState,
+  })

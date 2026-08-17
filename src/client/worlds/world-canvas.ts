@@ -13,6 +13,7 @@ import { derive } from "rokay/prop/derive"
 import { Level } from "../../shared/levels/types.gen"
 import { Unicorn, UnicornStateIdle, UnicornStateMoveTo } from "../../shared/unicorns/types.gen"
 import { AppClient, GameSize } from "../app"
+import { UNICORN_OFFSET } from "../unicorn/model"
 
 import { WorldFM } from "./form-models.gen"
 
@@ -41,7 +42,10 @@ export const
           size = V(_size.board.x, _size.board.y * 10),
           data = tab2d(size.y, size.x, (): Unicorn | undefined => undefined)
         data[size.y - 2][pick([2, size.x - 3])] = unicorn
-        unicorn.pos = scaleComponents_(V(pick([2, size.x - 3]), size.y - 2), _size.cell)
+        unicorn.pos = plus_(
+          scaleComponents_(V(pick([2, size.x - 3]), size.y - 2), _size.cell),
+          UNICORN_OFFSET,
+        )
         return Level(data, size)
       })
 
@@ -59,7 +63,15 @@ export const
             getCameraOffset(unicorn, level.get(), _size),
           )
           const cell = floor_(divideComponents_(pos, _size.cell))
-          unicorn.state = UnicornStateMoveTo(scaleComponents(cell, _size.cell), 1)
+          unicorn.state = UnicornStateMoveTo(
+            plus_(scaleComponents(cell, _size.cell), UNICORN_OFFSET),
+            1,
+          )
+          if (unicorn.state.pos.x < unicorn.pos.x) {
+            unicorn.scale.x = -1
+          } else if (unicorn.state.pos.x > unicorn.pos.x) {
+            unicorn.scale.x = 1
+          }
         },
       ),
       withCtx((ctx) => {
@@ -80,7 +92,11 @@ export const
                 }
               })
             })
-            ctx.drawImage(app.assets.unicorn, Math.round(unicorn.pos.x), Math.round(unicorn.pos.y))
+            ctx.save()
+            ctx.translate(Math.round(unicorn.pos.x), Math.round(unicorn.pos.y))
+            ctx.scale(unicorn.scale.x, unicorn.scale.y)
+            ctx.drawImage(app.assets.unicorn, -UNICORN_OFFSET.x, -UNICORN_OFFSET.y)
+            ctx.restore()
             ctx.restore()
           },
           step = () => {
