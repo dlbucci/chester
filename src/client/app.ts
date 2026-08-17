@@ -7,7 +7,7 @@ import { Assets } from "./assets.js"
 
 export type GameSize = {
   /**
-   * the size of the board in cells
+   * the size of the board visible on screen in cells
    **/
   board: V
   /**

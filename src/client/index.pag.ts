@@ -12,7 +12,7 @@ import { WorldCanvas } from "./worlds/world-canvas"
 
 export const
   IndexPage = (app: AppClient) => {
-    const world = WorldFM(0, Unicorn(VZ, V(1, 1), UnicornStateIdle()))
+    const world = WorldFM(0, Unicorn(VZ, VZ, V(1, 1), UnicornStateIdle(0, [])))
 
     return div(border("1px solid #000"), apd(WorldCanvas(app, world)))
   }
