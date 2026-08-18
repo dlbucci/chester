@@ -5,6 +5,7 @@ import { V } from "../maths/types"
 
 export const
   ThingState = TypeADT({
+    dying: {},
     idle: { cooldown: TypeNumber(), moves: TypeArray(TypeArray(V)) },
     moveTo: { path: TypeArray(V), speed: TypeNumber() },
   }),

@@ -5,15 +5,16 @@ import { $ } from "rokay/browser/prop"
 import { backgroundColor } from "rokay/browser/style"
 import { rafLoop } from "rokay/browser/visible"
 import { last } from "rokay/data/array"
+import { pick } from "rokay/math/random"
 import { divide_, divideComponents_, eq, floor_, iter, len, minus, minus_, plus_, scale_, unit, V, VZ } from "rokay/math/v"
 import { derive } from "rokay/prop/derive"
 
 import { Level } from "../../shared/levels/types.gen"
-import { getMoves, KNIGHT_MOVEMENTS } from "../../shared/things/model"
-import { ThingPawn } from "../../shared/things/types.gen"
+import { getMoves, KNIGHT_MOVEMENTS, PAWN_MOVEMENTS, THING_COOLDOWNS, THING_SPEEDS } from "../../shared/things/model"
+import { ThingPawn, ThingStateDying, ThingStateIdle, ThingStateMoveTo } from "../../shared/things/types.gen"
 import { Unicorn, UnicornStateIdle, UnicornStateMoveTo } from "../../shared/unicorns/types.gen"
 import { AppClient, GameSize } from "../app"
-import { cellToPos } from "../cells/utils"
+import { cellToPos, posToCell } from "../cells/utils"
 import { LEVELS } from "../levels/model"
 import { UNICORN_COOLDOWN_SEC, UNICORN_OFFSET } from "../unicorn/model"
 
@@ -89,7 +90,7 @@ export const
               const COOLDOWN_OFFSET = Math.ceil(
                 unicorn.state.cooldown / UNICORN_COOLDOWN_SEC * _size.cell.y,
               )
-              ctx.fillStyle = "rgba(255,255,255,.5)"
+              ctx.fillStyle = `rgba(255,255,255,${unicorn.state.cooldown > 0 ? ".25" : ".5"})`
               unicorn.state.moves.forEach((path) => {
                 const move = last(path)
                 ctx.fillRect(
@@ -120,15 +121,24 @@ export const
           },
 
           step = () => {
-            const { unicorn } = level.get()
+            const { things, unicorn } = level.get()
             if (unicorn.state.t === "idle" && unicorn.state.cooldown > 0) {
               unicorn.state.cooldown -= 1 / 60
             } else if (unicorn.state.t === "moveTo") {
               let next = unicorn.state.path[0]
+              const oldCell = posToCell(app, unicorn.pos)
               unicorn.pos = plus_(unicorn.pos, scale_(
                 unit(minus(next, unicorn.pos)),
                 unicorn.state.speed,
               ))
+              const newCell = posToCell(app, unicorn.pos)
+              if (!eq(oldCell, newCell) && eq(unicorn.cell, newCell)) {
+                things.forEach((thing) => {
+                  if (thing.state.t === "dying") { return }
+                  const thingCell = posToCell(app, thing.pos)
+                  if (eq(newCell, thingCell)) { thing.state = ThingStateDying() }
+                })
+              }
               if (len(minus(next, unicorn.pos)) < .5) {
                 unicorn.pos = next
                 unicorn.state.path = unicorn.state.path.slice(1)
@@ -141,6 +151,56 @@ export const
                 }
               }
             }
+
+            things.forEach((thing) => {
+              if (thing.state.t === "idle") {
+                if (thing.state.cooldown > 0) {
+                  thing.state.cooldown -= 1 / 60
+                } else {
+                  const move = pick(thing.state.moves)
+                  if (move != null) {
+                    thing.cell = last(move)
+                    thing.state = ThingStateMoveTo(
+                      move.map((cell) => cellToPos(app, cell)),
+                      THING_SPEEDS[thing.t],
+                    )
+                    thing.cell = last(thing.state.path)
+                  }
+                }
+              } else if (thing.state.t === "moveTo") {
+                let next = thing.state.path[0]
+                thing.pos = plus_(
+                  thing.pos,
+                  scale_(unit(minus(next, thing.pos)), thing.state.speed),
+                )
+                const newCell = posToCell(app, thing.pos)
+                if (!eq(thing.cell, newCell)) {
+                  thing.cell = newCell
+                  // we've entered the final square of the move, make the attack
+                  if (thing.state.path.length === 1) {
+                    things.forEach((otherThing) => {
+                      if (thing === otherThing || otherThing.state.t === "dying") { return }
+                      const thingCell = posToCell(app, otherThing.pos)
+                      if (eq(newCell, thingCell)) { otherThing.state = ThingStateDying() }
+                    })
+                  }
+                }
+                if (len(minus(next, thing.pos)) < .5) {
+                  thing.pos = next
+                  thing.state.path = thing.state.path.slice(1)
+                  if (thing.state.path.length === 0) {
+                    thing.state = ThingStateIdle(THING_COOLDOWNS[thing.t], getMoves(
+                      thing.cell,
+                      PAWN_MOVEMENTS,
+                      level.get().size,
+                    ))
+                  }
+                }
+              }
+            })
+
+            // TODO: animate death
+            level.get().things = things.filter((thing) => thing.state.t !== "dying")
           }
 
         app.size.listenAndCall((_size) => {
