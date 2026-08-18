@@ -2,9 +2,9 @@
   "author": "",
   "description": "JS13K 2026: Unicorns & Rainbows",
   "dependencies": {
-    "@types/pg": "^8.21.0",
+    "@types/pg": "^8.20.0",
     "okay-site-login": "^0.0.21",
-    "pg": "^8.23.0",
+    "pg": "^8.20.0",
     "rokay": "^0.2.0",
     "tslib": "^2.8.1",
     "typescript": "^5.9.3"
