@@ -15,6 +15,10 @@ export type GameSize = {
    **/
   cell: V
   /**
+   * half the size of a cell in pixels
+   **/
+  cellHalf: V
+  /**
    * the size of the board in pixels
    **/
   size: V
