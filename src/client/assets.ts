@@ -16,20 +16,27 @@ export type Assets = {
   font16italic: Map<string, HTMLCanvasElement>
   // music: { bg: AudioBuffer }
   // sfx: { button: AudioBuffer }
+  pawn: HTMLCanvasElement
 }
 
 
 export const
   load = () =>
     Promise.all([
-      loadImage("/art/unicorn.png").then((image) =>
-        canvas(size(image.width, image.height), withCtx(
+      loadImage("/art/sprites.png").then((image) => ({
+        pawn: canvas(size(16, 16), withCtx(
           (ctx) => {
-            ctx.drawImage(image, 0, 0)
+            ctx.drawImage(image, 16, 0, 16, 16, 0, 0, 16, 16)
           },
           outline(1),
-        ))
-      ),
+        )),
+        unicorn: canvas(size(16, 16), withCtx(
+          (ctx) => {
+            ctx.drawImage(image, 0, 0, 16, 16, 0, 0, 16, 16)
+          },
+          outline(1),
+        )),
+      })),
       // loadImage("/art/items.png"),
       // loadImage("/art/work.png"),
       loadFont("9px var(--font-monospace)"),
@@ -40,17 +47,18 @@ export const
       // sfxKikisCafeButton(new AudioContext()),
       // songKikisCafeBGMusic(new AudioContext()),
     ])
-      .then(([unicorn, font9, font12, font16, font16italic, font16cursive]): Assets => ({
+      .then(([{ pawn, unicorn }, font9, font12, font16, font16italic, font16cursive]): Assets => ({
         // cached: {
         //   bgs: new Map<string, HTMLCanvasElement>(),
         //   cats: new Map<CatFM, HTMLCanvasElement>(),
         // },
-        unicorn,
         font9,
         font12,
         font16,
         font16cursive,
         font16italic,
+        pawn,
+        unicorn,
       }))
 
 

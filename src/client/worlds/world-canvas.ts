@@ -9,17 +9,20 @@ import { divide_, divideComponents_, eq, floor_, iter, len, minus, minus_, plus_
 import { derive } from "rokay/prop/derive"
 
 import { Level } from "../../shared/levels/types.gen"
+import { getMoves, KNIGHT_MOVEMENTS } from "../../shared/things/model"
+import { ThingPawn } from "../../shared/things/types.gen"
 import { Unicorn, UnicornStateIdle, UnicornStateMoveTo } from "../../shared/unicorns/types.gen"
 import { AppClient, GameSize } from "../app"
 import { cellToPos } from "../cells/utils"
 import { LEVELS } from "../levels/model"
-import { getMoves, UNICORN_COOLDOWN_SEC, UNICORN_OFFSET } from "../unicorn/model"
+import { UNICORN_COOLDOWN_SEC, UNICORN_OFFSET } from "../unicorn/model"
 
 import { WorldFM } from "./form-models.gen"
 
 
 export const
   LEVEL_COLORS = ["red", "orange", "yellow", "green", "blue", "indigo", "violet"],
+
   WorldCanvas = (app: AppClient, world: WorldFM) => {
     const
       getCameraOffset = (unicorn: Unicorn, level: Level, size: GameSize) =>
@@ -98,14 +101,24 @@ export const
               })
             }
 
-            ctx.save()
-            ctx.translate(Math.round(unicorn.pos.x), Math.round(unicorn.pos.y))
-            ctx.scale(unicorn.scale.x, unicorn.scale.y)
-            ctx.drawImage(app.assets.unicorn, -UNICORN_OFFSET.x, -UNICORN_OFFSET.y)
-            ctx.restore()
+            const things: (Unicorn | ThingPawn)[] = [unicorn, ..._level.things].sort((a, b) =>
+              a.pos.y - b.pos.y
+            )
+            things.forEach((thing) => {
+              ctx.save()
+              ctx.translate(Math.round(thing.pos.x), Math.round(thing.pos.y))
+              ctx.scale(thing.scale.x, thing.scale.y)
+              if ("t" in thing) {
+                ctx.drawImage(app.assets[thing.t], -UNICORN_OFFSET.x, -UNICORN_OFFSET.y + 2)
+              } else {
+                ctx.drawImage(app.assets.unicorn, -UNICORN_OFFSET.x, -UNICORN_OFFSET.y + 2)
+              }
+              ctx.restore()
+            })
 
             ctx.restore()
           },
+
           step = () => {
             const { unicorn } = level.get()
             if (unicorn.state.t === "idle" && unicorn.state.cooldown > 0) {
@@ -122,6 +135,7 @@ export const
                 if (unicorn.state.path.length === 0) {
                   unicorn.state = UnicornStateIdle(UNICORN_COOLDOWN_SEC, getMoves(
                     unicorn.cell,
+                    KNIGHT_MOVEMENTS,
                     level.get().size,
                   ))
                 }
