@@ -4,7 +4,7 @@ import { plus, V } from "rokay/math/v"
 import { getPath } from "../paths/model"
 
 
-export const
+const
   KNIGHT_MOVEMENTS = [
     V(-1, -2),
     V(1, -2),
@@ -14,11 +14,18 @@ export const
     V(2, 1),
     V(-1, 2),
     V(1, 2),
-  ],
-  PAWN_MOVEMENTS = [V(0, 1)],
+  ]
 
-  THING_COOLDOWNS = { pawn: 2 },
-  THING_SPEEDS = { pawn: .5 },
+
+export const
+  THING_COOLDOWNS = { pawn: 2, unicorn: 1 },
+  THING_MOVEMENTS = {
+    knight: KNIGHT_MOVEMENTS,
+    pawn: [V(0, 1)],
+    unicorn: KNIGHT_MOVEMENTS,
+  },
+  THING_OFFSETS = { pawn: V(-8, -12), unicorn: V(-8, -12) },
+  THING_SPEEDS = { pawn: .5, unicorn: 1 },
 
   getMoves = (cell: V, movements: V[], levelSize: V): V[][] =>
     mapNotNil(movements, (movement) => {

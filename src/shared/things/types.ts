@@ -17,4 +17,10 @@ export const
       scale: V,
       state: ThingState,
     },
+    unicorn: {
+      cell: V,
+      pos: V,
+      scale: V,
+      state: ThingState,
+    },
   })
