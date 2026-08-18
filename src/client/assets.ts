@@ -1,3 +1,6 @@
+import { size } from "rokay/browser/attr"
+import { canvas } from "rokay/browser/elt"
+import { outline, withCtx } from "rokay/browser/game/danvas"
 import { tab } from "rokay/data/array"
 
 import { TextCanvas } from "./elts/text-canvas"
@@ -5,7 +8,7 @@ import { TextCanvas } from "./elts/text-canvas"
 
 export type Assets = {
   // cached: { bgs: Map<string, HTMLCanvasElement>, cats: Map<CatFM, HTMLCanvasElement> }
-  unicorn: HTMLImageElement
+  unicorn: HTMLCanvasElement
   font9: Map<string, HTMLCanvasElement>
   font12: Map<string, HTMLCanvasElement>
   font16: Map<string, HTMLCanvasElement>
@@ -19,7 +22,14 @@ export type Assets = {
 export const
   load = () =>
     Promise.all([
-      loadImage("/art/unicorn.png"),
+      loadImage("/art/unicorn.png").then((image) =>
+        canvas(size(image.width, image.height), withCtx(
+          (ctx) => {
+            ctx.drawImage(image, 0, 0)
+          },
+          outline(1),
+        ))
+      ),
       // loadImage("/art/items.png"),
       // loadImage("/art/work.png"),
       loadFont("9px var(--font-monospace)"),
