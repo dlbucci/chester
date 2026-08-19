@@ -5,9 +5,9 @@ import { $ } from "rokay/browser/prop"
 import { backgroundColor } from "rokay/browser/style"
 import { rafLoop } from "rokay/browser/visible"
 import { last } from "rokay/data/array"
-import { pick } from "rokay/math/random"
-import { divide_, divideComponents_, eq, floor_, iter, len, minus, minus_, plus_, s, scale_, scaleComponents,
-  unit, V, VZ } from "rokay/math/v"
+import { float, pick } from "rokay/math/random"
+import { divide_, divideComponents_, eq, floor_, iter, len, minus, minus_, plus, plus_, s, scale, scale_,
+  scaleComponents, unit, unitOfAng, V, VZ } from "rokay/math/v"
 import { derive } from "rokay/prop/derive"
 
 import { Level } from "../../shared/levels/types.gen"
@@ -15,6 +15,7 @@ import { getMoves, THING_COOLDOWNS, THING_MOVEMENTS, THING_OFFSETS, THING_SPEEDS
 import { Thing, ThingStateDying, ThingStateIdle, ThingStateMoveTo } from "../../shared/things/types.gen"
 import { AppClient, GameSize } from "../app"
 import { cellToPos, posToCell } from "../cells/utils"
+import { GRAVITY } from "../const"
 
 import { WorldFM } from "./form-models.gen"
 
@@ -100,6 +101,7 @@ export const
             _level.things.sort((a, b) => a.pos.y - b.pos.y).forEach((thing) => {
               ctx.save()
               ctx.translate(Math.round(thing.pos.x), Math.round(thing.pos.y))
+              if (thing.state.t === "dying") { ctx.rotate(thing.state.ang) }
               ctx.scale(thing.scale.x, thing.scale.y)
               ctx.drawImage(app.assets[thing.t], ...(s(THING_OFFSETS[thing.t])))
               ctx.restore()
@@ -108,11 +110,18 @@ export const
             ctx.restore()
           },
 
-          step = () => {
+          step = (dt: number) => {
             const { things } = level.get()
 
             things.forEach((thing) => {
-              if (thing.state.t === "idle") {
+              if (thing.state.t === "dying") {
+                if (thing.state.lifetime > 0) {
+                  thing.state.lifetime -= dt
+                  thing.state.vel = plus(thing.state.vel, scale(GRAVITY, dt))
+                  thing.pos = plus(thing.pos, scale(thing.state.vel, dt))
+                  thing.state.ang += thing.state.velAng * dt
+                }
+              } else if (thing.state.t === "idle") {
                 if (thing.state.cooldown > 0) {
                   thing.state.cooldown -= 1 / 60
                 } else if (thing.t === "pawn") {
@@ -140,7 +149,14 @@ export const
                     things.forEach((otherThing) => {
                       if (thing === otherThing || otherThing.state.t === "dying") { return }
                       const thingCell = posToCell(app, otherThing.pos)
-                      if (eq(newCell, thingCell)) { otherThing.state = ThingStateDying() }
+                      if (eq(newCell, thingCell)) {
+                        otherThing.state = ThingStateDying(
+                          0,
+                          2,
+                          scale(unitOfAng(float(-Math.PI * 3 / 8, -Math.PI * 5 / 8)), 50),
+                          1,
+                        )
+                      }
                     })
                   }
                 }
@@ -158,8 +174,9 @@ export const
               }
             })
 
-            // TODO: animate death
-            level.get().things = things.filter((thing) => thing.state.t !== "dying")
+            level.get().things = things.filter((thing) =>
+              thing.state.t !== "dying" || thing.state.lifetime > 0
+            )
           }
 
         app.size.listenAndCall((_size) => {
@@ -170,7 +187,7 @@ export const
         })
 
         rafLoop(app.visible, () => {
-          step()
+          step(1 / 60)
           draw()
         })
       }),
