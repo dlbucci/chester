@@ -12,11 +12,11 @@ import { ErrorDisplay } from "./error-display.syn"
 
 
 export const
-  Loader = <T>(asink: PropView<Async<T>>, render: (t: T) => Elt | undefined) =>
-    LoaderProp(asink, render),
+  Loader = <T>(prop: PropView<Async<T>>, render: (t: T) => Elt | undefined) =>
+    div($s100, apd(matchLoader(prop, render))),
 
-  LoaderProp = <T>(prop: PropView<Async<T>>, render: (t: T) => Elt | undefined) =>
-    div($s100, apd(match(prop, (prop) =>
+  matchLoader = <T>(prop: PropView<Async<T>>, render: (t: T) => Elt | undefined) =>
+    match(prop, (prop) =>
       prop.t === "load" ?
         div($flexCenter, $flexRow, $s100, apd(
           img(src("/art/icons/16.png"), sizeAttr(16), size("64px")),
@@ -25,4 +25,4 @@ export const
         ErrorDisplay(prop.error)
       :
         render(prop.data)
-    )))
+    )

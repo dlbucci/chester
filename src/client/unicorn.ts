@@ -11,17 +11,17 @@ import { mix } from "rokay/mix"
 import { Asink } from "rokay/prop/async"
 import { derive } from "rokay/prop/derive"
 
-import { AppClient } from "./app.js"
+import { AppClient, GameSize } from "./app.js"
 import { load } from "./assets.js"
-import { Loader } from "./elts/loader.syn.js"
+import { matchLoader } from "./elts/loader.syn.js"
 import { IndexPages } from "./pages.gen.js"
-import { $flexCenter, $s100 } from "./style/utils.gen.js"
+import { $s100 } from "./style/utils.gen.js"
 
 
 mount(document.body, () => {
   const
     router = BrowserRouter(),
-    size = derive(WindowSize(), (window) => {
+    size = derive(WindowSize(), (window): GameSize => {
       const cell = V(16, 16)
       const board = V(8, 8)
       const size = scaleComponents(cell, board)
@@ -33,6 +33,7 @@ mount(document.body, () => {
         cellHalf: divide(cell, 2),
         size,
         window,
+        windowUnzoomed: floor_(divide(window, zoom)),
         zoom,
         zoomedSize: scale(size, zoom),
       }
@@ -42,12 +43,11 @@ mount(document.body, () => {
     })
 
   return apd(div(
-    $flexCenter,
     position("relative"),
-    $(size, ({ size: { x, y }, zoom }) =>
+    $(size, ({ windowUnzoomed: { x, y }, zoom }) =>
       mix(sizeStyle((x + 2) + "px", (y + 2) + "px"), transform(`scale(${zoom})`))
     ),
-    apd(Loader(assets, (assets) => {
+    apd(matchLoader(assets, (assets) => {
       const app: AppClient = {
         assets,
         router,
@@ -55,7 +55,7 @@ mount(document.body, () => {
         visible: VisibleProp(),
       }
 
-      return div($s100, apd(router.match(IndexPages({ app }), (_else) =>
+      return div($s100, apd(app.router.match(IndexPages({ app }), (_else) =>
         div(apd("Uh, where ya goin', bruv?"))
       )))
     })),

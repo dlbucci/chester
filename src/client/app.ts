@@ -27,6 +27,10 @@ export type GameSize = {
    **/
   window: V
   /**
+   * the size of the window before zooming
+   **/
+  windowUnzoomed: V
+  /**
    * the zoom for the board
    **/
   zoom: number

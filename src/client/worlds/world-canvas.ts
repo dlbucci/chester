@@ -15,7 +15,6 @@ import { getMoves, THING_COOLDOWNS, THING_MOVEMENTS, THING_OFFSETS, THING_SPEEDS
 import { Thing, ThingStateDying, ThingStateIdle, ThingStateMoveTo } from "../../shared/things/types.gen"
 import { AppClient, GameSize } from "../app"
 import { cellToPos, posToCell } from "../cells/utils"
-import { LEVELS } from "../levels/model"
 
 import { WorldFM } from "./form-models.gen"
 
@@ -23,7 +22,7 @@ import { WorldFM } from "./form-models.gen"
 export const
   LEVEL_COLORS = ["red", "orange", "yellow", "green", "blue", "indigo", "violet"],
 
-  WorldCanvas = (app: AppClient, world: WorldFM) => {
+  WorldCanvas = (app: AppClient, levels: Level[], world: WorldFM) => {
     const
       getCameraOffset = (unicorn: Thing, level: Level, size: GameSize) =>
         V(
@@ -36,8 +35,6 @@ export const
             ),
           ),
         ),
-
-      levels = LEVELS(app),
 
       level = derive(world.level, (_level) => levels[_level])
 
