@@ -6,7 +6,7 @@ import { BrowserRouter } from "rokay/browser/router"
 import { position, size as sizeStyle, transform } from "rokay/browser/style"
 import { VisibleProp } from "rokay/browser/visible"
 import { WindowSize } from "rokay/browser/window"
-import { divide, divideComponents, floor_, scale, scaleComponents, V } from "rokay/math/v"
+import { divide, divideComponents, floor, scale, scaleComponents, V } from "rokay/math/v"
 import { mix } from "rokay/mix"
 import { Asink } from "rokay/prop/async"
 import { derive } from "rokay/prop/derive"
@@ -25,7 +25,7 @@ mount(document.body, () => {
       const cell = V(16, 16)
       const board = V(8, 8)
       const size = scaleComponents(cell, board)
-      const options = floor_(divideComponents(window, size))
+      const options = floor(divideComponents(window, size))
       const zoom = Math.max(1, Math.min(options.x, options.y))
       return {
         board,
@@ -33,7 +33,7 @@ mount(document.body, () => {
         cellHalf: divide(cell, 2),
         size,
         window,
-        windowUnzoomed: floor_(divide(window, zoom)),
+        windowUnzoomed: floor(divide(window, zoom)),
         zoom,
         zoomedSize: scale(size, zoom),
       }

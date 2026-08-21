@@ -8,6 +8,7 @@ export const
   LevelMeta = TypeObject({ index: TypeNumber() }),
 
   Level = TypeObject({
+    boss: Thing,
     meta: LevelMeta,
     size: V,
     things: TypeArray(Thing),

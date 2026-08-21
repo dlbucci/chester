@@ -7,11 +7,11 @@ import { backgroundColor, color, height, left, position, top, width } from "roka
 import { rafLoop } from "rokay/browser/visible"
 import { last } from "rokay/data/array"
 import { float, pick } from "rokay/math/random"
-import { divide, divide_, divideComponents_, eq, floor_, iter, len, minus, minus_, plus, plus_, scale,
-  scale_, scaleComponents, T, unit, unitOfAng, V, VZ } from "rokay/math/v"
+import { divide, divideComponents, eq, floor, iter, len, minus, plus, scale, scaleComponents, T, unit,
+  unitOfAng, V, VZ } from "rokay/math/v"
 import { PropBasic } from "rokay/prop/basic"
 
-import { Level, LevelStatePlaying } from "../../shared/levels/types.gen"
+import { Level, LevelStateBoss, LevelStatePlaying } from "../../shared/levels/types.gen"
 import { getMoves, THING_COOLDOWNS, THING_MOVEMENTS, THING_OFFSETS, THING_SPEEDS } from "../../shared/things/model"
 import { ThingStateDying, ThingStateIdle, ThingStateMoveTo } from "../../shared/things/types.gen"
 import { AppClient } from "../app"
@@ -29,7 +29,7 @@ export const
 
   LevelDisplay = (app: AppClient, level: Level) => {
     const
-      { size, unicorn } = level,
+      { boss, size, unicorn } = level,
 
       state = PropBasic<LevelStateFM>(LevelStatePreFM(LEVEL_PRE_LIFETIME))
 
@@ -50,14 +50,16 @@ export const
       canvas(
         backgroundColor("red"),
         onPointerdown((el, ev) => {
+          const _state = state.get()
+          if (_state.t !== "playing" && _state.t !== "boss") { return }
           if (unicorn.state.t !== "idle" || unicorn.state.cooldown > 0) { return }
           const _size = app.size.get()
-          const src = floor_(divide_(
-            minus_(V(ev.clientX, ev.clientY), el.getBoundingClientRect()),
+          const src = floor(divide(
+            minus(V(ev.clientX, ev.clientY), el.getBoundingClientRect()),
             _size.zoom,
           ))
-          const pos = plus_(src, camera.pos)
-          const cell = floor_(divideComponents_(pos, _size.cell))
+          const pos = plus(src, camera.pos)
+          const cell = floor(divideComponents(pos, _size.cell))
           const path = unicorn.state.moves.find((path) => eq(last(path), cell))
           if (path == null) { return }
           unicorn.state = ThingStateMoveTo(path.map((cell) => cellToPos(app, cell)), 1)
@@ -119,8 +121,9 @@ export const
                   state.set(() => LevelStatePlaying())
                   camera.state = CameraStateFollow(unicorn)
                 }
-              } else if (_state.t === "playing") {
+              } else if (_state.t === "boss" || _state.t === "playing") {
                 things.forEach((thing) => {
+                  if (thing === boss && _state.t !== "boss") { return }
                   if (thing.state.t === "dying") {
                     if (thing.state.lifetime > 0) {
                       thing.state.lifetime -= dt
@@ -134,17 +137,15 @@ export const
                     } else if (thing.t === "pawn") {
                       const move = pick(thing.state.moves)
                       if (move != null) {
-                        thing.cell = last(move)
                         thing.state = ThingStateMoveTo(
                           move.map((cell) => cellToPos(app, cell)),
                           THING_SPEEDS[thing.t],
                         )
-                        thing.cell = last(thing.state.path)
                       }
                     }
                   } else if (thing.state.t === "moveTo") {
                     let next = thing.state.path[0]
-                    thing.pos = plus_(thing.pos, scale_(
+                    thing.pos = plus(thing.pos, scale(
                       unit(minus(next, thing.pos)),
                       thing.state.speed,
                     ))
@@ -166,8 +167,19 @@ export const
                           }
                         })
                       }
+                      if (
+                        _state.t === "playing"
+                        && thing === unicorn
+                        && thing.cell.y < app.size.get().board.y
+                      ) {
+                        state.set(() => LevelStateBoss())
+                        camera.state = CameraStateEaseTo(cameraPos(camera, VZ), 1, camera.pos, 0)
+                      }
                     }
                     if (len(minus(next, thing.pos)) < .5) {
+                      if (thing === boss) {
+                        console.log("this is a boss, baby cake ass bitch keep this on a new line")
+                      }
                       thing.pos = next
                       thing.state.path = thing.state.path.slice(1)
                       if (thing.state.path.length === 0) {
