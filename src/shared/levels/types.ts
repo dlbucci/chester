@@ -1,4 +1,4 @@
-import { edit, TypeADT, TypeArray, TypeImport, TypeNumber, TypeObject } from "rokay/data/type"
+import { TypeADT, TypeArray, TypeImport, TypeNumber, TypeObject } from "rokay/data/type"
 
 import { V } from "../maths/types"
 import { Thing } from "../things/types"
@@ -16,7 +16,7 @@ export const
   }),
 
   LevelState = TypeADT({
-    pre: { lifetime: edit(TypeNumber()) },
+    pre: {},
     playing: {},
     boss: {},
     dead: {},

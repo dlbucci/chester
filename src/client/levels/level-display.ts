@@ -9,29 +9,26 @@ import { rafLoop } from "rokay/browser/visible"
 import { last } from "rokay/data/array"
 import { float, pick } from "rokay/math/random"
 import { divide, eq, floor, iter, len, minus, plus, scale, scaleComponents, T, unit, unitOfAng, V, VZ } from "rokay/math/v"
-import { PropBasic } from "rokay/prop/basic"
+import { PropView } from "rokay/prop/prop"
 
-import { Level, LevelStateBoss, LevelStatePlaying } from "../../shared/levels/types.gen"
+import { GameState } from "../../shared/games/types.gen"
+import { Level, LevelStateBoss } from "../../shared/levels/types.gen"
 import { getMoves, THING_COOLDOWNS, THING_MOVEMENTS, THING_OFFSETS, THING_SPEEDS } from "../../shared/things/model"
 import { ThingStateDying, ThingStateIdle, ThingStateMoveTo } from "../../shared/things/types.gen"
 import { AppClient } from "../app"
 import { cameraPos, cameraStep } from "../camera/model"
-import { Camera, CameraStateEaseTo, CameraStateFollow, CameraStateIdle } from "../camera/types.gen"
+import { Camera, CameraStateEaseTo, CameraStateIdle, CameraStateMobius } from "../camera/types.gen"
 import { cellToPos, posToCell } from "../cells/utils"
 import { GRAVITY, SIZE_BOARD, SIZE_BOARD_PIXELS, SIZE_CELL } from "../const"
-import { LevelStateFM, LevelStatePreFM } from "../levels/form-models.gen"
-import { $flexCenter, $levelPre } from "../style/utils.gen"
+import { $flexCenter } from "../style/utils.gen"
 
 
 export const
   LEVEL_COLORS = ["red", "orange", "yellow", "green", "blue", "indigo", "violet"],
   LEVEL_PRE_LIFETIME = 5,
 
-  LevelDisplay = (app: AppClient, level: Level) => {
-    const
-      { boss, size, unicorn } = level,
-
-      state = PropBasic<LevelStateFM>(LevelStatePreFM(LEVEL_PRE_LIFETIME))
+  LevelDisplay = (app: AppClient, level: Level, gameState: PropView<GameState>) => {
+    const { boss, size, unicorn } = level
 
     let
       now = performance.now(),
@@ -41,18 +38,22 @@ export const
         divide(SIZE_BOARD_PIXELS, 2),
         VZ,
         SIZE_BOARD_PIXELS,
-        CameraStateIdle(),
+        gameState.get().t === "title" ?
+          CameraStateMobius(V(0, SIZE_CELL.y), scale(SIZE_CELL, 2))
+        :
+          CameraStateIdle(),
       )
 
-    camera.state = CameraStateEaseTo(cameraPos(camera, unicorn.pos), 4, cameraPos(camera, VZ), 0)
-
+    //camera.state = CameraStateEaseTo(cameraPos(camera, unicorn.pos), 4, cameraPos(camera, VZ), 0)
     return div(position("relative"), apd(
       canvas(
         backgroundColor("red"),
         sizeAttr(...T(SIZE_BOARD_PIXELS)),
         onPointerdown((el, ev) => {
-          const _state = state.get()
-          if (_state.t !== "playing" && _state.t !== "boss") { return }
+          const _gameState = gameState.get()
+          if (_gameState.t !== "level") { return }
+          const _levelState = _gameState.state
+          if (_levelState.t !== "playing" && _levelState.t !== "boss") { return }
           if (unicorn.state.t !== "idle" || unicorn.state.cooldown > 0) { return }
           const _size = app.size.get()
           const src = floor(divide(
@@ -73,7 +74,7 @@ export const
         withCtx((ctx) => {
           const
             draw = () => {
-              const _state = state.get()
+              const _gameState = gameState.get()
 
               ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
               ctx.save()
@@ -85,20 +86,23 @@ export const
                 }
               })
 
-              if (_state.t === "playing" && unicorn.state.t === "idle") {
-                const COOLDOWN_OFFSET = Math.ceil(
-                  unicorn.state.cooldown / THING_COOLDOWNS.unicorn * SIZE_CELL.y,
-                )
-                ctx.fillStyle = `rgba(255,255,255,${unicorn.state.cooldown > 0 ? ".25" : ".5"})`
-                unicorn.state.moves.forEach((path) => {
-                  const move = last(path)
-                  ctx.fillRect(
-                    move.x * SIZE_CELL.x,
-                    move.y * SIZE_CELL.y + COOLDOWN_OFFSET,
-                    SIZE_CELL.x,
-                    SIZE_CELL.y - COOLDOWN_OFFSET,
+              if (_gameState.t === "level") {
+                const _state = _gameState.state
+                if ((_state.t === "boss" || _state.t === "playing") && unicorn.state.t === "idle") {
+                  const COOLDOWN_OFFSET = Math.ceil(
+                    unicorn.state.cooldown / THING_COOLDOWNS.unicorn * SIZE_CELL.y,
                   )
-                })
+                  ctx.fillStyle = `rgba(255,255,255,${unicorn.state.cooldown > 0 ? ".25" : ".5"})`
+                  unicorn.state.moves.forEach((path) => {
+                    const move = last(path)
+                    ctx.fillRect(
+                      move.x * SIZE_CELL.x,
+                      move.y * SIZE_CELL.y + COOLDOWN_OFFSET,
+                      SIZE_CELL.x,
+                      SIZE_CELL.y - COOLDOWN_OFFSET,
+                    )
+                  })
+                }
               }
 
               things.sort((a, b) => a.pos.y - b.pos.y).forEach((thing) => {
@@ -114,83 +118,87 @@ export const
             },
 
             step = (dt: number) => {
-              const _state = state.get()
-              if (_state.t === "pre") {
-                _state.lifetime.set((_lifetime) => _lifetime - dt)
-                if (_state.lifetime.get() <= 0) {
-                  state.set(() => LevelStatePlaying())
-                  camera.state = CameraStateFollow(unicorn)
-                }
-              } else if (_state.t === "boss" || _state.t === "playing") {
-                things.forEach((thing) => {
-                  if (thing === boss && _state.t !== "boss") { return }
-                  if (thing.state.t === "dying") {
-                    if (thing.state.lifetime > 0) {
-                      thing.state.lifetime -= dt
-                      thing.state.vel = plus(thing.state.vel, scale(GRAVITY, dt))
-                      thing.pos = plus(thing.pos, scale(thing.state.vel, dt))
-                      thing.state.ang += thing.state.velAng * dt
-                    }
-                  } else if (thing.state.t === "idle") {
-                    if (thing.state.cooldown > 0) {
-                      thing.state.cooldown -= 1 / 60
-                    } else if (thing.t === "pawn") {
-                      const move = pick(thing.state.moves)
-                      if (move != null) {
-                        thing.state = ThingStateMoveTo(
-                          move.map((cell) => cellToPos(cell)),
-                          THING_SPEEDS[thing.t],
-                        )
+              const _gameState = gameState.get()
+              if (_gameState.t === "level") {
+                const _state = _gameState.state
+                if (_state.t === "pre") {
+                  /**
+                   * if (_state.lifetime.get() <= 0) {
+                   * state.set(() => LevelStatePlaying())
+                   * camera.state = CameraStateFollow(unicorn)
+                   * }
+                   **/
+                } else if (_state.t === "boss" || _state.t === "playing") {
+                  things.forEach((thing) => {
+                    if (thing === boss && _state.t !== "boss") { return }
+                    if (thing.state.t === "dying") {
+                      if (thing.state.lifetime > 0) {
+                        thing.state.lifetime -= dt
+                        thing.state.vel = plus(thing.state.vel, scale(GRAVITY, dt))
+                        thing.pos = plus(thing.pos, scale(thing.state.vel, dt))
+                        thing.state.ang += thing.state.velAng * dt
+                      }
+                    } else if (thing.state.t === "idle") {
+                      if (thing.state.cooldown > 0) {
+                        thing.state.cooldown -= 1 / 60
+                      } else if (thing.t === "pawn") {
+                        const move = pick(thing.state.moves)
+                        if (move != null) {
+                          thing.state = ThingStateMoveTo(
+                            move.map((cell) => cellToPos(cell)),
+                            THING_SPEEDS[thing.t],
+                          )
+                        }
+                      }
+                    } else if (thing.state.t === "moveTo") {
+                      let next = thing.state.path[0]
+                      thing.pos = plus(thing.pos, scale(
+                        unit(minus(next, thing.pos)),
+                        thing.state.speed,
+                      ))
+                      const newCell = posToCell(thing.pos)
+                      if (!eq(thing.cell, newCell)) {
+                        thing.cell = newCell
+                        // we've entered the final square of the move, make the attack
+                        if (thing.state.path.length === 1) {
+                          things.forEach((otherThing) => {
+                            if (thing === otherThing || otherThing.state.t === "dying") { return }
+                            const thingCell = posToCell(otherThing.pos)
+                            if (eq(newCell, thingCell)) {
+                              otherThing.state = ThingStateDying(
+                                0,
+                                1,
+                                scale(unitOfAng(float(-Math.PI * 3 / 8, -Math.PI * 5 / 8)), 100),
+                                1,
+                              )
+                            }
+                          })
+                        }
+                        if (
+                          _state.t === "playing" && thing === unicorn && thing.cell.y < SIZE_BOARD.y
+                        ) {
+                          _gameState.state = LevelStateBoss()
+                          camera.state = CameraStateEaseTo(cameraPos(camera, VZ), 1, camera.pos, 0)
+                        }
+                      }
+                      if (len(minus(next, thing.pos)) < .5) {
+                        thing.pos = next
+                        thing.state.path = thing.state.path.slice(1)
+                        if (thing.state.path.length === 0) {
+                          thing.state = ThingStateIdle(THING_COOLDOWNS[thing.t], getMoves(
+                            thing.cell,
+                            THING_MOVEMENTS[thing.t],
+                            size,
+                          ))
+                        }
                       }
                     }
-                  } else if (thing.state.t === "moveTo") {
-                    let next = thing.state.path[0]
-                    thing.pos = plus(thing.pos, scale(
-                      unit(minus(next, thing.pos)),
-                      thing.state.speed,
-                    ))
-                    const newCell = posToCell(thing.pos)
-                    if (!eq(thing.cell, newCell)) {
-                      thing.cell = newCell
-                      // we've entered the final square of the move, make the attack
-                      if (thing.state.path.length === 1) {
-                        things.forEach((otherThing) => {
-                          if (thing === otherThing || otherThing.state.t === "dying") { return }
-                          const thingCell = posToCell(otherThing.pos)
-                          if (eq(newCell, thingCell)) {
-                            otherThing.state = ThingStateDying(
-                              0,
-                              1,
-                              scale(unitOfAng(float(-Math.PI * 3 / 8, -Math.PI * 5 / 8)), 100),
-                              1,
-                            )
-                          }
-                        })
-                      }
-                      if (
-                        _state.t === "playing" && thing === unicorn && thing.cell.y < SIZE_BOARD.y
-                      ) {
-                        state.set(() => LevelStateBoss())
-                        camera.state = CameraStateEaseTo(cameraPos(camera, VZ), 1, camera.pos, 0)
-                      }
-                    }
-                    if (len(minus(next, thing.pos)) < .5) {
-                      thing.pos = next
-                      thing.state.path = thing.state.path.slice(1)
-                      if (thing.state.path.length === 0) {
-                        thing.state = ThingStateIdle(THING_COOLDOWNS[thing.t], getMoves(
-                          thing.cell,
-                          THING_MOVEMENTS[thing.t],
-                          size,
-                        ))
-                      }
-                    }
-                  }
-                })
+                  })
 
-                things = things.filter((thing) =>
-                  thing.state.t !== "dying" || thing.state.lifetime > 0
-                )
+                  things = things.filter((thing) =>
+                    thing.state.t !== "dying" || thing.state.lifetime > 0
+                  )
+                }
               }
 
               cameraStep(dt, camera)
@@ -203,18 +211,19 @@ export const
           })
         }),
       ),
-      matchIf(state, (_state) =>
-        _state.t === "pre" ?
+
+      matchIf(gameState, (_gameState) =>
+        _gameState.t === "title" ?
           div(
+            backgroundColor("hsla(0, 0%, 20%, .5)"),
             color("#eee"),
             $flexCenter,
-            $levelPre,
             position("absolute"),
             top(0),
             left(0),
             width("100%"),
             height("100%"),
-            apd("Level ", level.meta.index + 1),
+            apd("Chester"),
           )
         :
           undefined

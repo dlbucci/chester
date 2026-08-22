@@ -60,7 +60,7 @@ mount(document.body, () => {
 
       const world = WorldFM(0)
 
-      return div($s100, apd(WorldDisplay(app, LEVELS, world)))
+      return div($s100, apd(WorldDisplay(app, LEVELS, app.state, world)))
     })),
   ))
 })

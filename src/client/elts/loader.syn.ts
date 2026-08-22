@@ -1,7 +1,7 @@
 import { size as sizeAttr, src } from "rokay/browser/attr"
 import { apd, Elt } from "rokay/browser/core"
 import { div, img } from "rokay/browser/elt"
-import { match } from "rokay/browser/match"
+import { matchIf } from "rokay/browser/match"
 import { size } from "rokay/browser/style"
 import { Async } from "rokay/prop/async"
 import { PropView } from "rokay/prop/prop"
@@ -16,7 +16,7 @@ export const
     div($s100, apd(matchLoader(prop, render))),
 
   matchLoader = <T>(prop: PropView<Async<T>>, render: (t: T) => Elt | undefined) =>
-    match(prop, (prop) =>
+    matchIf(prop, (prop) =>
       prop.t === "load" ?
         div($flexCenter, $flexRow, $s100, apd(
           img(src("/art/icons/16.png"), sizeAttr(16), size("64px")),

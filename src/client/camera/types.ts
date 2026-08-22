@@ -14,6 +14,7 @@ export const
     },
     follow: { thing: Thing },
     idle: {},
+    mobius: { d: V, modulus: V },
   }),
 
   Camera = TypeObject({

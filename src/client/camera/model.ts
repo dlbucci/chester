@@ -1,4 +1,4 @@
-import { interpolateLinear, max, min, minus, plus, V, VZ } from "rokay/math/v"
+import { interpolateLinear, max, min, minus, modulo, plus, scale, V, VZ } from "rokay/math/v"
 
 import { Camera, CameraStateIdle } from "./types.gen"
 
@@ -28,6 +28,8 @@ export const
         camera.pos = camera.state.end
         camera.state = CameraStateIdle()
       }
+    } else if (camera.state.t === "mobius") {
+      camera.pos = modulo(plus(camera.pos, scale(camera.state.d, dt)), camera.state.modulus)
     }
   },
 
