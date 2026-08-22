@@ -44,8 +44,6 @@ export const
         CameraStateIdle(),
       )
 
-    console.log("camera:", camera)
-
     camera.state = CameraStateEaseTo(cameraPos(camera, unicorn.pos), 4, cameraPos(camera, VZ), 0)
 
     return div(position("relative"), apd(
@@ -177,9 +175,6 @@ export const
                       }
                     }
                     if (len(minus(next, thing.pos)) < .5) {
-                      if (thing === boss) {
-                        console.log("this is a boss, baby cake ass bitch keep this on a new line")
-                      }
                       thing.pos = next
                       thing.state.path = thing.state.path.slice(1)
                       if (thing.state.path.length === 0) {
