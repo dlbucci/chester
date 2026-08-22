@@ -1,3 +1,4 @@
+import { size as sizeAttr } from "rokay/browser/attr"
 import { apd } from "rokay/browser/core"
 import { canvas, div } from "rokay/browser/elt"
 import { withCtx } from "rokay/browser/game/danvas"
@@ -7,8 +8,7 @@ import { backgroundColor, color, height, left, position, top, width } from "roka
 import { rafLoop } from "rokay/browser/visible"
 import { last } from "rokay/data/array"
 import { float, pick } from "rokay/math/random"
-import { divide, divideComponents, eq, floor, iter, len, minus, plus, scale, scaleComponents, T, unit,
-  unitOfAng, V, VZ } from "rokay/math/v"
+import { divide, eq, floor, iter, len, minus, plus, scale, scaleComponents, T, unit, unitOfAng, V, VZ } from "rokay/math/v"
 import { PropBasic } from "rokay/prop/basic"
 
 import { Level, LevelStateBoss, LevelStatePlaying } from "../../shared/levels/types.gen"
@@ -18,7 +18,7 @@ import { AppClient } from "../app"
 import { cameraPos, cameraStep } from "../camera/model"
 import { Camera, CameraStateEaseTo, CameraStateFollow, CameraStateIdle } from "../camera/types.gen"
 import { cellToPos, posToCell } from "../cells/utils"
-import { GRAVITY } from "../const"
+import { GRAVITY, SIZE_BOARD, SIZE_BOARD_PIXELS, SIZE_CELL } from "../const"
 import { LevelStateFM, LevelStatePreFM } from "../levels/form-models.gen"
 import { $flexCenter, $levelPre } from "../style/utils.gen"
 
@@ -36,19 +36,22 @@ export const
     let
       now = performance.now(),
       { things } = level,
-      camera = Camera({ nw: VZ, se: VZ }, VZ, VZ, VZ, CameraStateIdle())
+      camera = Camera(
+        { nw: VZ, se: scaleComponents(size, SIZE_CELL) },
+        divide(SIZE_BOARD_PIXELS, 2),
+        VZ,
+        SIZE_BOARD_PIXELS,
+        CameraStateIdle(),
+      )
 
-    app.size.listenAndCall((_size) => {
-      camera.bounds.se = scaleComponents(size, _size.cell)
-      camera.focus = divide(_size.size, 2)
-      camera.size = _size.size
-    })
+    console.log("camera:", camera)
 
     camera.state = CameraStateEaseTo(cameraPos(camera, unicorn.pos), 4, cameraPos(camera, VZ), 0)
 
     return div(position("relative"), apd(
       canvas(
         backgroundColor("red"),
+        sizeAttr(...T(SIZE_BOARD_PIXELS)),
         onPointerdown((el, ev) => {
           const _state = state.get()
           if (_state.t !== "playing" && _state.t !== "boss") { return }
@@ -59,10 +62,10 @@ export const
             _size.zoom,
           ))
           const pos = plus(src, camera.pos)
-          const cell = floor(divideComponents(pos, _size.cell))
+          const cell = posToCell(pos)
           const path = unicorn.state.moves.find((path) => eq(last(path), cell))
           if (path == null) { return }
-          unicorn.state = ThingStateMoveTo(path.map((cell) => cellToPos(app, cell)), 1)
+          unicorn.state = ThingStateMoveTo(path.map((cell) => cellToPos(cell)), 1)
           if (last(unicorn.state.path).x < unicorn.pos.x) {
             unicorn.scale.x = -1
           } else if (last(unicorn.state.path).x > unicorn.pos.x) {
@@ -75,28 +78,27 @@ export const
               const _state = state.get()
 
               ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
-              const _size = app.size.get()
               ctx.save()
               ctx.translate(...T(scale(camera.pos, -1)))
               ctx.fillStyle = "rgba(0, 0, 0, .125)"
               iter(VZ, minus(size, V(1, 1)), (pos) => {
                 if ((pos.x + pos.y) % 2 === 0) {
-                  ctx.fillRect(...T(scaleComponents(pos, _size.cell)), ...T(_size.cell))
+                  ctx.fillRect(...T(scaleComponents(pos, SIZE_CELL)), ...T(SIZE_CELL))
                 }
               })
 
               if (_state.t === "playing" && unicorn.state.t === "idle") {
                 const COOLDOWN_OFFSET = Math.ceil(
-                  unicorn.state.cooldown / THING_COOLDOWNS.unicorn * _size.cell.y,
+                  unicorn.state.cooldown / THING_COOLDOWNS.unicorn * SIZE_CELL.y,
                 )
                 ctx.fillStyle = `rgba(255,255,255,${unicorn.state.cooldown > 0 ? ".25" : ".5"})`
                 unicorn.state.moves.forEach((path) => {
                   const move = last(path)
                   ctx.fillRect(
-                    move.x * _size.cell.x,
-                    move.y * _size.cell.y + COOLDOWN_OFFSET,
-                    _size.cell.x,
-                    _size.cell.y - COOLDOWN_OFFSET,
+                    move.x * SIZE_CELL.x,
+                    move.y * SIZE_CELL.y + COOLDOWN_OFFSET,
+                    SIZE_CELL.x,
+                    SIZE_CELL.y - COOLDOWN_OFFSET,
                   )
                 })
               }
@@ -138,7 +140,7 @@ export const
                       const move = pick(thing.state.moves)
                       if (move != null) {
                         thing.state = ThingStateMoveTo(
-                          move.map((cell) => cellToPos(app, cell)),
+                          move.map((cell) => cellToPos(cell)),
                           THING_SPEEDS[thing.t],
                         )
                       }
@@ -149,14 +151,14 @@ export const
                       unit(minus(next, thing.pos)),
                       thing.state.speed,
                     ))
-                    const newCell = posToCell(app, thing.pos)
+                    const newCell = posToCell(thing.pos)
                     if (!eq(thing.cell, newCell)) {
                       thing.cell = newCell
                       // we've entered the final square of the move, make the attack
                       if (thing.state.path.length === 1) {
                         things.forEach((otherThing) => {
                           if (thing === otherThing || otherThing.state.t === "dying") { return }
-                          const thingCell = posToCell(app, otherThing.pos)
+                          const thingCell = posToCell(otherThing.pos)
                           if (eq(newCell, thingCell)) {
                             otherThing.state = ThingStateDying(
                               0,
@@ -168,9 +170,7 @@ export const
                         })
                       }
                       if (
-                        _state.t === "playing"
-                        && thing === unicorn
-                        && thing.cell.y < app.size.get().board.y
+                        _state.t === "playing" && thing === unicorn && thing.cell.y < SIZE_BOARD.y
                       ) {
                         state.set(() => LevelStateBoss())
                         camera.state = CameraStateEaseTo(cameraPos(camera, VZ), 1, camera.pos, 0)
@@ -200,13 +200,6 @@ export const
 
               cameraStep(dt, camera)
             }
-
-          app.size.listenAndCall((_size) => {
-            ctx.canvas.width = _size.size.x
-            ctx.canvas.height = _size.size.y
-
-            draw()
-          })
 
           rafLoop(app.visible, (n) => {
             step(Math.min((n - now) / 1000, 1 / 30))

@@ -2,28 +2,14 @@ import { V } from "rokay/math/v"
 import { PropView } from "rokay/prop/prop"
 import { Router } from "rokay/route/router"
 
+import { GameState } from "../shared/games/types.gen.js"
+
 import { Assets } from "./assets.js"
 
 
 export type GameSize = {
   /**
-   * the size of the board visible on screen in cells
-   **/
-  board: V
-  /**
-   * the size of a cell in pixels
-   **/
-  cell: V
-  /**
-   * half the size of a cell in pixels
-   **/
-  cellHalf: V
-  /**
-   * the size of the board in pixels
-   **/
-  size: V
-  /**
-   * the size of the window
+   * the size of the window. UNUSED
    **/
   window: V
   /**
@@ -35,7 +21,7 @@ export type GameSize = {
    **/
   zoom: number
   /**
-   * the size of the board * zoom in pixels
+   * the size of the board * zoom in pixels. UNUSED
    **/
   zoomedSize: V
 }
@@ -44,5 +30,6 @@ export type AppClient = {
   assets: Assets
   router: Router
   size: PropView<GameSize>
+  state: PropView<GameState>
   visible: PropView<boolean>
 }
