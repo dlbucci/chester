@@ -10,7 +10,7 @@ import { divide, divideComponents, floor, scale } from "rokay/math/v"
 import { mix } from "rokay/mix"
 import { Asink } from "rokay/prop/async"
 import { derive } from "rokay/prop/derive"
-import { PropConst } from "rokay/prop/prop"
+import { Prop } from "rokay/prop/prop"
 
 import { GameState, GameStateTitle } from "../shared/games/types.gen.js"
 
@@ -52,15 +52,15 @@ mount(document.body, () => {
         assets,
         router,
         size,
-        state: PropConst(GameStateTitle()),
         visible: VisibleProp(),
       }
       // update after the fact since IndexPages needs app
-      app.state = router.derive<GameState>(IndexPages({}), () => GameStateTitle())
+      const routedGameState = router.derive<GameState>(IndexPages({}), () => GameStateTitle())
+      const gameState = Prop(() => routedGameState.get())
 
       const world = WorldFM(0)
 
-      return div($s100, apd(WorldDisplay(app, LEVELS, app.state, world)))
+      return div($s100, apd(WorldDisplay(app, LEVELS, gameState, world)))
     })),
   ))
 })

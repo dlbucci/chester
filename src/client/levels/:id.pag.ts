@@ -1,7 +1,6 @@
-import { GameStateLevel } from "../../shared/games/types.gen"
-import { LevelStatePre } from "../../shared/levels/types.gen"
+import { GameStateLevelPre } from "../../shared/games/types.gen"
 
 
 export const
   LevelPage = (id: number) =>
-    GameStateLevel(id, LevelStatePre())
+    GameStateLevelPre(id)

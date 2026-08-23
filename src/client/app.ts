@@ -2,8 +2,6 @@ import { V } from "rokay/math/v"
 import { PropView } from "rokay/prop/prop"
 import { Router } from "rokay/route/router"
 
-import { GameState } from "../shared/games/types.gen.js"
-
 import { Assets } from "./assets.js"
 
 
@@ -30,6 +28,5 @@ export type AppClient = {
   assets: Assets
   router: Router
   size: PropView<GameSize>
-  state: PropView<GameState>
   visible: PropView<boolean>
 }

@@ -5,7 +5,7 @@ import { $ } from "rokay/browser/prop"
 import { border, imageRendering } from "rokay/browser/style"
 import { VB } from "rokay/math/v"
 import { derive } from "rokay/prop/derive"
-import { PropView } from "rokay/prop/prop"
+import { Prop } from "rokay/prop/prop"
 
 import { GameState } from "../../shared/games/types.gen"
 import { Level } from "../../shared/levels/types.gen"
@@ -18,12 +18,7 @@ import { WorldFM } from "./form-models.gen"
 
 
 export const
-  WorldDisplay = (
-    app: AppClient,
-    levels: Level[],
-    gameState: PropView<GameState>,
-    world: WorldFM,
-  ) => {
+  WorldDisplay = (app: AppClient, levels: Level[], gameState: Prop<GameState>, world: WorldFM) => {
     const level = derive(world.level, (_level) => levels[_level])
 
     return div(

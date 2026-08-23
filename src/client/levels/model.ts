@@ -12,7 +12,20 @@ import { SIZE_BOARD } from "../const"
 export const
   LEVELS = tab(8, (i) => {
     const
-      meta = LevelMeta(i),
+      meta = LevelMeta(
+        i,
+        i === 0 ?
+          [
+            "You're looking for something, aren't you?",
+            "Someone, perhaps?",
+            "Where should you go, little pony?",
+            "Seek out wise Rebu.",
+            "He will get you where you need to be.",
+            "Wake Up",
+          ]
+        :
+          ["TODO"],
+      ),
       size = V(SIZE_BOARD.x, (2 + meta.index) * SIZE_BOARD.y),
       cell = V(pick([2, size.x - 3]), size.y - 2),
       unicorn = ThingUnicorn(cell, cellToPos(cell), V(1, 1), ThingStateIdle(

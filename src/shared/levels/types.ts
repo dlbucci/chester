@@ -1,11 +1,11 @@
-import { TypeADT, TypeArray, TypeImport, TypeNumber, TypeObject } from "rokay/data/type"
+import { TypeADT, TypeArray, TypeImport, TypeNumber, TypeObject, TypeString } from "rokay/data/type"
 
 import { V } from "../maths/types"
 import { Thing } from "../things/types"
 
 
 export const
-  LevelMeta = TypeObject({ index: TypeNumber() }),
+  LevelMeta = TypeObject({ index: TypeNumber(), preamble: TypeArray(TypeString()) }),
 
   Level = TypeObject({
     boss: Thing,
