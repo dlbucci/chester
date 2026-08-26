@@ -3,7 +3,7 @@ import { pick } from "rokay/math/random"
 import { V, VZ } from "rokay/math/v"
 
 import { Level, LevelMeta } from "../../shared/levels/types.gen"
-import { getMoves, THING_MOVEMENTS } from "../../shared/things/model"
+import { getMoves, THING_STATS } from "../../shared/things/model"
 import { Thing, ThingPawn, ThingStateIdle, ThingUnicorn } from "../../shared/things/types.gen"
 import { cellToPos } from "../cells/utils"
 import { SIZE_BOARD } from "../const"
@@ -30,16 +30,19 @@ export const
       cell = V(pick([2, size.x - 3]), size.y - 2),
       unicorn = ThingUnicorn(cell, cellToPos(cell), V(1, 1), ThingStateIdle(
         0,
-        getMoves(cell, THING_MOVEMENTS.knight, size),
+        getMoves(cell, THING_STATS.unicorn.movements, size),
       )),
       things: Thing[] = tab(8, (x) => {
         const cell = V(x, size.y - 8)
         return ThingPawn(cell, cellToPos(cell), V(1, 1), ThingStateIdle(
           0,
-          getMoves(cell, THING_MOVEMENTS.pawn, size),
+          getMoves(cell, THING_STATS.pawn.movements, size),
         ))
       }),
-      boss = ThingPawn(VZ, VZ, V(1, 1), ThingStateIdle(0, getMoves(VZ, THING_MOVEMENTS.pawn, size)))
+      boss = ThingPawn(VZ, VZ, V(1, 1), ThingStateIdle(
+        0,
+        getMoves(VZ, THING_STATS.pawn.movements, size),
+      ))
 
     things.push(boss, unicorn)
 

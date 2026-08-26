@@ -56,6 +56,9 @@ mount(document.body, () => {
       }
       // update after the fact since IndexPages needs app
       const routedGameState = router.derive<GameState>(IndexPages({}), () => GameStateTitle())
+        .listen((view) => {
+          gameState.set(() => view)
+        })
       const gameState = Prop(() => routedGameState.get())
 
       const world = WorldFM(0)

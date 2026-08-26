@@ -13,19 +13,25 @@ export const
     },
     idle: { cooldown: TypeNumber(), moves: TypeArray(TypeArray(V)) },
     moveTo: { path: TypeArray(V), speed: TypeNumber() },
-  }),
+  })
 
+
+const
+  chessPieceAttrs = {
+    cell: V,
+    pos: V,
+    scale: V,
+    state: ThingState,
+  }
+
+
+export const
   Thing = TypeADT({
-    pawn: {
-      cell: V,
-      pos: V,
-      scale: V,
-      state: ThingState,
-    },
-    unicorn: {
-      cell: V,
-      pos: V,
-      scale: V,
-      state: ThingState,
-    },
+    bishop: chessPieceAttrs,
+    king: chessPieceAttrs,
+    knight: chessPieceAttrs,
+    pawn: chessPieceAttrs,
+    queen: chessPieceAttrs,
+    rook: chessPieceAttrs,
+    unicorn: chessPieceAttrs,
   })

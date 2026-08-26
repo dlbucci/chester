@@ -4,7 +4,7 @@ import { canvas, div } from "rokay/browser/elt"
 import { withCtx } from "rokay/browser/game/danvas"
 import { match, matchIf } from "rokay/browser/match"
 import { onPointerdown } from "rokay/browser/on"
-import { backgroundColor, color, height, left, position, top, width } from "rokay/browser/style"
+import { backgroundColor, color, height, left, position, textAlign, top, width } from "rokay/browser/style"
 import { rafLoop } from "rokay/browser/visible"
 import { last } from "rokay/data/array"
 import { float, pick } from "rokay/math/random"
@@ -15,7 +15,7 @@ import { Prop } from "rokay/prop/prop"
 import { GameState, GameStateLevel, GameStateLevelPre } from "../../shared/games/types.gen"
 import { Level } from "../../shared/levels/types.gen"
 import { pgLevel } from "../../shared/pages.gen"
-import { getMoves, THING_COOLDOWNS, THING_MOVEMENTS, THING_OFFSETS, THING_SPEEDS } from "../../shared/things/model"
+import { getMoves, THING_STATS } from "../../shared/things/model"
 import { ThingStateDying, ThingStateIdle, ThingStateMoveTo } from "../../shared/things/types.gen"
 import { AppClient } from "../app"
 import { cameraPos, cameraStep } from "../camera/model"
@@ -47,7 +47,7 @@ export const
           left(0),
           width("100%"),
           height("100%"),
-          apd(match(messageIndex, (index) => div(apd(preamble[index])))),
+          apd(match(messageIndex, (index) => div(textAlign("center"), apd(preamble[index])))),
           onPointerdown(() => {
             messageIndex.set((_index) => {
               if (_index < preamble.length - 1) { return _index + 1 }
@@ -129,7 +129,7 @@ export const
               if (_gameState.t === "level") {
                 if (unicorn.state.t === "idle") {
                   const COOLDOWN_OFFSET = Math.ceil(
-                    unicorn.state.cooldown / THING_COOLDOWNS.unicorn * SIZE_CELL.y,
+                    unicorn.state.cooldown / THING_STATS.unicorn.cooldown * SIZE_CELL.y,
                   )
                   ctx.fillStyle = `rgba(255,255,255,${unicorn.state.cooldown > 0 ? ".25" : ".5"})`
                   unicorn.state.moves.forEach((path) => {
@@ -148,7 +148,7 @@ export const
                   ctx.translate(Math.round(thing.pos.x), Math.round(thing.pos.y))
                   if (thing.state.t === "dying") { ctx.rotate(thing.state.ang) }
                   ctx.scale(...T(thing.scale))
-                  ctx.drawImage(app.assets[thing.t], ...T(THING_OFFSETS[thing.t]))
+                  ctx.drawImage(app.assets[thing.t], ...T(THING_STATS[thing.t].offset))
                   ctx.restore()
                 })
               }
@@ -176,7 +176,7 @@ export const
                       if (move != null) {
                         thing.state = ThingStateMoveTo(
                           move.map((cell) => cellToPos(cell)),
-                          THING_SPEEDS[thing.t],
+                          THING_STATS[thing.t].speed,
                         )
                       }
                     }
@@ -212,9 +212,9 @@ export const
                       thing.pos = next
                       thing.state.path = thing.state.path.slice(1)
                       if (thing.state.path.length === 0) {
-                        thing.state = ThingStateIdle(THING_COOLDOWNS[thing.t], getMoves(
+                        thing.state = ThingStateIdle(THING_STATS[thing.t].cooldown, getMoves(
                           thing.cell,
-                          THING_MOVEMENTS[thing.t],
+                          THING_STATS[thing.t].movements,
                           size,
                         ))
                       }
@@ -252,12 +252,6 @@ export const
               apd("Chester"),
               onPointerdown(() => {
                 app.router.replace(pgLevel(0))
-                camera.state = CameraStateEaseTo(
-                  cameraPos(camera, unicorn.pos),
-                  4,
-                  cameraPos(camera, camera.pos),
-                  0,
-                )
               }),
             )
           : _gameState.t === "levelPre" ?
