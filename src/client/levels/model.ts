@@ -4,7 +4,7 @@ import { V, VZ } from "rokay/math/v"
 
 import { Level, LevelMeta } from "../../shared/levels/types.gen"
 import { getMoves, THING_STATS } from "../../shared/things/model"
-import { Thing, ThingPawn, ThingStateIdle, ThingUnicorn } from "../../shared/things/types.gen"
+import { Thing, ThingStateIdle } from "../../shared/things/types.gen"
 import { cellToPos } from "../cells/utils"
 import { SIZE_BOARD } from "../const"
 
@@ -25,26 +25,33 @@ export const
           ]
         :
           ["TODO"],
+        {
+          bishop: 8,
+          king: 8,
+          knight: 8,
+          pawn: 8,
+          queen: 8,
+          rook: 8,
+          unicorn: 0,
+        },
       ),
-      size = V(SIZE_BOARD.x, (2 + meta.index) * SIZE_BOARD.y),
+      size = V(SIZE_BOARD.x, (3 + meta.index) * SIZE_BOARD.y),
       cell = V(pick([2, size.x - 3]), size.y - 2),
-      unicorn = ThingUnicorn(cell, cellToPos(cell), V(1, 1), ThingStateIdle(
-        0,
-        getMoves(cell, THING_STATS.unicorn.movements, size),
-      )),
-      things: Thing[] = tab(8, (x) => {
-        const cell = V(x, size.y - 8)
-        return ThingPawn(cell, cellToPos(cell), V(1, 1), ThingStateIdle(
-          0,
-          getMoves(cell, THING_STATS.pawn.movements, size),
-        ))
-      }),
-      boss = ThingPawn(VZ, VZ, V(1, 1), ThingStateIdle(
-        0,
-        getMoves(VZ, THING_STATS.pawn.movements, size),
-      ))
-
-    things.push(boss, unicorn)
+      unicorn = Thing(
+        cell,
+        cellToPos(cell),
+        V(1, 1),
+        ThingStateIdle(0, getMoves(cell, THING_STATS.unicorn.movements, size)),
+        "unicorn",
+      ),
+      boss = Thing(
+        VZ,
+        VZ,
+        V(1, 1),
+        ThingStateIdle(0, getMoves(VZ, THING_STATS.pawn.movements, size)),
+        "pawn",
+      ),
+      things: Thing[] = [unicorn, boss]
 
     return Level(boss, meta, size, things, unicorn)
   })

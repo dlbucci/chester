@@ -1,4 +1,4 @@
-import { TypeADT, TypeArray, TypeNumber } from "rokay/data/type"
+import { TypeADT, TypeArray, TypeNumber, TypeObject, TypeStringUnion } from "rokay/data/type"
 
 import { V } from "../maths/types"
 
@@ -15,23 +15,13 @@ export const
     moveTo: { path: TypeArray(V), speed: TypeNumber() },
   })
 
+export const
+  ThingType = TypeStringUnion(["bishop", "king", "knight", "pawn", "queen", "rook", "unicorn"]),
 
-const
-  chessPieceAttrs = {
+  Thing = TypeObject({
     cell: V,
     pos: V,
     scale: V,
     state: ThingState,
-  }
-
-
-export const
-  Thing = TypeADT({
-    bishop: chessPieceAttrs,
-    king: chessPieceAttrs,
-    knight: chessPieceAttrs,
-    pawn: chessPieceAttrs,
-    queen: chessPieceAttrs,
-    rook: chessPieceAttrs,
-    unicorn: chessPieceAttrs,
+    type: ThingType,
   })

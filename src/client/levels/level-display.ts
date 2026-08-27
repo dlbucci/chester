@@ -12,11 +12,11 @@ import { divide, eq, floor, iter, len, minus, plus, scale, scaleComponents, T, u
 import { PropBasic } from "rokay/prop/basic"
 import { Prop } from "rokay/prop/prop"
 
-import { GameState, GameStateLevel, GameStateLevelPre } from "../../shared/games/types.gen"
+import { GameState, GameStateLevel, GameStateLevelBoss, GameStateLevelPre } from "../../shared/games/types.gen"
 import { Level } from "../../shared/levels/types.gen"
 import { pgLevel } from "../../shared/pages.gen"
 import { getMoves, THING_STATS } from "../../shared/things/model"
-import { ThingStateDying, ThingStateIdle, ThingStateMoveTo } from "../../shared/things/types.gen"
+import { Thing, ThingStateDying, ThingStateIdle, ThingStateMoveTo, ThingType } from "../../shared/things/types.gen"
 import { AppClient } from "../app"
 import { cameraPos, cameraStep } from "../camera/model"
 import { Camera, CameraStateEaseTo, CameraStateFollow, CameraStateIdle, CameraStateMobius } from "../camera/types.gen"
@@ -80,6 +80,8 @@ export const
           CameraStateEaseTo(cameraPos(camera, unicorn.pos), 1, camera.pos, 0)
         : _gameState.t === "level" ?
           CameraStateFollow(unicorn)
+        : _gameState.t === "levelBoss" ?
+          CameraStateEaseTo(cameraPos(camera, VZ), 1, camera.pos, 0)
         :
           CameraStateIdle()
     })
@@ -91,7 +93,7 @@ export const
 
         onPointerdown((el, ev) => {
           const _gameState = gameState.get()
-          if (_gameState.t !== "level") { return }
+          if (_gameState.t !== "level" && _gameState.t !== "levelBoss") { return }
           if (unicorn.state.t !== "idle" || unicorn.state.cooldown > 0) { return }
           const _size = app.size.get()
           const src = floor(divide(
@@ -126,7 +128,7 @@ export const
                 }
               })
 
-              if (_gameState.t === "level") {
+              if (_gameState.t === "level" || _gameState.t === "levelBoss") {
                 if (unicorn.state.t === "idle") {
                   const COOLDOWN_OFFSET = Math.ceil(
                     unicorn.state.cooldown / THING_STATS.unicorn.cooldown * SIZE_CELL.y,
@@ -148,7 +150,7 @@ export const
                   ctx.translate(Math.round(thing.pos.x), Math.round(thing.pos.y))
                   if (thing.state.t === "dying") { ctx.rotate(thing.state.ang) }
                   ctx.scale(...T(thing.scale))
-                  ctx.drawImage(app.assets[thing.t], ...T(THING_STATS[thing.t].offset))
+                  ctx.drawImage(app.assets[thing.type], ...T(THING_STATS[thing.type].offset))
                   ctx.restore()
                 })
               }
@@ -156,9 +158,36 @@ export const
               ctx.restore()
             },
 
+            spawnEnemies = (dt: number) => {
+              const y = unicorn.cell.y - SIZE_BOARD.y / 4
+              if (y < SIZE_BOARD.y) { return }
+              for (let i = 0; i < SIZE_BOARD.x; ++i) {
+                for (const thing in level.meta.spawnRates) {
+                  const
+                    type = thing as ThingType,
+                    spawnTime = level.meta.spawnRates[type],
+                    odds = spawnTime === 0 ? 0 : 1 / spawnTime * dt / SIZE_BOARD.x
+                  if (Math.random() > odds) { continue }
+                  const cell = V(i, y)
+                  things.push(Thing(
+                    cell,
+                    cellToPos(cell),
+                    V(1, 1),
+                    ThingStateIdle(THING_STATS[type].cooldown, getMoves(
+                      cell,
+                      THING_STATS[type].movements,
+                      size,
+                    )),
+                    type,
+                  ))
+                }
+              }
+            },
+
             step = (dt: number) => {
               const _gameState = gameState.get()
-              if (_gameState.t === "level") {
+              if (_gameState.t === "level") { spawnEnemies(dt) }
+              if (_gameState.t === "level" || _gameState.t === "levelBoss") {
                 things.forEach((thing) => {
                   if (thing === boss) { return }
                   if (thing.state.t === "dying") {
@@ -171,12 +200,12 @@ export const
                   } else if (thing.state.t === "idle") {
                     if (thing.state.cooldown > 0) {
                       thing.state.cooldown -= 1 / 60
-                    } else if (thing.t === "pawn") {
+                    } else if (thing !== unicorn) {
                       const move = pick(thing.state.moves)
                       if (move != null) {
                         thing.state = ThingStateMoveTo(
                           move.map((cell) => cellToPos(cell)),
-                          THING_STATS[thing.t].speed,
+                          THING_STATS[thing.type].speed,
                         )
                       }
                     }
@@ -205,16 +234,16 @@ export const
                         })
                       }
                       if (thing === unicorn && thing.cell.y < SIZE_BOARD.y) {
-                        camera.state = CameraStateEaseTo(cameraPos(camera, VZ), 1, camera.pos, 0)
+                        gameState.set(() => GameStateLevelBoss(_gameState.index))
                       }
                     }
                     if (len(minus(next, thing.pos)) < .5) {
                       thing.pos = next
                       thing.state.path = thing.state.path.slice(1)
                       if (thing.state.path.length === 0) {
-                        thing.state = ThingStateIdle(THING_STATS[thing.t].cooldown, getMoves(
+                        thing.state = ThingStateIdle(THING_STATS[thing.type].cooldown, getMoves(
                           thing.cell,
-                          THING_STATS[thing.t].movements,
+                          THING_STATS[thing.type].movements,
                           size,
                         ))
                       }

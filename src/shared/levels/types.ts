@@ -1,18 +1,24 @@
-import { TypeADT, TypeArray, TypeImport, TypeNumber, TypeObject, TypeString } from "rokay/data/type"
+import { TypeADT, TypeArray, TypeNumber, TypeObject, TypeString, TypeWord } from "rokay/data/type"
 
 import { V } from "../maths/types"
-import { Thing } from "../things/types"
+import { Thing, ThingType } from "../things/types"
 
 
 export const
-  LevelMeta = TypeObject({ index: TypeNumber(), preamble: TypeArray(TypeString()) }),
+  LevelMeta = TypeObject({
+    index: TypeNumber(),
+    preamble: TypeArray(TypeString()),
+    spawnRates: TypeWord("Record", {
+      typeArgs: [ThingType, TypeNumber()],
+    }),
+  }),
 
   Level = TypeObject({
     boss: Thing,
     meta: LevelMeta,
     size: V,
     things: TypeArray(Thing),
-    unicorn: TypeImport("ThingUnicorn", "../things/types.gen.js"),
+    unicorn: Thing,
   }),
 
   LevelState = TypeADT({

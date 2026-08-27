@@ -43,7 +43,7 @@ const
 
 
 export const
-  THING_STATS: Record<Thing["t"], ThingStats> = {
+  THING_STATS: Record<Thing["type"], ThingStats> = {
     bishop: ThingStats(2, .5, V(-8, -12), BISHOP_MOVEMENTS),
     king: ThingStats(2, .5, V(-8, -12), KING_MOVEMENTS),
     knight: ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS),
@@ -61,3 +61,6 @@ export const
         :
           getPath(cell, pos)
     })
+
+
+console.log("THING_STATS:", THING_STATS)
