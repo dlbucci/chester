@@ -2,68 +2,38 @@ import { size as sizeAttr } from "rokay/browser/attr"
 import { apd } from "rokay/browser/core"
 import { canvas, div } from "rokay/browser/elt"
 import { withCtx } from "rokay/browser/game/danvas"
-import { match, matchIf } from "rokay/browser/match"
+import { matchIf } from "rokay/browser/match"
 import { onPointerdown } from "rokay/browser/on"
-import { backgroundColor, color, height, left, position, textAlign, top, width } from "rokay/browser/style"
+import { backgroundColor, position } from "rokay/browser/style"
 import { rafLoop } from "rokay/browser/visible"
 import { last } from "rokay/data/array"
 import { float, pick } from "rokay/math/random"
 import { divide, eq, floor, iter, len, minus, plus, scale, scaleComponents, T, unit, unitOfAng, V, VZ } from "rokay/math/v"
-import { PropBasic } from "rokay/prop/basic"
 import { Prop } from "rokay/prop/prop"
 
-import { GameState, GameStateLevel, GameStateLevelBoss, GameStateLevelPre } from "../../shared/games/types.gen"
+import { GameState, GameStateDead, GameStateLevelBoss } from "../../shared/games/types.gen"
 import { Level } from "../../shared/levels/types.gen"
-import { pgLevel } from "../../shared/pages.gen"
 import { getMoves, THING_STATS } from "../../shared/things/model"
 import { Thing, ThingStateDying, ThingStateIdle, ThingStateMoveTo, ThingType } from "../../shared/things/types.gen"
+import { World } from "../../shared/worlds/types.gen"
 import { AppClient } from "../app"
 import { cameraPos, cameraStep } from "../camera/model"
 import { Camera, CameraStateEaseTo, CameraStateFollow, CameraStateIdle, CameraStateMobius } from "../camera/types.gen"
 import { cellToPos, posToCell } from "../cells/utils"
 import { GRAVITY, SIZE_BOARD, SIZE_BOARD_PIXELS, SIZE_CELL } from "../const"
-import { $flexCenter } from "../style/utils.gen"
 
-import { LEVELS } from "./model"
+import { DeadOverlay, LevelPreOverlay, TitleOverlay } from "./overlays"
 
 
 export const
   LEVEL_COLORS = ["red", "orange", "yellow", "green", "blue", "indigo", "violet"],
   LEVEL_PRE_LIFETIME = 5,
 
-  LevelDisplay = (app: AppClient, level: Level, gameState: Prop<GameState>) => {
-    const
-      LevelPreOverlay = (state: GameStateLevelPre) => {
-        const
-          { preamble } = LEVELS[state.index].meta,
-          messageIndex = PropBasic(0)
-
-        return div(
-          backgroundColor("hsla(0, 0%, 20%, .5)"),
-          color("#eee"),
-          $flexCenter,
-          position("absolute"),
-          top(0),
-          left(0),
-          width("100%"),
-          height("100%"),
-          apd(match(messageIndex, (index) => div(textAlign("center"), apd(preamble[index])))),
-          onPointerdown(() => {
-            messageIndex.set((_index) => {
-              if (_index < preamble.length - 1) { return _index + 1 }
-              gameState.set(() => GameStateLevel(state.index))
-              return _index
-            })
-          }),
-        )
-      },
-      { boss, size, unicorn } = level
-
+  LevelDisplay = (app: AppClient, gameState: Prop<GameState>) => {
     let
       now = performance.now(),
-      { things } = level,
       camera = Camera(
-        { nw: VZ, se: scaleComponents(size, SIZE_CELL) },
+        { nw: VZ, se: scaleComponents(SIZE_BOARD, SIZE_CELL) },
         divide(SIZE_BOARD_PIXELS, 2),
         VZ,
         SIZE_BOARD_PIXELS,
@@ -74,9 +44,13 @@ export const
       )
 
     gameState.listenAndCall((_gameState) => {
-      camera.state = _gameState.t === "title" ?
-          CameraStateMobius(V(0, SIZE_CELL.y), scale(SIZE_CELL, 2))
-        : _gameState.t === "levelPre" ?
+      if (_gameState.t === "title") {
+        camera.state = CameraStateMobius(V(0, SIZE_CELL.y), scale(SIZE_CELL, 2))
+        return
+      }
+      const { unicorn } = _gameState.world
+      camera.bounds.se = scaleComponents(_gameState.level.size, SIZE_CELL)
+      camera.state = _gameState.t === "levelPre" ?
           CameraStateEaseTo(cameraPos(camera, unicorn.pos), 1, camera.pos, 0)
         : _gameState.t === "level" ?
           CameraStateFollow(unicorn)
@@ -94,6 +68,7 @@ export const
         onPointerdown((el, ev) => {
           const _gameState = gameState.get()
           if (_gameState.t !== "level" && _gameState.t !== "levelBoss") { return }
+          const { unicorn } = _gameState.world
           if (unicorn.state.t !== "idle" || unicorn.state.cooldown > 0) { return }
           const _size = app.size.get()
           const src = floor(divide(
@@ -128,21 +103,24 @@ export const
                 }
               })
 
-              if (_gameState.t === "level" || _gameState.t === "levelBoss") {
-                if (unicorn.state.t === "idle") {
-                  const COOLDOWN_OFFSET = Math.ceil(
-                    unicorn.state.cooldown / THING_STATS.unicorn.cooldown * SIZE_CELL.y,
-                  )
-                  ctx.fillStyle = `rgba(255,255,255,${unicorn.state.cooldown > 0 ? ".25" : ".5"})`
-                  unicorn.state.moves.forEach((path) => {
-                    const move = last(path)
-                    ctx.fillRect(
-                      move.x * SIZE_CELL.x,
-                      move.y * SIZE_CELL.y + COOLDOWN_OFFSET,
-                      SIZE_CELL.x,
-                      SIZE_CELL.y - COOLDOWN_OFFSET,
+              if (_gameState.t !== "title") {
+                const { things, unicorn } = _gameState.world
+                if (_gameState.t === "level" || _gameState.t === "levelBoss") {
+                  if (unicorn.state.t === "idle") {
+                    const COOLDOWN_OFFSET = Math.ceil(
+                      unicorn.state.cooldown / THING_STATS.unicorn.cooldown * SIZE_CELL.y,
                     )
-                  })
+                    ctx.fillStyle = `rgba(255,255,255,${unicorn.state.cooldown > 0 ? ".25" : ".5"})`
+                    unicorn.state.moves.forEach((path) => {
+                      const move = last(path)
+                      ctx.fillRect(
+                        move.x * SIZE_CELL.x,
+                        move.y * SIZE_CELL.y + COOLDOWN_OFFSET,
+                        SIZE_CELL.x,
+                        SIZE_CELL.y - COOLDOWN_OFFSET,
+                      )
+                    })
+                  }
                 }
 
                 things.sort((a, b) => a.pos.y - b.pos.y).forEach((thing) => {
@@ -158,14 +136,14 @@ export const
               ctx.restore()
             },
 
-            spawnEnemies = (dt: number) => {
-              const y = unicorn.cell.y - SIZE_BOARD.y / 4
+            spawnEnemies = (dt: number, level: Level, { unicorn, things }: World) => {
+              const y = unicorn.cell.y - SIZE_BOARD.y / 2 - 1
               if (y < SIZE_BOARD.y) { return }
               for (let i = 0; i < SIZE_BOARD.x; ++i) {
-                for (const thing in level.meta.spawnRates) {
+                for (const thing in level.spawnRates) {
                   const
                     type = thing as ThingType,
-                    spawnTime = level.meta.spawnRates[type],
+                    spawnTime = level.spawnRates[type],
                     odds = spawnTime === 0 ? 0 : 1 / spawnTime * dt / SIZE_BOARD.x
                   if (Math.random() > odds) { continue }
                   const cell = V(i, y)
@@ -176,7 +154,7 @@ export const
                     ThingStateIdle(THING_STATS[type].cooldown, getMoves(
                       cell,
                       THING_STATS[type].movements,
-                      size,
+                      level.size,
                     )),
                     type,
                   ))
@@ -186,74 +164,82 @@ export const
 
             step = (dt: number) => {
               const _gameState = gameState.get()
-              if (_gameState.t === "level") { spawnEnemies(dt) }
-              if (_gameState.t === "level" || _gameState.t === "levelBoss") {
-                things.forEach((thing) => {
-                  if (thing === boss) { return }
-                  if (thing.state.t === "dying") {
-                    if (thing.state.lifetime > 0) {
-                      thing.state.lifetime -= dt
-                      thing.state.vel = plus(thing.state.vel, scale(GRAVITY, dt))
-                      thing.pos = plus(thing.pos, scale(thing.state.vel, dt))
-                      thing.state.ang += thing.state.velAng * dt
-                    }
-                  } else if (thing.state.t === "idle") {
-                    if (thing.state.cooldown > 0) {
-                      thing.state.cooldown -= 1 / 60
-                    } else if (thing !== unicorn) {
-                      const move = pick(thing.state.moves)
-                      if (move != null) {
-                        thing.state = ThingStateMoveTo(
-                          move.map((cell) => cellToPos(cell)),
-                          THING_STATS[thing.type].speed,
-                        )
+              if (_gameState.t !== "title") {
+                const { level, world } = _gameState
+                const { boss, things, unicorn } = world
+                if (_gameState.t === "level") { spawnEnemies(dt, level, world) }
+                if (_gameState.t === "level" || _gameState.t === "levelBoss") {
+                  things.forEach((thing) => {
+                    if (thing === boss) { return }
+                    if (thing.state.t === "dying") {
+                      if (thing.state.lifetime > 0) {
+                        thing.state.lifetime -= dt
+                        thing.state.vel = plus(thing.state.vel, scale(GRAVITY, dt))
+                        thing.pos = plus(thing.pos, scale(thing.state.vel, dt))
+                        thing.state.ang += thing.state.velAng * dt
+                      }
+                    } else if (thing.state.t === "idle") {
+                      if (thing.state.cooldown > 0) {
+                        thing.state.cooldown -= 1 / 60
+                      } else if (thing !== unicorn) {
+                        const move = pick(thing.state.moves)
+                        if (move != null) {
+                          thing.state = ThingStateMoveTo(
+                            move.map((cell) => cellToPos(cell)),
+                            THING_STATS[thing.type].speed,
+                          )
+                        }
+                      }
+                    } else if (thing.state.t === "moveTo") {
+                      let next = thing.state.path[0]
+                      thing.pos = plus(thing.pos, scale(
+                        unit(minus(next, thing.pos)),
+                        thing.state.speed,
+                      ))
+                      const newCell = posToCell(thing.pos)
+                      if (!eq(thing.cell, newCell)) {
+                        thing.cell = newCell
+                        // we've entered the final square of the move, make the attack
+                        if (thing.state.path.length === 1) {
+                          things.forEach((otherThing) => {
+                            if (thing === otherThing || otherThing.state.t === "dying") { return }
+                            const thingCell = posToCell(otherThing.pos)
+                            if (eq(newCell, thingCell)) {
+                              otherThing.state = ThingStateDying(
+                                0,
+                                1,
+                                scale(unitOfAng(float(-Math.PI * 3 / 8, -Math.PI * 5 / 8)), 100),
+                                1,
+                              )
+                            }
+                          })
+                        }
+                        if (thing === unicorn && thing.cell.y < SIZE_BOARD.y) {
+                          gameState.set(() => GameStateLevelBoss(level, world))
+                        }
+                      }
+                      if (len(minus(next, thing.pos)) < .5) {
+                        thing.pos = next
+                        thing.state.path = thing.state.path.slice(1)
+                        if (thing.state.path.length === 0) {
+                          thing.state = ThingStateIdle(THING_STATS[thing.type].cooldown, getMoves(
+                            thing.cell,
+                            THING_STATS[thing.type].movements,
+                            level.size,
+                          ))
+                        }
                       }
                     }
-                  } else if (thing.state.t === "moveTo") {
-                    let next = thing.state.path[0]
-                    thing.pos = plus(thing.pos, scale(
-                      unit(minus(next, thing.pos)),
-                      thing.state.speed,
-                    ))
-                    const newCell = posToCell(thing.pos)
-                    if (!eq(thing.cell, newCell)) {
-                      thing.cell = newCell
-                      // we've entered the final square of the move, make the attack
-                      if (thing.state.path.length === 1) {
-                        things.forEach((otherThing) => {
-                          if (thing === otherThing || otherThing.state.t === "dying") { return }
-                          const thingCell = posToCell(otherThing.pos)
-                          if (eq(newCell, thingCell)) {
-                            otherThing.state = ThingStateDying(
-                              0,
-                              1,
-                              scale(unitOfAng(float(-Math.PI * 3 / 8, -Math.PI * 5 / 8)), 100),
-                              1,
-                            )
-                          }
-                        })
-                      }
-                      if (thing === unicorn && thing.cell.y < SIZE_BOARD.y) {
-                        gameState.set(() => GameStateLevelBoss(_gameState.index))
-                      }
-                    }
-                    if (len(minus(next, thing.pos)) < .5) {
-                      thing.pos = next
-                      thing.state.path = thing.state.path.slice(1)
-                      if (thing.state.path.length === 0) {
-                        thing.state = ThingStateIdle(THING_STATS[thing.type].cooldown, getMoves(
-                          thing.cell,
-                          THING_STATS[thing.type].movements,
-                          size,
-                        ))
-                      }
-                    }
-                  }
-                })
+                  })
 
-                things = things.filter((thing) =>
-                  thing.state.t !== "dying" || thing.state.lifetime > 0
-                )
+                  world.things = things.filter((thing) =>
+                    thing.state.t !== "dying" || thing.state.lifetime > 0
+                  )
+
+                  if (!things.includes(unicorn)) {
+                    gameState.set(() => GameStateDead(level, world))
+                  }
+                }
               }
 
               cameraStep(dt, camera)
@@ -269,22 +255,11 @@ export const
 
       matchIf(gameState, (_gameState) => {
         return _gameState.t === "title" ?
-            div(
-              backgroundColor("hsla(0, 0%, 20%, .5)"),
-              color("#eee"),
-              $flexCenter,
-              position("absolute"),
-              top(0),
-              left(0),
-              width("100%"),
-              height("100%"),
-              apd("Chester"),
-              onPointerdown(() => {
-                app.router.replace(pgLevel(0))
-              }),
-            )
+            TitleOverlay(app)
           : _gameState.t === "levelPre" ?
-            LevelPreOverlay(_gameState)
+            LevelPreOverlay(_gameState, gameState)
+          : _gameState.t === "dead" ?
+            DeadOverlay(app)
           :
             undefined
       }),

@@ -1,10 +1,14 @@
-import { TypeADT, TypeInt } from "rokay/data/type"
+import { TypeADT } from "rokay/data/type"
+
+import { Level } from "../levels/types"
+import { World } from "../worlds/types"
 
 
 export const
   GameState = TypeADT({
     title: {},
-    levelPre: { index: TypeInt() },
-    level: { index: TypeInt() },
-    levelBoss: { index: TypeInt() },
+    levelPre: { level: Level, world: World },
+    level: { level: Level, world: World },
+    levelBoss: { level: Level, world: World },
+    dead: { level: Level, world: World },
   })
