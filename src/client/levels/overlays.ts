@@ -3,7 +3,7 @@ import { div } from "rokay/browser/elt"
 import { match } from "rokay/browser/match"
 import { onPointerdown } from "rokay/browser/on"
 import { backgroundColor, color, flexDirection, fontSize, gap, height, left, position, textAlign, top,
-  userSelect, width } from "rokay/browser/style"
+  userSelect, whiteSpace, width } from "rokay/browser/style"
 import { MixArgs } from "rokay/mix"
 import { PropBasic } from "rokay/prop/basic"
 import { Prop } from "rokay/prop/prop"
@@ -68,11 +68,8 @@ export const
       color("hsl(352,78%,45%)"),
       flexDirection("column"),
       gap(".5em"),
-      apd(div(
-        $messageEnter,
-        textAlign("center"),
-        apd(div(apd(level.bossName)), div(apd("DEFEATED"))),
-      )),
+      whiteSpace("pre"),
+      apd(div($messageEnter, textAlign("center"), apd(level.bossName + "\nDEFEATED"))),
       onPointerdown(() => {
         app.router.replace(level.index + 1 < LEVELS.length ? pgLevel(level.index + 1) : pgIndex())
       }),

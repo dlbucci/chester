@@ -4,9 +4,10 @@ import { canvas, div } from "rokay/browser/elt"
 import { withCtx } from "rokay/browser/game/danvas"
 import { matchIf } from "rokay/browser/match"
 import { onPointerdown } from "rokay/browser/on"
+import { $ } from "rokay/browser/prop"
 import { backgroundColor, position } from "rokay/browser/style"
 import { rafLoop } from "rokay/browser/visible"
-import { last } from "rokay/data/array"
+import { last, tab } from "rokay/data/array"
 import { float, pick } from "rokay/math/random"
 import { divide, eq, floor, iter, len, minus, plus, scale, scaleComponents, T, unit, unitOfAng, V, VZ } from "rokay/math/v"
 import { Prop } from "rokay/prop/prop"
@@ -22,11 +23,12 @@ import { Camera, CameraStateEaseTo, CameraStateFollow, CameraStateIdle, CameraSt
 import { cellToPos, posToCell } from "../cells/utils"
 import { GRAVITY, SIZE_BOARD, SIZE_BOARD_PIXELS, SIZE_CELL } from "../const"
 
+import { LEVELS } from "./model"
 import { DeadOverlay, LevelPreOverlay, LevelWinOverlay, TitleOverlay } from "./overlays"
 
 
 export const
-  LEVEL_COLORS = ["red", "orange", "yellow", "green", "blue", "indigo", "violet"],
+  LEVEL_COLORS = tab(LEVELS.length, (i) => `hsl(123, ${i / (LEVELS.length - 1) * 78}%, 34%)`),
   LEVEL_PRE_LIFETIME = 5,
 
   LevelDisplay = (app: AppClient, gameState: Prop<GameState>) => {
@@ -62,7 +64,9 @@ export const
 
     return div(position("relative"), apd(
       canvas(
-        backgroundColor("red"),
+        $(gameState, (_gameState) => backgroundColor(
+          LEVEL_COLORS[_gameState.t === "title" ? 0 : _gameState.level.index] ?? "gray",
+        )),
         sizeAttr(...T(SIZE_BOARD_PIXELS)),
 
         onPointerdown((el, ev) => {

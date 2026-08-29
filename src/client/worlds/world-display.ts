@@ -21,7 +21,7 @@ export const
     )
 
     return div(
-      $(level, (_level) => $rainbowBackground(VB(32), 8, (_level + 1) / LEVELS.length)),
+      $(level, (_level) => $rainbowBackground(VB(32), 8, _level / (LEVELS.length - 1))),
       imageRendering("pixelated"),
       $flexCenter,
       $s100,
