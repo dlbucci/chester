@@ -71,7 +71,7 @@ Really?!
 I sorta expected the first two would be no help.
 But Halsik?
 Really?
-Maybe just go talk to Sicafant.
+Maybe just go talk to Sicafant?
 He's a big fan of these guys, he'll know what's up.`.split(
           "\n",
         ),
