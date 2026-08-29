@@ -1,7 +1,7 @@
 import { mapNotNil, tab } from "rokay/data/array"
 import { plus, scale, V } from "rokay/math/v"
 
-import { getPath } from "../paths/model"
+import { getDiagonalPath, getPath } from "../paths/model"
 
 import { Thing } from "./types.gen"
 
@@ -53,13 +53,15 @@ export const
     unicorn: ThingStats(1, 1, V(-8, -12), KNIGHT_MOVEMENTS),
   },
 
-  getMoves = (cell: V, movements: V[], levelSize: V): V[][] =>
+  getMoves = (cell: V, movements: V[], levelSize: V, noDiag: boolean): V[][] =>
     mapNotNil(movements, (movement) => {
       const pos = plus(cell, movement)
       return pos.x < 0 || pos.x >= levelSize.x || pos.y < 0 || pos.y >= levelSize.y ?
           undefined
-        :
+        : noDiag ?
           getPath(cell, pos)
+        :
+          getDiagonalPath(cell, pos)
     })
 
 

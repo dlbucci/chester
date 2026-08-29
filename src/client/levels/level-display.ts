@@ -155,6 +155,7 @@ export const
                       cell,
                       THING_STATS[type].movements,
                       level.size,
+                      type === "knight" || type === "unicorn",
                     )),
                     type,
                   ))
@@ -226,6 +227,7 @@ export const
                             thing.cell,
                             THING_STATS[thing.type].movements,
                             level.size,
+                            thing.type === "knight" || thing.type === "unicorn",
                           ))
                         }
                       }

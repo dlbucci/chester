@@ -1,4 +1,4 @@
-import { eq, minus, V, VZ } from "rokay/math/v"
+import { eq, minus, plus, V, VZ } from "rokay/math/v"
 
 
 export const
@@ -15,6 +15,17 @@ export const
 
       d = minus(to, from)
       if ((vert && d.y === 0) || (!vert && d.x === 0)) { vert = !vert }
+    }
+    return path
+  },
+
+  getDiagonalPath = (from: V, to: V): V[] | undefined => {
+    let d = minus(to, from)
+    if (d.x === 0 || d.y === 0) { return getPath(from, to) }
+    let step = V(Math.sign(d.x), Math.sign(d.y))
+    const path: V[] = []
+    while (!eq(from, to)) {
+      path.push(from = plus(from, step))
     }
     return path
   }
