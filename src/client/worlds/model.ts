@@ -1,11 +1,12 @@
 import { pick } from "rokay/math/random"
-import { V, VZ } from "rokay/math/v"
+import { V } from "rokay/math/v"
 
 import { Level } from "../../shared/levels/types.gen"
 import { getMoves, THING_STATS } from "../../shared/things/model"
 import { Thing, ThingStateIdle } from "../../shared/things/types.gen"
 import { World } from "../../shared/worlds/types.gen"
 import { cellToPos } from "../cells/utils"
+import { SIZE_BOARD } from "../const"
 
 
 export const
@@ -19,11 +20,12 @@ export const
         ThingStateIdle(0, getMoves(cell, THING_STATS.unicorn.movements, level.size)),
         "unicorn",
       ),
+      bossCell = V(Math.floor(SIZE_BOARD.x / 2), 0),
       boss = Thing(
-        VZ,
-        VZ,
+        bossCell,
+        cellToPos(bossCell),
         V(1, 1),
-        ThingStateIdle(0, getMoves(VZ, THING_STATS.pawn.movements, level.size)),
+        ThingStateIdle(0, getMoves(bossCell, THING_STATS.pawn.movements, level.size)),
         "pawn",
       ),
       things: Thing[] = [unicorn, boss]

@@ -11,7 +11,7 @@ import { float, pick } from "rokay/math/random"
 import { divide, eq, floor, iter, len, minus, plus, scale, scaleComponents, T, unit, unitOfAng, V, VZ } from "rokay/math/v"
 import { Prop } from "rokay/prop/prop"
 
-import { GameState, GameStateDead, GameStateLevelBoss } from "../../shared/games/types.gen"
+import { GameState, GameStateDead, GameStateLevelBoss, GameStateLevelWin } from "../../shared/games/types.gen"
 import { Level } from "../../shared/levels/types.gen"
 import { getMoves, THING_STATS } from "../../shared/things/model"
 import { Thing, ThingStateDying, ThingStateIdle, ThingStateMoveTo, ThingType } from "../../shared/things/types.gen"
@@ -22,7 +22,7 @@ import { Camera, CameraStateEaseTo, CameraStateFollow, CameraStateIdle, CameraSt
 import { cellToPos, posToCell } from "../cells/utils"
 import { GRAVITY, SIZE_BOARD, SIZE_BOARD_PIXELS, SIZE_CELL } from "../const"
 
-import { DeadOverlay, LevelPreOverlay, TitleOverlay } from "./overlays"
+import { DeadOverlay, LevelPreOverlay, LevelWinOverlay, TitleOverlay } from "./overlays"
 
 
 export const
@@ -170,7 +170,7 @@ export const
                 if (_gameState.t === "level") { spawnEnemies(dt, level, world) }
                 if (_gameState.t === "level" || _gameState.t === "levelBoss") {
                   things.forEach((thing) => {
-                    if (thing === boss) { return }
+                    if (thing === boss && _gameState.t !== "levelBoss") { return }
                     if (thing.state.t === "dying") {
                       if (thing.state.lifetime > 0) {
                         thing.state.lifetime -= dt
@@ -236,6 +236,9 @@ export const
                     thing.state.t !== "dying" || thing.state.lifetime > 0
                   )
 
+                  if (!things.includes(boss)) {
+                    gameState.set(() => GameStateLevelWin(level, world))
+                  }
                   if (!things.includes(unicorn)) {
                     gameState.set(() => GameStateDead(level, world))
                   }
@@ -258,6 +261,8 @@ export const
             TitleOverlay(app)
           : _gameState.t === "levelPre" ?
             LevelPreOverlay(_gameState, gameState)
+          : _gameState.t === "levelWin" ?
+            LevelWinOverlay(app, _gameState.level)
           : _gameState.t === "dead" ?
             DeadOverlay(app)
           :

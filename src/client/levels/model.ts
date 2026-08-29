@@ -24,6 +24,7 @@ let
 export const
   LEVELS = [
     Level(
+      "Rebu",
       ++i,
       [
         "You're looking for something, aren't you?",
@@ -36,11 +37,11 @@ export const
       V(SIZE_BOARD.x, (3 + i) * SIZE_BOARD.y),
       spawnRates({}),
     ),
-    Level(++i, ["TODO"], V(SIZE_BOARD.x, (3 + i) * SIZE_BOARD.y), spawnRates({})),
-    Level(++i, ["TODO"], V(SIZE_BOARD.x, (3 + i) * SIZE_BOARD.y), spawnRates({})),
-    Level(++i, ["TODO"], V(SIZE_BOARD.x, (3 + i) * SIZE_BOARD.y), spawnRates({})),
-    Level(++i, ["TODO"], V(SIZE_BOARD.x, (3 + i) * SIZE_BOARD.y), spawnRates({})),
-    Level(++i, ["TODO"], V(SIZE_BOARD.x, (3 + i) * SIZE_BOARD.y), spawnRates({})),
-    Level(++i, ["TODO"], V(SIZE_BOARD.x, (3 + i) * SIZE_BOARD.y), spawnRates({})),
-    Level(++i, ["TODO"], V(SIZE_BOARD.x, (3 + i) * SIZE_BOARD.y), spawnRates({})),
+    Level("Barbin", ++i, ["TODO"], V(SIZE_BOARD.x, (3 + i) * SIZE_BOARD.y), spawnRates({})),
+    Level("Halsik", ++i, ["TODO"], V(SIZE_BOARD.x, (3 + i) * SIZE_BOARD.y), spawnRates({})),
+    Level("Sicafant", ++i, ["TODO"], V(SIZE_BOARD.x, (3 + i) * SIZE_BOARD.y), spawnRates({})),
+    Level("Peanio", ++i, ["TODO"], V(SIZE_BOARD.x, (3 + i) * SIZE_BOARD.y), spawnRates({})),
+    Level("Dinkus", ++i, ["TODO"], V(SIZE_BOARD.x, (3 + i) * SIZE_BOARD.y), spawnRates({})),
+    Level("Boof Cake", ++i, ["TODO"], V(SIZE_BOARD.x, (3 + i) * SIZE_BOARD.y), spawnRates({})),
+    Level("Evernut Clapati", ++i, ["TODO"], V(SIZE_BOARD.x, (3 + i) * SIZE_BOARD.y), spawnRates({})),
   ]
