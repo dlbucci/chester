@@ -51,18 +51,24 @@ export const
     queen: ThingStats(2, .5, V(-8, -12), QUEEN_MOVEMENTS),
     rook: ThingStats(2, .5, V(-8, -12), ROOK_MOVEMENTS),
     unicorn: ThingStats(1, 1, V(-8, -12), KNIGHT_MOVEMENTS),
+
+    Rebu: ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS),
+    Barbin: ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS),
+    Halsik: ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS),
+    Sicafant: ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS),
+    Peanio: ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS),
+    Dinkus: ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS),
+    "Boof Cake": ThingStats(1, 1, V(-8, -12), KNIGHT_MOVEMENTS),
+    "Evernut Clapati": ThingStats(1, 1, V(-8, -12), KNIGHT_MOVEMENTS),
   },
 
-  getMoves = (cell: V, movements: V[], levelSize: V, noDiag: boolean): V[][] =>
+  getMoves = (cell: V, movements: V[], levelSize: V): V[][] =>
     mapNotNil(movements, (movement) => {
       const pos = plus(cell, movement)
       return pos.x < 0 || pos.x >= levelSize.x || pos.y < 0 || pos.y >= levelSize.y ?
           undefined
-        : noDiag ?
+        : movements === KNIGHT_MOVEMENTS ?
           getPath(cell, pos)
         :
           getDiagonalPath(cell, pos)
     })
-
-
-console.log("THING_STATS:", THING_STATS)

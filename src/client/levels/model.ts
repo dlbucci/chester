@@ -13,6 +13,16 @@ const
     queen: 8,
     rook: 8,
     unicorn: 0,
+
+    Rebu: 0,
+    Barbin: 0,
+    Halsik: 0,
+    Sicafant: 0,
+    Peanio: 0,
+    Dinkus: 0,
+    "Boof Cake": 0,
+    "Evernut Clapati": 0,
+
     ...rates,
   })
 

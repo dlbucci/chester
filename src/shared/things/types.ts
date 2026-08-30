@@ -3,6 +3,19 @@ import { TypeADT, TypeArray, TypeNumber, TypeObject, TypeStringUnion } from "rok
 import { V } from "../maths/types"
 
 
+const
+  BOSS_NAMES = [
+    "Rebu",
+    "Barbin",
+    "Halsik",
+    "Sicafant",
+    "Peanio",
+    "Dinkus",
+    "Boof Cake",
+    "Evernut Clapati",
+  ]
+
+
 export const
   ThingState = TypeADT({
     dying: {
@@ -16,7 +29,18 @@ export const
   })
 
 export const
-  ThingType = TypeStringUnion(["bishop", "king", "knight", "pawn", "queen", "rook", "unicorn"]),
+  BossName = TypeStringUnion(BOSS_NAMES),
+
+  ThingType = TypeStringUnion([
+    "bishop",
+    "king",
+    "knight",
+    "pawn",
+    "queen",
+    "rook",
+    "unicorn",
+    ...BOSS_NAMES,
+  ]),
 
   Thing = TypeObject({
     cell: V,

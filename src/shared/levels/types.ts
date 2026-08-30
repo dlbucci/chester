@@ -1,12 +1,12 @@
 import { TypeArray, TypeNumber, TypeObject, TypeString, TypeWord } from "rokay/data/type"
 
 import { V } from "../maths/types"
-import { ThingType } from "../things/types"
+import { BossName, ThingType } from "../things/types"
 
 
 export const
   Level = TypeObject({
-    bossName: TypeString(),
+    bossName: BossName,
     index: TypeNumber(),
     preamble: TypeArray(TypeString()),
     size: V,

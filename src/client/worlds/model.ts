@@ -17,7 +17,7 @@ export const
         cell,
         cellToPos(cell),
         V(1, 1),
-        ThingStateIdle(0, getMoves(cell, THING_STATS.unicorn.movements, level.size, true)),
+        ThingStateIdle(0, getMoves(cell, THING_STATS.unicorn.movements, level.size)),
         "unicorn",
       ),
       bossCell = V(Math.floor(SIZE_BOARD.x / 2), 0),
@@ -25,8 +25,8 @@ export const
         bossCell,
         cellToPos(bossCell),
         V(1, 1),
-        ThingStateIdle(0, getMoves(bossCell, THING_STATS.pawn.movements, level.size, false)),
-        "pawn",
+        ThingStateIdle(0, getMoves(bossCell, THING_STATS[level.bossName].movements, level.size)),
+        level.bossName,
       ),
       things: Thing[] = [unicorn, boss]
     return World(boss, things, unicorn)

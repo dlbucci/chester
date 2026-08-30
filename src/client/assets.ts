@@ -1,31 +1,27 @@
 import { size } from "rokay/browser/attr"
 import { canvas } from "rokay/browser/elt"
-import { outline, withCtx } from "rokay/browser/game/danvas"
+import { fills, outline, withCtx } from "rokay/browser/game/danvas"
 import { tab } from "rokay/data/array"
+import { T, V } from "rokay/math/v"
+
+import { ThingType } from "../shared/things/types.gen"
 
 import { TextCanvas } from "./elts/text-canvas"
 
 
-export type Assets = {
-  // cached: { bgs: Map<string, HTMLCanvasElement>, cats: Map<CatFM, HTMLCanvasElement> }
-  font9: Map<string, HTMLCanvasElement>
-  font12: Map<string, HTMLCanvasElement>
-  font16: Map<string, HTMLCanvasElement>
-  font16cursive: Map<string, HTMLCanvasElement>
-  font16italic: Map<string, HTMLCanvasElement>
-
-  bishop: HTMLCanvasElement
-  king: HTMLCanvasElement
-  knight: HTMLCanvasElement
-  pawn: HTMLCanvasElement
-  queen: HTMLCanvasElement
-  rook: HTMLCanvasElement
-  unicorn: HTMLCanvasElement
-  // music: { bg: AudioBuffer }
-  // sfx: { button: AudioBuffer }
-}
+export type Assets =
+  & {
+    font9: Map<string, HTMLCanvasElement>
+    font12: Map<string, HTMLCanvasElement>
+    font16: Map<string, HTMLCanvasElement>
+    font16cursive: Map<string, HTMLCanvasElement>
+    font16italic: Map<string, HTMLCanvasElement>
+  }
+  & Record<ThingType, HTMLCanvasElement>
 
 
+// music: { bg: AudioBuffer }
+// sfx: { button: AudioBuffer }
 export const
   load = () =>
     Promise.all([
@@ -37,6 +33,14 @@ export const
         queen: sprite(image, 5),
         rook: sprite(image, 3),
         unicorn: sprite(image, 0),
+        Rebu: paintUnicorn(image, "red"),
+        Barbin: paintUnicorn(image, "orange"),
+        Halsik: paintUnicorn(image, "yellow"),
+        Sicafant: paintUnicorn(image, "green"),
+        Peanio: paintUnicorn(image, "blue"),
+        Dinkus: paintUnicorn(image, "indigo"),
+        "Boof Cake": paintUnicorn(image, "violet"),
+        "Evernut Clapati": paintUnicorn(image, "black"),
       })),
       // loadImage("/art/items.png"),
       // loadImage("/art/work.png"),
@@ -90,6 +94,48 @@ const
         rej(e)
       }
     }),
+
+  paint = (colors: Record<string, string[]>) =>
+    (ctx: CanvasRenderingContext2D) => {
+      const { data } = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height)
+      const colorSet = new Set<string>()
+      for (let i = 0; i < data.length; i += 4) {
+        const slice = data.slice(i, i + 4).join(",")
+        const fills = colors[slice]
+        if (fills != null) {
+          fills.forEach((fill) => {
+            const pos = T(V((i / 4) % ctx.canvas.width, Math.floor(i / 4 / ctx.canvas.width)))
+            if (fill === "transparent") {
+              ctx.clearRect(...pos, 1, 1)
+            } else {
+              ctx.fillStyle = fill
+              ctx.fillRect(...pos, 1, 1)
+            }
+          })
+        } else {
+          colorSet.add(slice)
+        }
+      }
+      console.log("colors:", colorSet)
+    },
+
+  paintUnicorn = (image: HTMLImageElement, color: string) =>
+    canvas(size(16, 16), withCtx(
+      (ctx) => {
+        ctx.drawImage(image, 0, 0, 16, 16, 0, 0, 16, 16)
+      },
+      paint({
+        // main colors
+        "255,255,255,255": [color],
+        "224,224,224,255": [color, "rgba(0, 0, 0, .1)"],
+        // mane colors
+        "204,204,221,255": [color, "rgba(0, 0, 0, .2)"],
+        "179,179,194,255": [color, "rgba(0, 0, 0, .3)"],
+        // "0,0,0,0", "255,255,0,255", "0,0,0,255"
+      }),
+      fills("#000"),
+      outline(1),
+    )),
 
   sprite = (image: HTMLImageElement, index: number) =>
     canvas(size(16, 16), withCtx(
