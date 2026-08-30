@@ -186,7 +186,19 @@ export const
                       if (thing.state.cooldown > 0) {
                         thing.state.cooldown -= 1 / 60
                       } else if (thing !== unicorn) {
-                        const move = pick(thing.state.moves)
+                        const getNextMove = (thing: Thing) => {
+                          const
+                            moves = getMoves(
+                              thing.cell,
+                              THING_STATS[thing.type].movements,
+                              _gameState.t === "levelBoss" ? SIZE_BOARD : level.size,
+                            ),
+                            playerMove = moves.find((move) => eq(last(move), unicorn.cell))
+
+                          return playerMove ?? pick(moves)
+                        }
+
+                        const move = getNextMove(thing)
                         if (move != null) {
                           thing.state = ThingStateMoveTo(
                             move.map((cell) => cellToPos(cell)),
