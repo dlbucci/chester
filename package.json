@@ -10,12 +10,12 @@
     "typescript": "^5.9.3"
   },
   "license": "ISC",
-  "main": "_dist/server/unicorn.js",
-  "name": "unicorn",
+  "main": "_dist/server/chester.js",
+  "name": "chester",
   "rokay": {
     "port": 7024,
     "theme": "#dde",
-    "title": "Unicorn",
+    "title": "Chester",
     "version": 5
   },
   "scripts": {
@@ -23,11 +23,11 @@
     "start": "rokay server:run",
     "watch": "rokay watch",
     "zip": "npm run zip:html && npm run zip:rollup && npm run zip:zip && npm run zip:size",
-    "zip:final": "npm run zip:rollup && cp static/unicorn.min.js static/unicorn.js && npm run zip:zip && npm run zip:size",
+    "zip:final": "npm run zip:rollup && cp static/chester.min.js static/chester.js && npm run zip:zip && npm run zip:size",
     "zip:html": "curl localhost:7024 -H 'Accept: text/html' > static/index.html",
-    "zip:rollup": "rollup --input static/unicorn.js --file static/unicorn.js --format cjs --plugin terser",
+    "zip:rollup": "rollup --input static/chester.js --file static/chester.js --format cjs --plugin terser",
     "zip:size": "ls -al static/build.zip | awk '{print $5}'",
-    "zip:zip": "cd static && rm -f build.zip && zip build.zip art/*.png art/icons/16.png index.html unicorn.css unicorn.js manifest.json"
+    "zip:zip": "cd static && rm -f build.zip && zip build.zip art/*.png art/icons/16.png index.html chester.css chester.js manifest.json"
   },
   "type": "module",
   "version": "1.0.0",

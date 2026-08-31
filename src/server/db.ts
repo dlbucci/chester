@@ -1,11 +1,11 @@
 import { DB } from "rokay/server/db/db"
 
 
-export type UnicornDB = ReturnType<typeof UnicornDB>
+export type ChesterDB = ReturnType<typeof ChesterDB>
 
 
 export const
-  UnicornDB = (db: DB) => ({
+  ChesterDB = (db: DB) => ({
     single: db.single,
 
     transact: db.transact,

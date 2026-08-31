@@ -3,7 +3,7 @@
   "description": "JS13K 2026: Unicorns & Rainbows",
   "icons": [],
   "lang": "en-US",
-  "name": "Unicorn",
+  "name": "Chester",
   "orientation": "any",
   "related_applications": [
     {
@@ -11,7 +11,7 @@
     }
   ],
   "scope": "/",
-  "short_name": "Unicorn",
+  "short_name": "Chester",
   "start_url": ".",
   "theme_color": "#dde"
 }

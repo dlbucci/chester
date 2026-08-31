@@ -1,4 +1,4 @@
-# Unicorn
+# Chester
 
 JS13K 2026: Unicorns & Rainbows
 

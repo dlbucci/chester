@@ -10,7 +10,7 @@ export const
   HTML = (_app: AppServer, ...args: MixArgs<Elt>) =>
     html(lang("en"), apd(
       head(apd(
-        title(apd("Unicorn")),
+        title(apd("Chester")),
 
         _meta(charset("utf-8")),
         meta("apple-mobile-web-app-capable", "yes"),
@@ -22,10 +22,10 @@ export const
         link("apple-touch-icon", "/art/icons/16.png"),
         link("icon", "/art/icons/16.png"),
         link("manifest", "/manifest.json"),
-        link("stylesheet", "/unicorn.css"),
+        link("stylesheet", "/chester.css"),
 
         // script(nonce(cspNonce), apd(`const SERVER_DATA = ${JSON.stringify(serverData)}`)),
-        script(async, src("/unicorn.js")),
+        script(async, src("/chester.js")),
       )),
       body(...args),
     ))
