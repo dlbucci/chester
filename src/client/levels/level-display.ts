@@ -12,7 +12,7 @@ import { float, pick } from "rokay/math/random"
 import { divide, eq, floor, iter, len, minus, plus, scale, scaleComponents, T, unit, unitOfAng, V, VZ } from "rokay/math/v"
 import { Prop } from "rokay/prop/prop"
 
-import { GameState, GameStateDead, GameStateLevelBoss, GameStateLevelWin } from "../../shared/games/types.gen"
+import { GameState, GameStateDead, GameStateLevelBoss, GameStateLevelWin, GameStateWin } from "../../shared/games/types.gen"
 import { Level } from "../../shared/levels/types.gen"
 import { getMoves, THING_STATS } from "../../shared/things/model"
 import { Thing, ThingStateDying, ThingStateIdle, ThingStateMoveTo, ThingType } from "../../shared/things/types.gen"
@@ -24,7 +24,7 @@ import { cellToPos, posToCell } from "../cells/utils"
 import { GRAVITY, SIZE_BOARD, SIZE_BOARD_PIXELS, SIZE_CELL } from "../const"
 
 import { LEVELS } from "./model"
-import { DeadOverlay, LevelPreOverlay, LevelWinOverlay, TitleOverlay } from "./overlays"
+import { DeadOverlay, LevelPreOverlay, LevelWinOverlay, TitleOverlay, WinOverlay } from "./overlays"
 
 
 export const
@@ -278,7 +278,11 @@ export const
           : _gameState.t === "levelPre" ?
             LevelPreOverlay(_gameState, gameState)
           : _gameState.t === "levelWin" ?
-            LevelWinOverlay(app, _gameState.level)
+            LevelWinOverlay(app, _gameState.level, {
+              onWin() { gameState.set(() => GameStateWin(_gameState.level, _gameState.world)) },
+            })
+          : _gameState.t === "win" ?
+            WinOverlay(app)
           : _gameState.t === "dead" ?
             DeadOverlay(app)
           :

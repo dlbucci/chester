@@ -62,7 +62,7 @@ export const
     )
   },
 
-  LevelWinOverlay = (app: AppClient, level: Level) =>
+  LevelWinOverlay = (app: AppClient, level: Level, { onWin }: { onWin(): void }) =>
     Overlay(
       backgroundColor("hsla(0, 0%, 20%, .75)"),
       color("hsl(352,78%,45%)"),
@@ -71,11 +71,28 @@ export const
       whiteSpace("pre"),
       apd(div($messageEnter, textAlign("center"), apd(level.bossName + "\nDEFEATED"))),
       onPointerdown(() => {
-        app.router.replace(level.index + 1 < LEVELS.length ? pgLevel(level.index + 1) : pgIndex())
+        if (level.index + 1 < LEVELS.length) {
+          app.router.replace(level.index + 1 < LEVELS.length ? pgLevel(level.index + 1) : pgIndex())
+        } else {
+          onWin()
+        }
       }),
     ),
 
   TitleOverlay = (app: AppClient) =>
     Overlay(apd("Chester"), onPointerdown(() => {
       app.router.replace(pgLevel(0))
-    }))
+    })),
+
+  WinOverlay = (app: AppClient) =>
+    Overlay(
+      backgroundColor("hsla(0, 0%, 20%, .75)"),
+      color("hsl(352,78%,45%)"),
+      flexDirection("column"),
+      gap(".5em"),
+      whiteSpace("pre"),
+      apd(div($messageEnter, textAlign("center"), apd("YOU WIN\nTHE END"))),
+      onPointerdown(() => {
+        app.router.replace(pgIndex())
+      }),
+    )
