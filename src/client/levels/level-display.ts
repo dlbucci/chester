@@ -2,10 +2,10 @@ import { size as sizeAttr } from "rokay/browser/attr"
 import { apd } from "rokay/browser/core"
 import { canvas, div } from "rokay/browser/elt"
 import { withCtx } from "rokay/browser/game/danvas"
-import { matchIf } from "rokay/browser/match"
+import { match, matchIf } from "rokay/browser/match"
 import { onPointerdown } from "rokay/browser/on"
 import { $ } from "rokay/browser/prop"
-import { backgroundColor, position } from "rokay/browser/style"
+import { backgroundColor, border, height, position } from "rokay/browser/style"
 import { rafLoop } from "rokay/browser/visible"
 import { last, tab } from "rokay/data/array"
 import { float, pick } from "rokay/math/random"
@@ -22,6 +22,7 @@ import { cameraPos, cameraStep } from "../camera/model"
 import { Camera, CameraStateEaseTo, CameraStateFollow, CameraStateIdle, CameraStateMobius } from "../camera/types.gen"
 import { cellToPos, posToCell } from "../cells/utils"
 import { GRAVITY, SIZE_BOARD, SIZE_BOARD_PIXELS, SIZE_CELL } from "../const"
+import { $flexRow } from "../style/utils.gen"
 
 import { LEVELS } from "./model"
 import { DeadOverlay, LevelPreOverlay, LevelWinOverlay, TitleOverlay, WinOverlay } from "./overlays"
@@ -43,11 +44,13 @@ export const
           CameraStateMobius(V(0, SIZE_CELL.y), scale(SIZE_CELL, 2))
         :
           CameraStateIdle(),
-      )
+      ),
+      captured = Prop<Thing[]>(() => [])
 
     gameState.listenAndCall((_gameState) => {
       if (_gameState.t === "title") {
         camera.state = CameraStateMobius(V(0, SIZE_CELL.y), scale(SIZE_CELL, 2))
+        captured.set(() => [])
         return
       }
       const { unicorn } = _gameState.world
@@ -62,7 +65,7 @@ export const
           CameraStateIdle()
     })
 
-    return div(position("relative"), apd(
+    return div(border("1px solid #000"), position("relative"), apd(
       canvas(
         $(gameState, (_gameState) => backgroundColor(
           LEVEL_COLORS[_gameState.t === "title" ? 0 : _gameState.level.index] ?? "gray",
@@ -227,6 +230,9 @@ export const
                                 scale(unitOfAng(float(-Math.PI * 3 / 8, -Math.PI * 5 / 8)), 100),
                                 1,
                               )
+                              if (thing === unicorn) {
+                                captured.set((_captured) => _captured.concat(otherThing))
+                              }
                             }
                           })
                         }
@@ -271,6 +277,14 @@ export const
           })
         }),
       ),
+
+      div(backgroundColor("gray"), height("16px"), apd(match(captured, (_captured) =>
+        div($flexRow, apd(..._captured.map((thing) =>
+          canvas(sizeAttr(16, 16), withCtx((ctx) => {
+            ctx.drawImage(app.assets[thing.type], 0, 0)
+          }))
+        )))
+      ))),
 
       matchIf(gameState, (_gameState) => {
         return _gameState.t === "title" ?

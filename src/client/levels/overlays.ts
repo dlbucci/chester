@@ -5,7 +5,6 @@ import { onPointerdown } from "rokay/browser/on"
 import { backgroundColor, color, flexDirection, fontSize, gap, height, left, position, textAlign, top,
   userSelect, whiteSpace, width } from "rokay/browser/style"
 import { MixArgs } from "rokay/mix"
-import { PropBasic } from "rokay/prop/basic"
 import { Prop } from "rokay/prop/prop"
 
 import { GameState, GameStateLevel, GameStateLevelPre } from "../../shared/games/types.gen"
@@ -45,7 +44,7 @@ export const
   LevelPreOverlay = (state: GameStateLevelPre, gameState: Prop<GameState>) => {
     const
       { preamble } = state.level,
-      messageIndex = PropBasic(0)
+      messageIndex = Prop(() => 0)
 
     return Overlay(
       fontSize(".8em"),

@@ -1,7 +1,7 @@
 import { apd } from "rokay/browser/core"
 import { div } from "rokay/browser/elt"
 import { $ } from "rokay/browser/prop"
-import { border, imageRendering } from "rokay/browser/style"
+import { imageRendering } from "rokay/browser/style"
 import { VB } from "rokay/math/v"
 import { derive } from "rokay/prop/derive"
 import { Prop } from "rokay/prop/prop"
@@ -25,6 +25,6 @@ export const
       imageRendering("pixelated"),
       $flexCenter,
       $s100,
-      apd(div(border("1px solid #000"), apd(LevelDisplay(app, gameState)))),
+      apd(LevelDisplay(app, gameState)),
     )
   }

@@ -29,5 +29,5 @@ export const
         level.bossName,
       ),
       things: Thing[] = [unicorn, boss]
-    return World(boss, things, unicorn)
+    return World(boss, [], things, unicorn)
   }
