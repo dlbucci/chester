@@ -14,6 +14,7 @@ export const
     const
       cell = V(pick([2, level.size.x - 3]), level.size.y - 2),
       unicorn = Thing(
+        "good",
         cell,
         cellToPos(cell),
         V(1, 1),
@@ -22,6 +23,7 @@ export const
       ),
       bossCell = V(Math.floor(SIZE_BOARD.x / 2), 0),
       boss = Thing(
+        "bad",
         bossCell,
         cellToPos(bossCell),
         V(1, 1),

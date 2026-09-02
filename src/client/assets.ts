@@ -4,7 +4,7 @@ import { fills, outline, withCtx } from "rokay/browser/game/danvas"
 import { tab } from "rokay/data/array"
 import { T, V } from "rokay/math/v"
 
-import { ThingType } from "../shared/things/types.gen"
+import { BossName, ChessPiece, Thing } from "../shared/things/types.gen"
 
 import { TextCanvas } from "./elts/text-canvas"
 
@@ -17,7 +17,8 @@ export type Assets =
     font16cursive: Map<string, HTMLCanvasElement>
     font16italic: Map<string, HTMLCanvasElement>
   }
-  & Record<ThingType, HTMLCanvasElement>
+  & Record<ChessPiece, Record<"bad" | "good", HTMLCanvasElement>>
+  & Record<BossName | "unicorn", HTMLCanvasElement>
 
 
 // music: { bg: AudioBuffer }
@@ -63,7 +64,20 @@ export const
         font16cursive,
         font16italic,
         ...chessPieces,
-      }))
+        unicorn: chessPieces.unicorn.good,
+      })),
+
+  getSprite = (assets: Assets, thing: Thing) => {
+    if (
+      thing.type === "bishop"
+      || thing.type === "king"
+      || thing.type === "knight"
+      || thing.type === "pawn"
+      || thing.type === "queen"
+      || thing.type === "rook"
+    ) { return assets[thing.type][thing.alignment] }
+    return assets[thing.type]
+  }
 
 
 const
@@ -137,10 +151,24 @@ const
       outline(1),
     )),
 
-  sprite = (image: HTMLImageElement, index: number) =>
-    canvas(size(16, 16), withCtx(
+  sprite = (image: HTMLImageElement, index: number) => {
+    const bad = canvas(size(16, 16), withCtx(
       (ctx) => {
         ctx.drawImage(image, 16 * index, 0, 16, 16, 0, 0, 16, 16)
       },
       outline(1),
     ))
+    return {
+      bad,
+      good: canvas(size(16, 16), withCtx(
+        (ctx) => {
+          ctx.drawImage(image, 16 * index, 0, 16, 16, 0, 0, 16, 16)
+        },
+        paint({
+          "34,34,34,255": ["hsl(58,9%,93%)"],
+        }),
+        fills("#000"),
+        outline(1),
+      )),
+    }
+  }

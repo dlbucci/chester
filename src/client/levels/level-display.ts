@@ -3,11 +3,11 @@ import { apd } from "rokay/browser/core"
 import { canvas, div } from "rokay/browser/elt"
 import { withCtx } from "rokay/browser/game/danvas"
 import { match, matchIf } from "rokay/browser/match"
-import { onPointerdown } from "rokay/browser/on"
+import { onClick, onPointerdown } from "rokay/browser/on"
 import { $ } from "rokay/browser/prop"
 import { backgroundColor, border, height, position } from "rokay/browser/style"
 import { rafLoop } from "rokay/browser/visible"
-import { last, tab } from "rokay/data/array"
+import { last, remove, tab } from "rokay/data/array"
 import { float, pick } from "rokay/math/random"
 import { divide, eq, floor, iter, len, minus, plus, scale, scaleComponents, T, unit, unitOfAng, V, VZ } from "rokay/math/v"
 import { Prop } from "rokay/prop/prop"
@@ -18,6 +18,7 @@ import { getMoves, THING_STATS } from "../../shared/things/model"
 import { Thing, ThingStateDying, ThingStateIdle, ThingStateMoveTo, ThingType } from "../../shared/things/types.gen"
 import { World } from "../../shared/worlds/types.gen"
 import { AppClient } from "../app"
+import { getSprite } from "../assets"
 import { cameraPos, cameraStep } from "../camera/model"
 import { Camera, CameraStateEaseTo, CameraStateFollow, CameraStateIdle, CameraStateMobius } from "../camera/types.gen"
 import { cellToPos, posToCell } from "../cells/utils"
@@ -135,7 +136,7 @@ export const
                   ctx.translate(Math.round(thing.pos.x), Math.round(thing.pos.y))
                   if (thing.state.t === "dying") { ctx.rotate(thing.state.ang) }
                   ctx.scale(...T(thing.scale))
-                  ctx.drawImage(app.assets[thing.type], ...T(THING_STATS[thing.type].offset))
+                  ctx.drawImage(getSprite(app.assets, thing), ...T(THING_STATS[thing.type].offset))
                   ctx.restore()
                 })
               }
@@ -155,6 +156,7 @@ export const
                   if (Math.random() > odds) { continue }
                   const cell = V(i, y)
                   things.push(Thing(
+                    "bad",
                     cell,
                     cellToPos(cell),
                     V(1, 1),
@@ -231,7 +233,9 @@ export const
                                 1,
                               )
                               if (thing === unicorn) {
-                                captured.set((_captured) => _captured.concat(otherThing))
+                                captured.set((_captured) =>
+                                  _captured.concat({ ...otherThing, alignment: "good" })
+                                )
                               }
                             }
                           })
@@ -280,9 +284,28 @@ export const
 
       div(backgroundColor("gray"), height("16px"), apd(match(captured, (_captured) =>
         div($flexRow, apd(..._captured.map((thing) =>
-          canvas(sizeAttr(16, 16), withCtx((ctx) => {
-            ctx.drawImage(app.assets[thing.type], 0, 0)
-          }))
+          canvas(
+            sizeAttr(16, 16),
+            withCtx((ctx) => {
+              ctx.drawImage(getSprite(app.assets, thing), 0, 0)
+            }),
+            onClick(() => {
+              const _gameState = gameState.get()
+              if (_gameState.t === "level" || _gameState.t === "levelBoss") {
+                const { world } = _gameState
+                const cell = minus(world.unicorn.cell, V(0, 1))
+                world.things.push(Thing(
+                  "good",
+                  cell,
+                  cellToPos(cell),
+                  V(1, 1),
+                  ThingStateIdle(1.5, []),
+                  thing.type,
+                ))
+                captured.set((_captured) => remove(_captured, thing))
+              }
+            }),
+          )
         )))
       ))),
 
