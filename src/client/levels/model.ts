@@ -39,7 +39,7 @@ export const
       `You're looking for something, aren't you?
 Someone, perhaps?
 Where should you go, little pony?
-Seek out wise Rebu.
+Seek out the wise Rebu.
 He will get you where you need to be.
 Now wake up.`.split(
           "\n",
@@ -53,7 +53,7 @@ Now wake up.`.split(
       `What's this?
 Rebu was no help to you?
 What a shame.
-Perhaps strong Barbin will help instead.`.split(
+Perhaps the mighty Barbin will help instead.`.split(
           "\n",
         ),
       V(SIZE_BOARD.x, (3 + i) * SIZE_BOARD.y),
@@ -91,11 +91,8 @@ He's a big fan of these guys, he'll know what's up.`.split(
     Level(
       "Peanio",
       ++i,
-      `Okay, this one was my bad.
-As soon as I sent you on your way, I thought "wait, this guy's gonna be an asshole too".
-But you had already started out, and you just looked so confident.
-I didn't want to ruin it for you.
-That's my bad.
+      `Sheesh, what a psycho.
+At least the weather's clearing up.
 You should talk to Peanio.
 They know everything.
 They'll be able to explain what's going on.`.split(
@@ -104,7 +101,45 @@ They'll be able to explain what's going on.`.split(
       V(SIZE_BOARD.x, (3 + i) * SIZE_BOARD.y),
       spawnRates({}),
     ),
-    Level("Dinkus", ++i, ["TODO"], V(SIZE_BOARD.x, (3 + i) * SIZE_BOARD.y), spawnRates({})),
-    Level("Boof Cake", ++i, ["TODO"], V(SIZE_BOARD.x, (3 + i) * SIZE_BOARD.y), spawnRates({})),
-    Level("Evernut Clapati", ++i, ["TODO"], V(SIZE_BOARD.x, (3 + i) * SIZE_BOARD.y), spawnRates({})),
+    Level(
+      "Dinkus",
+      ++i,
+      `...
+I got nothing, man.
+You know, I'm really starting to thing that all these unicorns are assholes.
+You could try Dinkus,
+but uh... well, you get it.`.split(
+          "\n",
+        ),
+      V(SIZE_BOARD.x, (3 + i) * SIZE_BOARD.y),
+      spawnRates({}),
+    ),
+    Level(
+      "Boof Cake",
+      ++i,
+      `Look, this has been a bit of a bust.
+But on the bright side:
+The world?
+Really, where'd all this color come from?
+Go kick Boof Cake's ass, maybe it'll keep coming!`.split(
+          "\n",
+        ),
+      V(SIZE_BOARD.x, (3 + i) * SIZE_BOARD.y),
+      spawnRates({}),
+    ),
+    Level(
+      "Evernut Clapati",
+      ++i,
+      `Hey, you did it!
+And look at this place!
+Look at all the pretty colors!
+Those asshole unicorns had just hoarded it all for themselves, didn't they?
+Good work, man! Quality stuff!
+That said, there's one final thing to wrap up:
+The true source of power for all you've faced...`.split(
+          "\n",
+        ),
+      V(SIZE_BOARD.x, (3 + i) * SIZE_BOARD.y),
+      spawnRates({}),
+    ),
   ]
