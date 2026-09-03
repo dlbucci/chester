@@ -23,6 +23,7 @@
     "start": "rokay server:run",
     "watch": "rokay watch",
     "zip": "npm run zip:html && npm run zip:rollup && npm run zip:zip && npm run zip:size",
+    "zip:5": "npm run zip && npm run zip && npm run zip && npm run zip && npm run zip && npm run zip:size",
     "zip:final": "npm run zip:rollup && cp static/chester.min.js static/chester.js && npm run zip:zip && npm run zip:size",
     "zip:html": "curl localhost:7024 -H 'Accept: text/html' > static/index.html",
     "zip:rollup": "rollup --input static/chester.js --file static/chester.js --format cjs --plugin terser",

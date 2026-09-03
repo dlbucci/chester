@@ -13,23 +13,17 @@ export const
   worldNew = (level: Level): World => {
     const
       cell = V(pick([2, level.size.x - 3]), level.size.y - 2),
-      unicorn = Thing(
-        "good",
-        cell,
-        cellToPos(cell),
-        V(1, 1),
-        ThingStateIdle(0, getMoves(cell, THING_STATS.unicorn.movements, level.size)),
-        "unicorn",
-      ),
+      unicorn = Thing("good", cell, cellToPos(cell), V(1, 1), ThingStateIdle(0, []), "unicorn"),
       bossCell = V(Math.floor(SIZE_BOARD.x / 2), 0),
       boss = Thing(
         "bad",
         bossCell,
         cellToPos(bossCell),
         V(1, 1),
-        ThingStateIdle(0, getMoves(bossCell, THING_STATS[level.bossName].movements, level.size)),
+        ThingStateIdle(THING_STATS[level.bossName].cooldown, []),
         level.bossName,
       ),
       things: Thing[] = [unicorn, boss]
+    unicorn.state = ThingStateIdle(0, getMoves(unicorn, level.size))
     return World(boss, [], things, unicorn)
   }

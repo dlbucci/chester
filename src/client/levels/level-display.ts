@@ -160,11 +160,7 @@ export const
                     cell,
                     cellToPos(cell),
                     V(1, 1),
-                    ThingStateIdle(THING_STATS[type].cooldown, getMoves(
-                      cell,
-                      THING_STATS[type].movements,
-                      level.size,
-                    )),
+                    ThingStateIdle(THING_STATS[type].cooldown, []),
                     type,
                   ))
                 }
@@ -192,15 +188,28 @@ export const
                         thing.state.cooldown -= 1 / 60
                       } else if (thing !== unicorn) {
                         const getNextMove = (thing: Thing) => {
-                          const
-                            moves = getMoves(
-                              thing.cell,
-                              THING_STATS[thing.type].movements,
-                              _gameState.t === "levelBoss" ? SIZE_BOARD : level.size,
-                            ),
-                            playerMove = moves.find((move) => eq(last(move), unicorn.cell))
+                          const moves = getMoves(
+                            thing,
+                            _gameState.t === "levelBoss" ? SIZE_BOARD : level.size,
+                          )
 
-                          return playerMove ?? pick(moves)
+                          return (
+                              thing.alignment === "bad" ?
+                                moves.find((move) => eq(last(move), unicorn.cell))
+                              :
+                                undefined
+                            )
+                            ?? moves.find((move) =>
+                              things.some((enemy) =>
+                                enemy.alignment !== thing.alignment && eq(last(move), enemy.cell)
+                              )
+                            )
+                            ?? pick(moves.filter((move) =>
+                              things.every((enemy) =>
+                                enemy.alignment !== thing.alignment || !eq(last(move), enemy.cell)
+                              )
+                            ))
+                            ?? pick(moves)
                         }
 
                         const move = getNextMove(thing)
@@ -248,11 +257,10 @@ export const
                         thing.pos = next
                         thing.state.path = thing.state.path.slice(1)
                         if (thing.state.path.length === 0) {
-                          thing.state = ThingStateIdle(THING_STATS[thing.type].cooldown, getMoves(
-                            thing.cell,
-                            THING_STATS[thing.type].movements,
-                            level.size,
-                          ))
+                          thing.state = ThingStateIdle(
+                            THING_STATS[thing.type].cooldown,
+                            thing === unicorn ? getMoves(thing, level.size) : [],
+                          )
                         }
                       }
                     }

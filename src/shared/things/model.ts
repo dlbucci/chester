@@ -62,13 +62,15 @@ export const
     "Evernut Clapati": ThingStats(1, 1, V(-8, -12), KNIGHT_MOVEMENTS),
   },
 
-  getMoves = (cell: V, movements: V[], levelSize: V): V[][] =>
-    mapNotNil(movements, (movement) => {
-      const pos = plus(cell, movement)
+  getMoves = (thing: Thing, levelSize: V): V[][] => {
+    const { movements } = THING_STATS[thing.type]
+    return mapNotNil(movements, (movement) => {
+      const pos = plus(thing.cell, movement)
       return pos.x < 0 || pos.x >= levelSize.x || pos.y < 0 || pos.y >= levelSize.y ?
           undefined
         : movements === KNIGHT_MOVEMENTS ?
-          getPath(cell, pos)
+          getPath(thing.cell, pos)
         :
-          getDiagonalPath(cell, pos)
+          getDiagonalPath(thing.cell, pos)
     })
+  }
