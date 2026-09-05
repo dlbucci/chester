@@ -1,6 +1,5 @@
 # TODO
 
-- crystal transitions
 - a real ending
 - pony wakeup
 - Make chester change colors
@@ -23,7 +22,9 @@
 
 ## TOSLIM
 
-- remove router
-- use packed images?
+- remove router => 13334 - 12189 = 1145 bytes
+- remove icons/16.png => 12189 - 11798 = 391 bytes
+- use packed images? => (for crystal) 11798 - 11712 = 86 bytes
 - remove other rokay-dom stuff
-- remove icons/16.png
+
+total: 14934
