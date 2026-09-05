@@ -22,6 +22,17 @@
   flex-direction: row;
 }
 
+@keyframes flash {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  5%,
+  50% {
+    opacity: 1;
+  }
+}
+
 .level-pre {
   animation: level-pre 5s;
 }

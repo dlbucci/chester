@@ -2,8 +2,8 @@ import { apd } from "rokay/browser/core"
 import { div } from "rokay/browser/elt"
 import { match } from "rokay/browser/match"
 import { onPointerdown } from "rokay/browser/on"
-import { backgroundColor, color, flexDirection, fontSize, gap, height, left, position, textAlign, top,
-  userSelect, whiteSpace, width } from "rokay/browser/style"
+import { animation, backgroundColor, color, flexDirection, fontSize, gap, height, left, position, textAlign,
+  top, userSelect, whiteSpace, width } from "rokay/browser/style"
 import { MixArgs } from "rokay/mix"
 import { Prop } from "rokay/prop/prop"
 
@@ -12,8 +12,6 @@ import { Level } from "../../shared/levels/types.gen"
 import { pgIndex, pgLevel } from "../../shared/pages.gen"
 import { AppClient } from "../app"
 import { $bossIntroOverlay, $flexCenter, $messageEnter } from "../style/utils.gen"
-
-import { LEVELS } from "./model"
 
 
 export const
@@ -46,6 +44,16 @@ export const
       }),
     ),
 
+  FlashOverlay = (
+    timeSec: number,
+    color: string,
+    { onDone, onWhite }: { onDone(): void, onWhite(): void },
+  ) => {
+    setTimeout(onWhite, timeSec * 500)
+    setTimeout(onDone, timeSec * 1000)
+    return Overlay(animation(`flash ${timeSec}s`), backgroundColor(color))
+  },
+
   LevelPreOverlay = (state: GameStateLevelPre, gameState: Prop<GameState>) => {
     const
       { preamble } = state.level,
@@ -66,7 +74,7 @@ export const
     )
   },
 
-  LevelWinOverlay = (app: AppClient, level: Level, { onWin }: { onWin(): void }) =>
+  LevelWinOverlay = (level: Level, { onClick }: { onClick(): void }) =>
     Overlay(
       backgroundColor("hsla(0, 0%, 20%, .75)"),
       color("hsl(352,78%,45%)"),
@@ -74,13 +82,7 @@ export const
       gap(".5em"),
       whiteSpace("pre"),
       apd(div($messageEnter, textAlign("center"), apd(level.bossName + "\nDEFEATED"))),
-      onPointerdown(() => {
-        if (level.index + 1 < LEVELS.length) {
-          app.router.replace(level.index + 1 < LEVELS.length ? pgLevel(level.index + 1) : pgIndex())
-        } else {
-          onWin()
-        }
-      }),
+      onPointerdown(onClick),
     ),
 
   TitleOverlay = (app: AppClient) =>

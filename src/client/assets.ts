@@ -2,6 +2,7 @@ import { size } from "rokay/browser/attr"
 import { canvas } from "rokay/browser/elt"
 import { fills, outline, withCtx } from "rokay/browser/game/danvas"
 import { tab } from "rokay/data/array"
+import { getOrPut } from "rokay/data/object"
 import { T, V } from "rokay/math/v"
 
 import { BossName, ChessPiece, Thing } from "../shared/things/types.gen"
@@ -11,6 +12,7 @@ import { TextCanvas } from "./elts/text-canvas"
 
 export type Assets =
   & {
+    crystal: (color: string) => HTMLCanvasElement
     font9: Map<string, HTMLCanvasElement>
     font12: Map<string, HTMLCanvasElement>
     font16: Map<string, HTMLCanvasElement>
@@ -26,6 +28,7 @@ export type Assets =
 export const
   load = () =>
     Promise.all([
+      loadImage("/art/crystal.png"),
       loadImage("/art/sprites.png").then((image) => ({
         bishop: sprite(image, 4),
         king: sprite(image, 6),
@@ -53,19 +56,22 @@ export const
       // sfxKikisCafeButton(new AudioContext()),
       // songKikisCafeBGMusic(new AudioContext()),
     ])
-      .then(([chessPieces, font9, font12, font16, font16italic, font16cursive]): Assets => ({
-        // cached: {
-        //   bgs: new Map<string, HTMLCanvasElement>(),
-        //   cats: new Map<CatFM, HTMLCanvasElement>(),
-        // },
-        font9,
-        font12,
-        font16,
-        font16cursive,
-        font16italic,
-        ...chessPieces,
-        unicorn: chessPieces.unicorn.good,
-      })),
+      .then(
+        ([crystal, chessPieces, font9, font12, font16, font16italic, font16cursive]): Assets => ({
+          // cached: {
+          //   bgs: new Map<string, HTMLCanvasElement>(),
+          //   cats: new Map<CatFM, HTMLCanvasElement>(),
+          // },
+          crystal: cached((color) => Crystal(crystal, color)),
+          font9,
+          font12,
+          font16,
+          font16cursive,
+          font16italic,
+          ...chessPieces,
+          unicorn: chessPieces.unicorn.good,
+        }),
+      ),
 
   getSprite = (assets: Assets, thing: Thing) => {
     if (
@@ -81,6 +87,28 @@ export const
 
 
 const
+  cached = (cb: (...args: string[]) => HTMLCanvasElement) => {
+    const cache: Record<string, HTMLCanvasElement> = {}
+    return (...args: string[]) => getOrPut(cache, args.join(","), () => cb(...args))
+  },
+
+  Crystal = (image: HTMLImageElement, color: string) =>
+    canvas(size(image.width, image.height), withCtx(
+      (ctx) => {
+        ctx.drawImage(image, 0, 0)
+      },
+      paint(
+        {
+          "255,0,0,255": [color],
+          "224,0,0,255": [color, "rgba(0,0,0,.1)"],
+          "196,0,0,255": [color, "rgba(0,0,0,.2)"],
+        },
+        true,
+      ),
+      fills("#000"),
+      outline(1),
+    )),
+
   loadFont = (font: string, minWidth = 3, fill = "#fff") =>
     new Promise<Map<string, HTMLCanvasElement>>((res) => {
       res(
@@ -109,7 +137,7 @@ const
       }
     }),
 
-  paint = (colors: Record<string, string[]>) =>
+  paint = (colors: Record<string, string[]>, debug = false) =>
     (ctx: CanvasRenderingContext2D) => {
       const { data } = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height)
       const colorSet = new Set<string>()
@@ -130,7 +158,7 @@ const
           colorSet.add(slice)
         }
       }
-      console.log("colors:", colorSet)
+      if (debug) { console.log("colors:", colorSet) }
     },
 
   paintUnicorn = (image: HTMLImageElement, color: string) =>
@@ -141,10 +169,10 @@ const
       paint({
         // main colors
         "255,255,255,255": [color],
-        "224,224,224,255": [color, "rgba(0, 0, 0, .1)"],
+        "224,224,224,255": [color, "rgba(0,0,0,.1)"],
         // mane colors
-        "204,204,221,255": [color, "rgba(0, 0, 0, .2)"],
-        "179,179,194,255": [color, "rgba(0, 0, 0, .3)"],
+        "204,204,221,255": [color, "rgba(0,0,0,.2)"],
+        "179,179,194,255": [color, "rgba(0,0,0,.3)"],
         // "0,0,0,0", "255,255,0,255", "0,0,0,255"
       }),
       fills("#000"),

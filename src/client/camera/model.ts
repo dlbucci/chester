@@ -1,4 +1,4 @@
-import { interpolateLinear, max, min, minus, modulo, plus, scale, V, VZ } from "rokay/math/v"
+import { interpolateLinear, max, min, minus, modulo, plus, round, scale, unitOfAng, V, VZ } from "rokay/math/v"
 
 import { Camera, CameraStateIdle } from "./types.gen"
 
@@ -30,6 +30,16 @@ export const
       }
     } else if (camera.state.t === "mobius") {
       camera.pos = modulo(plus(camera.pos, scale(camera.state.d, dt)), camera.state.modulus)
+    }
+    if (camera.shake != null) {
+      camera.shake.timeSec += dt
+      if (camera.shake.timeSec > 1 / 30) {
+        camera.shake.offset = round(scale(
+          unitOfAng(Math.random() * 2 * Math.PI),
+          camera.shake.magnitude,
+        ))
+        camera.shake.timeSec = camera.shake.timeSec % 1 / 30
+      }
     }
   },
 

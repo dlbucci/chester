@@ -1,10 +1,16 @@
-import { TypeADT, TypeNumber, TypeObject } from "rokay/data/type"
+import { opt, TypeADT, TypeNumber, TypeObject } from "rokay/data/type"
 
 import { V } from "../../shared/maths/types"
 import { Thing } from "../../shared/things/types"
 
 
 export const
+  CameraShake = TypeObject({
+    magnitude: TypeNumber(),
+    offset: V,
+    timeSec: TypeNumber(),
+  }),
+
   CameraState = TypeADT({
     easeTo: {
       end: V,
@@ -21,6 +27,7 @@ export const
     bounds: TypeObject({ nw: V, se: V }),
     focus: V,
     pos: V,
+    shake: opt(CameraShake),
     size: V,
     state: CameraState,
   })
