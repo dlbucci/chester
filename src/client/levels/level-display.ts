@@ -1,5 +1,5 @@
 import { size as sizeAttr } from "rokay/browser/attr"
-import { apd, Elt } from "rokay/browser/core"
+import { apd } from "rokay/browser/core"
 import { canvas, div } from "rokay/browser/elt"
 import { withCtx } from "rokay/browser/game/danvas"
 import { match, matchIf } from "rokay/browser/match"
@@ -9,30 +9,27 @@ import { backgroundColor, border, height, position } from "rokay/browser/style"
 import { rafLoop } from "rokay/browser/visible"
 import { last, remove, tab } from "rokay/data/array"
 import { float, pick } from "rokay/math/random"
-import { divide, eq, floor, interpolateLinear, iter, len, minus, plus, round, scale, scaleComponents,
-  T, unit, unitOfAng, V, VZ } from "rokay/math/v"
+import { divide, eq, floor, iter, len, minus, plus, round, scale, scaleComponents, T, unit, unitOfAng,
+  V, VZ } from "rokay/math/v"
 import { Prop } from "rokay/prop/prop"
 
-import { GameState, GameStateDead, GameStateLevelBoss, GameStateLevelBossIntro, GameStateLevelWin, GameStateWin } from "../../shared/games/types.gen"
+import { GameState, GameStateDead, GameStateLevelBoss, GameStateLevelBossIntro } from "../../shared/games/types.gen"
 import { Level } from "../../shared/levels/types.gen"
-import { pgIndex, pgLevel } from "../../shared/pages.gen"
 import { getMoves, THING_STATS } from "../../shared/things/model"
 import { Thing, ThingStateDying, ThingStateIdle, ThingStateMoveTo, ThingType } from "../../shared/things/types.gen"
 import { World } from "../../shared/worlds/types.gen"
 import { AppClient } from "../app"
 import { getSprite } from "../assets"
-import { cameraPos, cameraStep, ease } from "../camera/model"
-import { Camera, CameraShake, CameraStateEaseTo, CameraStateFollow, CameraStateIdle, CameraStateMobius } from "../camera/types.gen"
+import { cameraPos, cameraStep } from "../camera/model"
+import { Camera, CameraStateEaseTo, CameraStateFollow, CameraStateIdle, CameraStateMobius } from "../camera/types.gen"
 import { cellToPos, posToCell } from "../cells/utils"
 import { GRAVITY, SIZE_BOARD, SIZE_BOARD_PIXELS, SIZE_CELL } from "../const"
 import { $flexRow } from "../style/utils.gen"
 
+import { Anime } from "./animes/model"
+import { postLevelWin } from "./animes/post-level-win"
 import { LEVELS } from "./model"
-import { BossIntroOverlay, DeadOverlay, FlashOverlay, LevelPreOverlay, LevelWinOverlay, TitleOverlay,
-  WinOverlay } from "./overlays"
-
-
-type Anime = { t: "overlay", elt(): Elt } | { t: "step", cb(dt: number): void }
+import { BossIntroOverlay, DeadOverlay, LevelPreOverlay, TitleOverlay, WinOverlay } from "./overlays"
 
 
 export const
@@ -186,7 +183,7 @@ export const
             step = (dt: number) => {
               const _gameState = gameState.get()
               const _anime = animes.get()[0]
-              if (_anime != null) { if (_anime.t === "step") { _anime.cb(dt) } }
+              if (_anime != null) { if (_anime.t === "step") { _anime.step(dt) } }
               if (_gameState.t === "levelBossIntro") {
                 _gameState.lifetime -= dt
                 if (_gameState.lifetime <= 0) {
@@ -303,75 +300,9 @@ export const
                   )
 
                   if (!things.includes(boss)) {
-                    gameState.set(() => GameStateLevelWin(level, world))
-                    const crystalStart = V(SIZE_BOARD_PIXELS.x / 2 - 8, -16)
-                    const crystalEnd = minus(divide(SIZE_BOARD_PIXELS, 2), V(8, 8))
-                    const crystal = {
-                      life: 0,
-                      pos: crystalStart,
-                      sprite: app.assets.crystal(level.color),
-                    }
-                    const shake = CameraShake(0, VZ, 0)
-                    animes.set((_animes) => [
-                      {
-                        t: "overlay",
-                        elt: () =>
-                          LevelWinOverlay(level, {
-                            onClick() {
-                              world.crystal = crystal
-                              animeEnd()
-                            },
-                          }),
-                      },
-                      {
-                        t: "step",
-                        cb: (dt) => {
-                          crystal.life += dt
-                          if (crystal.life < 5) {
-                            crystal.pos = interpolateLinear(crystalStart, crystalEnd, ease(
-                              crystal.life / 5,
-                            ))
-                            return
-                          }
-                          crystal.life = 0
-                          camera.shake = shake
-                          animeEnd()
-                        },
-                      },
-                      {
-                        t: "step",
-                        cb: (dt) => {
-                          crystal.life += dt
-                          if (crystal.life < 5) {
-                            shake.magnitude = crystal.life / 5 * 2
-                            return
-                          }
-                          camera.shake = undefined
-                          animeEnd()
-                        },
-                      },
-                      {
-                        t: "overlay",
-                        elt: () =>
-                          FlashOverlay(5, level.color, {
-                            onDone() { animeEnd() },
-                            onWhite() {
-                              if (level.index + 1 < LEVELS.length) {
-                                app.router.replace(
-                                  level.index + 1 < LEVELS.length ?
-                                    pgLevel(level.index + 1)
-                                  :
-                                    pgIndex(),
-                                )
-                              } else {
-                                gameState.set(
-                                  () => GameStateWin(_gameState.level, _gameState.world),
-                                )
-                              }
-                            },
-                          }),
-                      },
-                    ])
+                    animes.set((_animes) =>
+                      postLevelWin(app, camera, gameState, _gameState, animeEnd)
+                    )
                   }
                   if (!things.includes(unicorn)) {
                     gameState.set(() => GameStateDead(level, world))

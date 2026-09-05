@@ -15,7 +15,6 @@ export const
       world: World,
     },
     levelBoss: { level: Level, world: World },
-    levelWin: { level: Level, world: World },
     win: { level: Level, world: World },
     dead: { level: Level, world: World },
   })
