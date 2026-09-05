@@ -19,6 +19,15 @@
   flex-direction: row;
 }
 
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 @keyframes flash {
   0%,
   100% {
@@ -42,16 +51,17 @@
     background-color: hsla(0, 0%, 20%, 0);
   }
 }
+
 .message-enter {
-  animation: message-enter 0.5s;
+  animation:
+    fade-in 0.5s,
+    message-enter 0.5s;
 }
 @keyframes message-enter {
   0% {
-    opacity: 0;
     transform: translate(0, 1em);
   }
   100% {
-    opacity: 1;
     transform: translate(0, 0);
   }
 }

@@ -6,7 +6,7 @@ import { BrowserRouter } from "rokay/browser/router"
 import { position, size as sizeStyle, transform } from "rokay/browser/style"
 import { VisibleProp } from "rokay/browser/visible"
 import { WindowSize } from "rokay/browser/window"
-import { divide, divideComponents, floor, scale } from "rokay/math/v"
+import { divide, divideComponents, floor, plus, scale, V } from "rokay/math/v"
 import { mix } from "rokay/mix"
 import { Asink } from "rokay/prop/async"
 import { derive } from "rokay/prop/derive"
@@ -27,7 +27,7 @@ mount(document.body, () => {
   const
     router = BrowserRouter(),
     size = derive(WindowSize(), (window): GameSize => {
-      const options = floor(divideComponents(window, SIZE_BOARD_PIXELS))
+      const options = floor(divideComponents(window, plus(SIZE_BOARD_PIXELS, V(0, 16))))
       const zoom = Math.max(1, Math.min(options.x, options.y))
       return {
         window,

@@ -78,9 +78,14 @@ export const
 
         onPointerdown((el, ev) => {
           const _gameState = gameState.get()
-          if (_gameState.t !== "level" && _gameState.t !== "levelBoss") { return }
+          const _anime = animes.get()[0]
+          if ((_gameState.t !== "level" && _gameState.t !== "levelBoss") || _anime != null) {
+            return
+          }
+
           const { unicorn } = _gameState.world
           if (unicorn.state.t !== "idle" || unicorn.state.cooldown > 0) { return }
+
           const _size = app.size.get()
           const src = floor(divide(
             minus(V(ev.clientX, ev.clientY), el.getBoundingClientRect()),
@@ -90,6 +95,7 @@ export const
           const cell = posToCell(pos)
           const path = unicorn.state.moves.find((path) => eq(last(path), cell))
           if (path == null) { return }
+
           unicorn.state = ThingStateMoveTo(path.map((cell) => cellToPos(cell)), 1)
           if (last(unicorn.state.path).x < unicorn.pos.x) {
             unicorn.scale.x = -1
@@ -114,7 +120,9 @@ export const
                 -1,
               )))
               ctx.fillStyle = "rgba(0, 0, 0, .125)"
-              const start = posToCell(camera.pos)
+              const start = posToCell(
+                camera.shake != null ? plus(camera.pos, camera.shake.offset) : camera.pos,
+              )
               iter(start, plus(start, SIZE_BOARD), (pos) => {
                 if ((pos.x + pos.y) % 2 === 0) {
                   ctx.fillRect(...T(scaleComponents(pos, SIZE_CELL)), ...T(SIZE_CELL))
@@ -123,7 +131,8 @@ export const
 
               if (_gameState.t !== "title") {
                 const { crystal, things, unicorn } = _gameState.world
-                if (_gameState.t === "level" || _gameState.t === "levelBoss") {
+                const _anime = animes.get()[0]
+                if ((_gameState.t === "level" || _gameState.t === "levelBoss") && _anime == null) {
                   if (unicorn.state.t === "idle") {
                     const COOLDOWN_OFFSET = Math.ceil(
                       unicorn.state.cooldown / THING_STATS.unicorn.cooldown * SIZE_CELL.y,
@@ -344,22 +353,18 @@ export const
         )))
       ))),
 
-      matchIf(gameState, (_gameState) => {
-        // : _gameState.t === "levelWin" ?
-        //   LevelWinOverlay(app, _gameState.level, {
-        //     onClick() { gameState.set(() => GameStateWin(_gameState.level, _gameState.world)) },
-        //   })
-        return _gameState.t === "title" ?
-            TitleOverlay(app)
-          : _gameState.t === "levelPre" ?
-            LevelPreOverlay(_gameState, gameState)
-          : _gameState.t === "win" ?
-            WinOverlay(app)
-          : _gameState.t === "dead" ?
-            DeadOverlay(app)
-          :
-            undefined
-      }),
+      matchIf(gameState, (_gameState) =>
+        _gameState.t === "title" ?
+          TitleOverlay(app)
+        : _gameState.t === "levelPre" ?
+          LevelPreOverlay(_gameState, gameState)
+        : _gameState.t === "win" ?
+          WinOverlay(app)
+        : _gameState.t === "dead" ?
+          DeadOverlay(app)
+        :
+          undefined
+      ),
 
       matchIf(animes, (_animes) => {
         const _anime = _animes[0]

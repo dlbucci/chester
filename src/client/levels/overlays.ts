@@ -38,6 +38,7 @@ export const
 
   DeadOverlay = (app: AppClient) =>
     Overlay(
+      animation("fade-in 1s"),
       backgroundColor("hsla(0, 0%, 20%, .75)"),
       color("hsl(352,78%,45%)"),
       apd(div($messageEnter, apd("YOU DIED"))),
