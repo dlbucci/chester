@@ -7,6 +7,7 @@ import { BossName, ThingType } from "../things/types"
 export const
   Level = TypeObject({
     bossName: BossName,
+    color: TypeString(),
     index: TypeNumber(),
     preamble: TypeArray(TypeString()),
     size: V,

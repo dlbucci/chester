@@ -35,6 +35,7 @@ export const
   LEVELS = [
     Level(
       "Rebu",
+      "red",
       ++i,
       `You're looking for something, aren't you?
 Someone, perhaps?
@@ -49,6 +50,7 @@ Now wake up.`.split(
     ),
     Level(
       "Barbin",
+      "orange",
       ++i,
       `What's this?
 Rebu was no help to you?
@@ -61,6 +63,7 @@ Perhaps the mighty Barbin will help instead.`.split(
     ),
     Level(
       "Halsik",
+      "yellow",
       ++i,
       `Oh?
 Barbin was no help either?
@@ -74,6 +77,7 @@ I'd bet my life on it.`.split(
     ),
     Level(
       "Sicafant",
+      "green",
       ++i,
       `Really?
 Really?!
@@ -90,6 +94,7 @@ He's a big fan of these guys, he'll know what's up.`.split(
     ),
     Level(
       "Peanio",
+      "blue",
       ++i,
       `Sheesh, what a psycho.
 At least the weather's clearing up.
@@ -103,6 +108,7 @@ They'll be able to explain what's going on.`.split(
     ),
     Level(
       "Dinkus",
+      "indigo",
       ++i,
       `...
 I got nothing, man.
@@ -116,6 +122,7 @@ but uh... well, you get it.`.split(
     ),
     Level(
       "Boof Cake",
+      "violet",
       ++i,
       `Look, this has been a bit of a bust.
 But on the bright side:
@@ -129,6 +136,7 @@ Go kick Boof Cake's ass, maybe it'll keep coming!`.split(
     ),
     Level(
       "Evernut Clapati",
+      "black",
       ++i,
       `Hey, you did it!
 And look at this place!

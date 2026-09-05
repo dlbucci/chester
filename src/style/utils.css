@@ -1,3 +1,17 @@
+.boss-intro-overlay {
+  animation: boss-intro-overlay 5s;
+}
+@keyframes boss-intro-overlay {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  20%,
+  80% {
+    opacity: 1;
+  }
+}
+
 .flex-center {
   align-items: center;
   display: flex;

@@ -7,11 +7,11 @@ import { backgroundColor, color, flexDirection, fontSize, gap, height, left, pos
 import { MixArgs } from "rokay/mix"
 import { Prop } from "rokay/prop/prop"
 
-import { GameState, GameStateLevel, GameStateLevelPre } from "../../shared/games/types.gen"
+import { GameState, GameStateLevel, GameStateLevelBossIntro, GameStateLevelPre } from "../../shared/games/types.gen"
 import { Level } from "../../shared/levels/types.gen"
 import { pgIndex, pgLevel } from "../../shared/pages.gen"
 import { AppClient } from "../app"
-import { $flexCenter, $messageEnter } from "../style/utils.gen"
+import { $bossIntroOverlay, $flexCenter, $messageEnter } from "../style/utils.gen"
 
 import { LEVELS } from "./model"
 
@@ -30,6 +30,11 @@ export const
       width("100%"),
       ...args
     ),
+
+  BossIntroOverlay = (state: GameStateLevelBossIntro) =>
+    Overlay($bossIntroOverlay, apd(
+      div(color(state.level.color), $messageEnter, apd(state.level.bossName)),
+    )),
 
   DeadOverlay = (app: AppClient) =>
     Overlay(

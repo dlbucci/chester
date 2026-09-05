@@ -12,7 +12,7 @@ import { float, pick } from "rokay/math/random"
 import { divide, eq, floor, iter, len, minus, plus, scale, scaleComponents, T, unit, unitOfAng, V, VZ } from "rokay/math/v"
 import { Prop } from "rokay/prop/prop"
 
-import { GameState, GameStateDead, GameStateLevelBoss, GameStateLevelWin, GameStateWin } from "../../shared/games/types.gen"
+import { GameState, GameStateDead, GameStateLevelBoss, GameStateLevelBossIntro, GameStateLevelWin, GameStateWin } from "../../shared/games/types.gen"
 import { Level } from "../../shared/levels/types.gen"
 import { getMoves, THING_STATS } from "../../shared/things/model"
 import { Thing, ThingStateDying, ThingStateIdle, ThingStateMoveTo, ThingType } from "../../shared/things/types.gen"
@@ -26,11 +26,11 @@ import { GRAVITY, SIZE_BOARD, SIZE_BOARD_PIXELS, SIZE_CELL } from "../const"
 import { $flexRow } from "../style/utils.gen"
 
 import { LEVELS } from "./model"
-import { DeadOverlay, LevelPreOverlay, LevelWinOverlay, TitleOverlay, WinOverlay } from "./overlays"
+import { BossIntroOverlay, DeadOverlay, LevelPreOverlay, LevelWinOverlay, TitleOverlay, WinOverlay } from "./overlays"
 
 
 export const
-  LEVEL_COLORS = tab(LEVELS.length, (i) => `hsl(123, ${i / (LEVELS.length - 1) * 78}%, 34%)`),
+  BG_COLORS_BY_LEVEL = tab(LEVELS.length, (i) => `hsl(123, ${i / (LEVELS.length - 1) * 78}%, 34%)`),
   LEVEL_PRE_LIFETIME = 5,
 
   LevelDisplay = (app: AppClient, gameState: Prop<GameState>) => {
@@ -60,7 +60,7 @@ export const
           CameraStateEaseTo(cameraPos(camera, unicorn.pos), 1, camera.pos, 0)
         : _gameState.t === "level" ?
           CameraStateFollow(unicorn)
-        : _gameState.t === "levelBoss" ?
+        : _gameState.t === "levelBossIntro" ?
           CameraStateEaseTo(cameraPos(camera, VZ), 1, camera.pos, 0)
         :
           CameraStateIdle()
@@ -69,7 +69,7 @@ export const
     return div(border("1px solid #000"), position("relative"), apd(
       canvas(
         $(gameState, (_gameState) => backgroundColor(
-          LEVEL_COLORS[_gameState.t === "title" ? 0 : _gameState.level.index] ?? "gray",
+          BG_COLORS_BY_LEVEL[_gameState.t === "title" ? 0 : _gameState.level.index] ?? "gray",
         )),
         sizeAttr(...T(SIZE_BOARD_PIXELS)),
 
@@ -169,13 +169,25 @@ export const
 
             step = (dt: number) => {
               const _gameState = gameState.get()
+              if (_gameState.t === "levelBossIntro") {
+                _gameState.lifetime -= dt
+                if (_gameState.lifetime <= 0) {
+                  gameState.set(() => GameStateLevelBoss(_gameState.level, _gameState.world))
+                }
+              }
               if (_gameState.t !== "title") {
                 const { level, world } = _gameState
                 const { boss, things, unicorn } = world
                 if (_gameState.t === "level") { spawnEnemies(dt, level, world) }
-                if (_gameState.t === "level" || _gameState.t === "levelBoss") {
+                if (
+                  _gameState.t === "level"
+                  || _gameState.t === "levelBoss"
+                  || _gameState.t === "levelBossIntro"
+                ) {
                   things.forEach((thing) => {
                     if (thing === boss && _gameState.t !== "levelBoss") { return }
+                    // keep the player animating
+                    if (_gameState.t === "levelBossIntro" && thing !== unicorn) { return }
                     if (thing.state.t === "dying") {
                       if (thing.state.lifetime > 0) {
                         thing.state.lifetime -= dt
@@ -249,9 +261,11 @@ export const
                             }
                           })
                         }
-                        if (thing === unicorn && thing.cell.y < SIZE_BOARD.y) {
-                          gameState.set(() => GameStateLevelBoss(level, world))
-                        }
+                        if (
+                          _gameState.t === "level"
+                          && thing === unicorn
+                          && thing.cell.y < SIZE_BOARD.y
+                        ) { gameState.set(() => GameStateLevelBossIntro(level, 5, world)) }
                       }
                       if (len(minus(next, thing.pos)) < .5) {
                         thing.pos = next
@@ -322,6 +336,8 @@ export const
             TitleOverlay(app)
           : _gameState.t === "levelPre" ?
             LevelPreOverlay(_gameState, gameState)
+          : _gameState.t === "levelBossIntro" ?
+            BossIntroOverlay(_gameState)
           : _gameState.t === "levelWin" ?
             LevelWinOverlay(app, _gameState.level, {
               onWin() { gameState.set(() => GameStateWin(_gameState.level, _gameState.world)) },

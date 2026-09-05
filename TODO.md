@@ -1,6 +1,5 @@
 # TODO
 
-- boss intros
 - crystal transitions
 - a real ending
 - pony wakeup
@@ -13,6 +12,7 @@
 - bananas
 - terrain
 - lives
+- more fades
 - music
 - sfx
 - pixel text
