@@ -13,7 +13,7 @@ import { divide, eq, floor, iter, len, minus, plus, round, scale, scaleComponent
   V, VZ } from "rokay/math/v"
 import { Prop } from "rokay/prop/prop"
 
-import { GameState, GameStateDead, GameStateLevelBoss, GameStateLevelBossIntro } from "../../shared/games/types.gen"
+import { GameState, GameStateDead, GameStateLevelBoss } from "../../shared/games/types.gen"
 import { Level } from "../../shared/levels/types.gen"
 import { getMoves, THING_STATS } from "../../shared/things/model"
 import { Thing, ThingStateDying, ThingStateIdle, ThingStateMoveTo, ThingType } from "../../shared/things/types.gen"
@@ -26,10 +26,11 @@ import { cellToPos, posToCell } from "../cells/utils"
 import { GRAVITY, SIZE_BOARD, SIZE_BOARD_PIXELS, SIZE_CELL } from "../const"
 import { $flexRow } from "../style/utils.gen"
 
+import { bossIntro } from "./animes/boss-intro"
 import { Anime } from "./animes/model"
 import { postLevelWin } from "./animes/post-level-win"
 import { LEVELS } from "./model"
-import { BossIntroOverlay, DeadOverlay, LevelPreOverlay, TitleOverlay, WinOverlay } from "./overlays"
+import { DeadOverlay, LevelPreOverlay, TitleOverlay, WinOverlay } from "./overlays"
 
 
 export const
@@ -64,8 +65,6 @@ export const
           CameraStateEaseTo(cameraPos(camera, unicorn.pos), 1, camera.pos, 0)
         : _gameState.t === "level" ?
           CameraStateFollow(unicorn)
-        : _gameState.t === "levelBossIntro" ?
-          CameraStateEaseTo(cameraPos(camera, VZ), 1, camera.pos, 0)
         :
           CameraStateIdle()
     })
@@ -184,25 +183,15 @@ export const
               const _gameState = gameState.get()
               const _anime = animes.get()[0]
               if (_anime != null) { if (_anime.t === "step") { _anime.step(dt) } }
-              if (_gameState.t === "levelBossIntro") {
-                _gameState.lifetime -= dt
-                if (_gameState.lifetime <= 0) {
-                  gameState.set(() => GameStateLevelBoss(_gameState.level, _gameState.world))
-                }
-              }
               if (_gameState.t !== "title") {
                 const { level, world } = _gameState
                 const { boss, things, unicorn } = world
                 if (_gameState.t === "level") { spawnEnemies(dt, level, world) }
-                if (
-                  _gameState.t === "level"
-                  || _gameState.t === "levelBoss"
-                  || _gameState.t === "levelBossIntro"
-                ) {
+                if (_gameState.t === "level" || _gameState.t === "levelBoss") {
                   things.forEach((thing) => {
                     if (thing === boss && _gameState.t !== "levelBoss") { return }
                     // keep the player animating
-                    if (_gameState.t === "levelBossIntro" && thing !== unicorn) { return }
+                    if (_anime != null && thing !== unicorn) { return }
                     if (thing.state.t === "dying") {
                       if (thing.state.lifetime > 0) {
                         thing.state.lifetime -= dt
@@ -280,7 +269,14 @@ export const
                           _gameState.t === "level"
                           && thing === unicorn
                           && thing.cell.y < SIZE_BOARD.y
-                        ) { gameState.set(() => GameStateLevelBossIntro(level, 5, world)) }
+                        ) {
+                          animes.set(() =>
+                            bossIntro(app, camera, level, animeEnd, () => {
+                              animeEnd()
+                              gameState.set(() => GameStateLevelBoss(level, world))
+                            })
+                          )
+                        }
                       }
                       if (len(minus(next, thing.pos)) < .5) {
                         thing.pos = next
@@ -299,7 +295,7 @@ export const
                     thing.state.t !== "dying" || thing.state.lifetime > 0
                   )
 
-                  if (!things.includes(boss)) {
+                  if (_anime == null && !things.includes(boss)) {
                     animes.set((_animes) =>
                       postLevelWin(app, camera, gameState, _gameState, animeEnd)
                     )
@@ -357,8 +353,6 @@ export const
             TitleOverlay(app)
           : _gameState.t === "levelPre" ?
             LevelPreOverlay(_gameState, gameState)
-          : _gameState.t === "levelBossIntro" ?
-            BossIntroOverlay(_gameState)
           : _gameState.t === "win" ?
             WinOverlay(app)
           : _gameState.t === "dead" ?

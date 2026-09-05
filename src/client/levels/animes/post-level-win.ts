@@ -1,7 +1,7 @@
 import { divide, interpolateLinear, minus, V, VZ } from "rokay/math/v"
 import { Prop } from "rokay/prop/prop"
 
-import { GameState, GameStateLevel, GameStateLevelBoss, GameStateLevelBossIntro, GameStateWin } from "../../../shared/games/types.gen"
+import { GameState, GameStateLevel, GameStateLevelBoss, GameStateWin } from "../../../shared/games/types.gen"
 import { pgIndex, pgLevel } from "../../../shared/pages.gen"
 import { AppClient } from "../../app"
 import { ease } from "../../camera/model"
@@ -10,7 +10,7 @@ import { SIZE_BOARD_PIXELS } from "../../const"
 import { LEVELS } from "../model"
 import { FlashOverlay, LevelWinOverlay } from "../overlays"
 
-import { AnimeOverlay, AnimeStep } from "./model"
+import { Anime, AnimeOverlay, AnimeStep } from "./model"
 
 
 export const
@@ -18,9 +18,9 @@ export const
     app: AppClient,
     camera: Camera,
     gameState: Prop<GameState>,
-    { level, world }: GameStateLevel | GameStateLevelBoss | GameStateLevelBossIntro,
+    { level, world }: GameStateLevel | GameStateLevelBoss,
     animeEnd: () => void,
-  ) => {
+  ): Anime[] => {
     const crystalStart = V(SIZE_BOARD_PIXELS.x / 2 - 8, -16)
     const crystalEnd = minus(divide(SIZE_BOARD_PIXELS, 2), V(8, 8))
     const crystal = {

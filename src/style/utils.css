@@ -1,6 +1,3 @@
-.boss-intro-overlay {
-  animation: boss-intro-overlay 5s;
-}
 @keyframes boss-intro-overlay {
   0%,
   100% {
