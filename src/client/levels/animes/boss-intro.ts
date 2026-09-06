@@ -10,20 +10,14 @@ import { Anime, AnimeOverlay, AnimeStep } from "./model"
 
 
 export const
-  bossIntro = (
-    _app: AppClient,
-    camera: Camera,
-    level: Level,
-    animeEnd: () => void,
-    onEnd: () => void,
-  ): Anime[] => {
+  bossIntro = (_app: AppClient, camera: Camera, level: Level, onEnd: () => void): Anime[] => {
     return [
       AnimeStep(() => {
         camera.state = CameraStateEaseTo(cameraPos(camera, VZ), 1, camera.pos, 0)
-        animeEnd()
+        return true
       }),
       AnimeStep(() => {
-        if (camera.state.t === "idle") { animeEnd() }
+        return camera.state.t === "idle"
       }),
       AnimeOverlay(() => BossIntroOverlay(level, 5, onEnd)),
     ]

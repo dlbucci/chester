@@ -58,8 +58,8 @@ export const
     Sicafant: ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS),
     Peanio: ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS),
     Dinkus: ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS),
-    "Boof Cake": ThingStats(1, 1, V(-8, -12), KNIGHT_MOVEMENTS),
-    "Evernut Clapati": ThingStats(1, 1, V(-8, -12), KNIGHT_MOVEMENTS),
+    "Boof Cake": ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS),
+    "Evernut Clapati": ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS),
   },
 
   getMoves = (thing: Thing, levelSize: V): V[][] => {

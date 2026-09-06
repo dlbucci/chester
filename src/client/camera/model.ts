@@ -53,8 +53,22 @@ export const
       .y
   },
 
-  ease = (frac: number) =>
-    cubicBezier(V(0.42, 0), V(0.58, 1), frac),
+  linearV = (a: V, b: V) =>
+    (frac: number) => plus(scale(a, 1 - frac), scale(b, frac)),
+
+  cubicBezier2 = (a: V, b: V) => {
+    const abF = linearV(a, b)
+    return (frac: number) => {
+      const ab = abF(frac)
+      return linearV(
+        linearV(linearV(VZ, a)(frac), ab)(frac),
+        linearV(ab, linearV(b, V(1, 1))(frac))(frac),
+      )(frac)
+        .y
+    }
+  },
+
+  ease = cubicBezier2(V(0.42, 0), V(0.58, 1)),
 
   linear = (a: number, b: number, f: number) =>
     a * (1 - f) + b * f

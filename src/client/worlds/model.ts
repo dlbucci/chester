@@ -25,5 +25,5 @@ export const
       ),
       things: Thing[] = [unicorn, boss]
     unicorn.state = ThingStateIdle(0, getMoves(unicorn, level.size))
-    return World(boss, [], things, unicorn)
+    return World(boss, [], [], things, unicorn)
   }

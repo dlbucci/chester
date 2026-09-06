@@ -147,7 +147,7 @@ That said, there's one final thing to wrap up:
 The true source of power for all you've faced...`.split(
           "\n",
         ),
-      V(SIZE_BOARD.x, (3 + i) * SIZE_BOARD.y),
+      V(SIZE_BOARD.x, (3) * SIZE_BOARD.y),
       spawnRates({}),
     ),
   ]

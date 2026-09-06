@@ -1,13 +1,10 @@
 import { divide, interpolateLinear, minus, V, VZ } from "rokay/math/v"
-import { Prop } from "rokay/prop/prop"
 
-import { GameState, GameStateLevel, GameStateLevelBoss, GameStateWin } from "../../../shared/games/types.gen"
-import { pgIndex, pgLevel } from "../../../shared/pages.gen"
+import { GameStateLevel, GameStateLevelBoss } from "../../../shared/games/types.gen"
 import { AppClient } from "../../app"
 import { ease } from "../../camera/model"
 import { Camera, CameraShake } from "../../camera/types.gen"
 import { SIZE_BOARD_PIXELS } from "../../const"
-import { LEVELS } from "../model"
 import { FlashOverlay, LevelWinOverlay } from "../overlays"
 
 import { Anime, AnimeOverlay, AnimeStep } from "./model"
@@ -17,9 +14,9 @@ export const
   postLevelWin = (
     app: AppClient,
     camera: Camera,
-    gameState: Prop<GameState>,
     { level, world }: GameStateLevel | GameStateLevelBoss,
     animeEnd: () => void,
+    onEnd: () => void,
   ): Anime[] => {
     const crystalStart = V(SIZE_BOARD_PIXELS.x / 2 - 8, -16)
     const crystalEnd = minus(divide(SIZE_BOARD_PIXELS, 2), V(8, 8))
@@ -34,7 +31,7 @@ export const
       AnimeOverlay(() =>
         LevelWinOverlay(level, {
           onClick() {
-            world.crystal = crystal
+            world.crystals = [crystal]
             animeEnd()
           },
         })
@@ -47,7 +44,7 @@ export const
         }
         crystal.life = 0
         camera.shake = shake
-        animeEnd()
+        return true
       }),
       AnimeStep((dt) => {
         crystal.life += dt
@@ -56,21 +53,8 @@ export const
           return
         }
         camera.shake = undefined
-        animeEnd()
+        return true
       }),
-      AnimeOverlay(() =>
-        FlashOverlay(5, level.color, {
-          onDone() { animeEnd() },
-          onWhite() {
-            if (level.index + 1 < LEVELS.length) {
-              app.router.replace(
-                level.index + 1 < LEVELS.length ? pgLevel(level.index + 1) : pgIndex(),
-              )
-            } else {
-              gameState.set(() => GameStateWin(level, world))
-            }
-          },
-        })
-      ),
+      AnimeOverlay(() => FlashOverlay(5, level.color, { onDone: animeEnd, onWhite: onEnd })),
     ]
   }

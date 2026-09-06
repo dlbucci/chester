@@ -8,7 +8,10 @@ export type AnimeOverlay = {
 }
 export type AnimeStep = {
   t: "step"
-  step(dt: number): void
+  /**
+   * @returns true if the animation is done
+   **/
+  step(dt: number): boolean | undefined
 }
 
 
@@ -16,5 +19,5 @@ export const
   AnimeOverlay = (elt: () => Elt): AnimeOverlay =>
     ({ t: "overlay", elt }),
 
-  AnimeStep = (step: (dt: number) => void): AnimeStep =>
+  AnimeStep = (step: (dt: number) => boolean | undefined): AnimeStep =>
     ({ t: "step", step })

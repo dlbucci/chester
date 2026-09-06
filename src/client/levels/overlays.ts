@@ -95,7 +95,7 @@ export const
 
   WinOverlay = (app: AppClient) =>
     Overlay(
-      backgroundColor("hsla(0, 0%, 20%, .75)"),
+      backgroundColor("#fff"),
       color("hsl(352,78%,45%)"),
       flexDirection("column"),
       gap(".5em"),

@@ -15,6 +15,7 @@ import { Prop } from "rokay/prop/prop"
 
 import { GameState, GameStateDead, GameStateLevelBoss } from "../../shared/games/types.gen"
 import { Level } from "../../shared/levels/types.gen"
+import { pgIndex, pgLevel } from "../../shared/pages.gen"
 import { getMoves, THING_STATS } from "../../shared/things/model"
 import { Thing, ThingStateDying, ThingStateIdle, ThingStateMoveTo, ThingType } from "../../shared/things/types.gen"
 import { World } from "../../shared/worlds/types.gen"
@@ -29,8 +30,9 @@ import { $flexRow } from "../style/utils.gen"
 import { bossIntro } from "./animes/boss-intro"
 import { Anime } from "./animes/model"
 import { postLevelWin } from "./animes/post-level-win"
+import { win } from "./animes/win"
 import { LEVELS } from "./model"
-import { DeadOverlay, LevelPreOverlay, TitleOverlay, WinOverlay } from "./overlays"
+import { DeadOverlay, LevelPreOverlay, TitleOverlay } from "./overlays"
 
 
 export const
@@ -55,6 +57,7 @@ export const
 
     gameState.listenAndCall((_gameState) => {
       if (_gameState.t === "title") {
+        animes.set(() => [])
         camera.state = CameraStateMobius(V(0, SIZE_CELL.y), scale(SIZE_CELL, 2))
         captured.set(() => [])
         return
@@ -130,7 +133,7 @@ export const
               })
 
               if (_gameState.t !== "title") {
-                const { crystal, things, unicorn } = _gameState.world
+                const { crystals, things, unicorn } = _gameState.world
                 const _anime = animes.get()[0]
                 if ((_gameState.t === "level" || _gameState.t === "levelBoss") && _anime == null) {
                   if (unicorn.state.t === "idle") {
@@ -159,7 +162,9 @@ export const
                   ctx.restore()
                 })
 
-                if (crystal != null) { ctx.drawImage(crystal.sprite, ...T(round(crystal.pos))) }
+                crystals.sort((a, b) => a.pos.y - b.pos.y).forEach((crystal) => {
+                  ctx.drawImage(crystal.sprite, ...T(round(crystal.pos)))
+                })
               }
 
               ctx.restore()
@@ -191,7 +196,9 @@ export const
             step = (dt: number) => {
               const _gameState = gameState.get()
               const _anime = animes.get()[0]
-              if (_anime != null) { if (_anime.t === "step") { _anime.step(dt) } }
+              if (_anime != null) {
+                if (_anime.t === "step") { if (_anime.step(dt)) { animeEnd() } }
+              }
               if (_gameState.t !== "title") {
                 const { level, world } = _gameState
                 const { boss, things, unicorn } = world
@@ -280,7 +287,7 @@ export const
                           && thing.cell.y < SIZE_BOARD.y
                         ) {
                           animes.set(() =>
-                            bossIntro(app, camera, level, animeEnd, () => {
+                            bossIntro(app, camera, level, () => {
                               animeEnd()
                               gameState.set(() => GameStateLevelBoss(level, world))
                             })
@@ -305,9 +312,16 @@ export const
                   )
 
                   if (_anime == null && !things.includes(boss)) {
-                    animes.set((_animes) =>
-                      postLevelWin(app, camera, gameState, _gameState, animeEnd)
-                    )
+                    animes.set((_animes) => {
+                      if (level.index + 1 < LEVELS.length) {
+                        return postLevelWin(app, camera, _gameState, animeEnd, () => {
+                          app.router.replace(
+                            level.index + 1 < LEVELS.length ? pgLevel(level.index + 1) : pgIndex(),
+                          )
+                        })
+                      }
+                      return win(app, world, animeEnd)
+                    })
                   }
                   if (!things.includes(unicorn)) {
                     gameState.set(() => GameStateDead(level, world))
@@ -358,8 +372,6 @@ export const
           TitleOverlay(app)
         : _gameState.t === "levelPre" ?
           LevelPreOverlay(_gameState, gameState)
-        : _gameState.t === "win" ?
-          WinOverlay(app)
         : _gameState.t === "dead" ?
           DeadOverlay(app)
         :
