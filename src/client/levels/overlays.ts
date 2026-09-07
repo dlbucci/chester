@@ -7,10 +7,12 @@ import { animation, backgroundColor, color, flexDirection, fontSize, gap, height
 import { MixArgs } from "rokay/mix"
 import { Prop } from "rokay/prop/prop"
 
-import { GameState, GameStateLevel, GameStateLevelPre } from "../../shared/games/types.gen"
+import { GameStateLevel } from "../../shared/games/types.gen"
 import { Level } from "../../shared/levels/types.gen"
 import { pgIndex, pgLevel } from "../../shared/pages.gen"
 import { AppClient } from "../app"
+import { cameraPos } from "../camera/model"
+import { Camera, CameraStateEaseTo } from "../camera/types.gen"
 import { $flexCenter, $messageEnter } from "../style/utils.gen"
 
 
@@ -57,7 +59,7 @@ export const
     return Overlay(animation(`flash ${timeSec}s`), backgroundColor(color))
   },
 
-  LevelPreOverlay = (state: GameStateLevelPre, gameState: Prop<GameState>) => {
+  LevelPreOverlay = (camera: Camera, state: GameStateLevel, onEnd: () => void) => {
     const
       { preamble } = state.level,
       messageIndex = Prop(() => 0)
@@ -69,8 +71,18 @@ export const
       )),
       onPointerdown(() => {
         messageIndex.set((_index) => {
-          if (_index < preamble.length - 1) { return _index + 1 }
-          gameState.set(() => GameStateLevel(state.level, state.world))
+          if (_index + 1 < preamble.length) {
+            if (_index + 1 === preamble.length - 1) {
+              camera.state = CameraStateEaseTo(
+                cameraPos(camera, state.world.unicorn.pos),
+                1,
+                camera.pos,
+                0,
+              )
+            }
+            return _index + 1
+          }
+          onEnd()
           return _index
         })
       }),

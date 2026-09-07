@@ -1,6 +1,6 @@
 import { divide, interpolateLinear, minus, V, VZ } from "rokay/math/v"
 
-import { GameStateLevel, GameStateLevelBoss } from "../../../shared/games/types.gen"
+import { GameStateLevel } from "../../../shared/games/types.gen"
 import { AppClient } from "../../app"
 import { ease } from "../../camera/model"
 import { Camera, CameraShake } from "../../camera/types.gen"
@@ -14,7 +14,7 @@ export const
   postLevelWin = (
     app: AppClient,
     camera: Camera,
-    { level, world }: GameStateLevel | GameStateLevelBoss,
+    { level, world }: GameStateLevel,
     animeEnd: () => void,
     onEnd: () => void,
   ): Anime[] => {

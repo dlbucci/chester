@@ -7,8 +7,5 @@ import { World } from "../worlds/types"
 export const
   GameState = TypeADT({
     title: {},
-    levelPre: { level: Level, world: World },
     level: { level: Level, world: World },
-    levelBoss: { level: Level, world: World },
-    dead: { level: Level, world: World },
   })
