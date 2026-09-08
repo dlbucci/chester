@@ -21,20 +21,20 @@ import { Thing, ThingStateDying, ThingStateIdle, ThingStateMoveTo, ThingType } f
 import { World } from "../../shared/worlds/types.gen"
 import { AppClient } from "../app"
 import { getSprite } from "../assets"
-import { cameraStep } from "../camera/model"
-import { Camera, CameraStateFollow, CameraStateMobius } from "../camera/types.gen"
+import { cameraPos, cameraStep } from "../camera/model"
+import { Camera, CameraStateEaseTo, CameraStateFollow, CameraStateMobius } from "../camera/types.gen"
 import { cellToPos, posToCell } from "../cells/utils"
 import { GRAVITY, SIZE_BOARD, SIZE_BOARD_PIXELS, SIZE_CELL } from "../const"
 import { $flexRow } from "../style/utils.gen"
 
 import { bossIntro } from "./animes/boss-intro"
 import { dead } from "./animes/dead"
-import { Anime } from "./animes/model"
+import { Anime, AnimeOverlay } from "./animes/model"
 import { postLevelWin } from "./animes/post-level-win"
 import { preLevel } from "./animes/pre-level"
 import { win } from "./animes/win"
 import { LEVELS } from "./model"
-import { TitleOverlay } from "./overlays"
+import { FlashOutOverlay, TitleOverlay } from "./overlays"
 
 
 export const
@@ -56,7 +56,8 @@ export const
         CameraStateMobius(V(0, SIZE_CELL.y), scale(SIZE_CELL, 2)),
       ),
       animes = Prop<Anime[]>(() => []),
-      captured = Prop<Thing[]>(() => [])
+      captured = Prop<Thing[]>(() => []),
+      prevGameState = gameState.get()
 
     gameState.listenAndCall((_gameState) => {
       if (_gameState.t === "title") {
@@ -64,14 +65,32 @@ export const
         camera.state = CameraStateMobius(V(0, SIZE_CELL.y), scale(SIZE_CELL, 2))
         captured.set(() => [])
       } else if (_gameState.t === "level") {
-        animes.set(() =>
-          preLevel(camera, _gameState, () => {
-            animeEnd()
-            camera.state = CameraStateFollow(_gameState.world.unicorn)
-          })
-        )
         camera.bounds.se = scaleComponents(_gameState.level.size, SIZE_CELL)
+        const _prev = prevGameState
+        animes.set(() => [
+          ..._prev.t === "title" || _prev === _gameState ?
+            []
+          :
+            [AnimeOverlay(() => FlashOutOverlay(2.5, _prev.level.color, animeEnd))],
+          ...preLevel(
+            _gameState.level,
+            () => {
+              camera.state = CameraStateEaseTo(
+                cameraPos(camera, _gameState.world.unicorn.pos),
+                1,
+                camera.pos,
+                0,
+              )
+            },
+            () => {
+              animeEnd()
+              camera.state = CameraStateFollow(_gameState.world.unicorn)
+              camera.bounds.se = scaleComponents(_gameState.level.size, SIZE_CELL)
+            },
+          ),
+        ])
       }
+      prevGameState = _gameState
     })
 
     return div(border("1px solid #000"), position("relative"), apd(
@@ -285,7 +304,7 @@ export const
                           }
                         })
                       }
-                      if (boss != null && thing === unicorn && thing.cell.y < SIZE_BOARD.y) {
+                      if (boss == null && thing === unicorn && thing.cell.y < SIZE_BOARD.y) {
                         spawnBoss(_gameState)
                         animes.set(() =>
                           bossIntro(app, camera, level, () => {
@@ -307,11 +326,11 @@ export const
                   }
                 })
 
-                world.things = things.filter((thing) =>
+                world.things = world.things.filter((thing) =>
                   thing.state.t !== "dying" || thing.state.lifetime > 0
                 )
 
-                if (_anime == null && boss != null && !things.includes(boss)) {
+                if (_anime == null && boss != null && !world.things.includes(boss)) {
                   animes.set((_animes) => {
                     if (level.index + 1 < LEVELS.length) {
                       return postLevelWin(app, camera, _gameState, animeEnd, () => {
@@ -323,7 +342,9 @@ export const
                     return win(app, world, animeEnd)
                   })
                 }
-                if (!things.includes(unicorn) && _anime == null) { animes.set(() => dead(app)) }
+                if (!world.things.includes(unicorn) && _anime == null) {
+                  animes.set(() => dead(app))
+                }
               }
 
               cameraStep(dt, camera)
@@ -365,7 +386,14 @@ export const
         )))
       ))),
 
-      matchIf(gameState, (_gameState) => _gameState.t === "title" ? TitleOverlay(app) : undefined),
+      matchIf(gameState, (_gameState) =>
+        _gameState.t === "title" ?
+          TitleOverlay(() => {
+            app.router.replace(pgLevel(0))
+          })
+        :
+          undefined
+      ),
 
       matchIf(animes, (_animes) => {
         const _anime = _animes[0]

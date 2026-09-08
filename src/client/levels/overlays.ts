@@ -1,18 +1,13 @@
 import { apd } from "rokay/browser/core"
 import { div } from "rokay/browser/elt"
-import { match } from "rokay/browser/match"
 import { onPointerdown } from "rokay/browser/on"
-import { animation, backgroundColor, color, flexDirection, fontSize, gap, height, left, position, textAlign,
-  top, userSelect, whiteSpace, width } from "rokay/browser/style"
+import { animation, backgroundColor, color, flexDirection, gap, height, left, position, textAlign, top,
+  userSelect, whiteSpace, width } from "rokay/browser/style"
 import { MixArgs } from "rokay/mix"
-import { Prop } from "rokay/prop/prop"
 
-import { GameStateLevel } from "../../shared/games/types.gen"
 import { Level } from "../../shared/levels/types.gen"
-import { pgIndex, pgLevel } from "../../shared/pages.gen"
+import { pgIndex } from "../../shared/pages.gen"
 import { AppClient } from "../app"
-import { cameraPos } from "../camera/model"
-import { Camera, CameraStateEaseTo } from "../camera/types.gen"
 import { $flexCenter, $messageEnter } from "../style/utils.gen"
 
 
@@ -33,14 +28,14 @@ export const
 
   BossIntroOverlay = (level: Level, timeSec: number, onDone: () => void) => {
     setTimeout(onDone, timeSec * 1000)
-    return Overlay(animation(`boss-intro-overlay ${timeSec}s`), apd(
+    return Overlay(animation(`${timeSec}s boss-intro-overlay forwards`), apd(
       div(color(level.color), $messageEnter, apd(level.bossName)),
     ))
   },
 
   DeadOverlay = (app: AppClient) =>
     Overlay(
-      animation("fade-in 1s"),
+      animation("1s fade-in"),
       backgroundColor("hsla(0, 0%, 20%, .75)"),
       color("hsl(352,78%,45%)"),
       apd(div($messageEnter, apd("YOU DIED"))),
@@ -59,34 +54,14 @@ export const
     return Overlay(animation(`flash ${timeSec}s`), backgroundColor(color))
   },
 
-  LevelPreOverlay = (camera: Camera, state: GameStateLevel, onEnd: () => void) => {
-    const
-      { preamble } = state.level,
-      messageIndex = Prop(() => 0)
+  FlashInOverlay = (timeSec: number, color: string, onDone: () => void) => {
+    setTimeout(onDone, timeSec * 1000)
+    return Overlay(animation(`${timeSec}s flash-in forwards`), backgroundColor(color))
+  },
 
-    return Overlay(
-      fontSize(".8em"),
-      apd(match(messageIndex, (index) =>
-        div($messageEnter, textAlign("center"), apd(preamble[index]))
-      )),
-      onPointerdown(() => {
-        messageIndex.set((_index) => {
-          if (_index + 1 < preamble.length) {
-            if (_index + 1 === preamble.length - 1) {
-              camera.state = CameraStateEaseTo(
-                cameraPos(camera, state.world.unicorn.pos),
-                1,
-                camera.pos,
-                0,
-              )
-            }
-            return _index + 1
-          }
-          onEnd()
-          return _index
-        })
-      }),
-    )
+  FlashOutOverlay = (timeSec: number, color: string, onDone: () => void) => {
+    setTimeout(onDone, timeSec * 1000)
+    return Overlay(animation(`${timeSec}s flash-out forwards`), backgroundColor(color))
   },
 
   LevelWinOverlay = (level: Level, { onClick }: { onClick(): void }) =>
@@ -100,10 +75,8 @@ export const
       onPointerdown(onClick),
     ),
 
-  TitleOverlay = (app: AppClient) =>
-    Overlay(apd("Chester"), onPointerdown(() => {
-      app.router.replace(pgLevel(0))
-    })),
+  TitleOverlay = (onClick: () => void) =>
+    Overlay(apd("Chester"), onPointerdown(onClick)),
 
   WinOverlay = (app: AppClient) =>
     Overlay(

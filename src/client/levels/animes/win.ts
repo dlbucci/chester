@@ -1,4 +1,3 @@
-import { nop } from "rokay/data/fun"
 import { divide, minus, plus, scale, unitOfAng, V } from "rokay/math/v"
 
 import { Crystal, World } from "../../../shared/worlds/types.gen"
@@ -6,7 +5,7 @@ import { AppClient } from "../../app"
 import { ease, linear } from "../../camera/model"
 import { SIZE_BOARD_PIXELS, SIZE_CELL } from "../../const"
 import { LEVELS } from "../model"
-import { FlashOverlay, WinOverlay } from "../overlays"
+import { FlashInOverlay, WinOverlay } from "../overlays"
 
 import { Anime, AnimeOverlay, AnimeStep } from "./model"
 
@@ -55,7 +54,7 @@ export const
         })
         return done
       }),
-      AnimeOverlay(() => FlashOverlay(5, "#fff", { onDone: nop, onWhite: animeEnd })),
+      AnimeOverlay(() => FlashInOverlay(2.5, "#fff", animeEnd)),
       AnimeOverlay(() => WinOverlay(app)),
     ]
   }

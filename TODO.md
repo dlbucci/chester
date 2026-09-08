@@ -26,5 +26,9 @@
 - remove icons/16.png => 12189 - 11798 = 391 bytes
 - use packed images? => (for crystal) 11798 - 11712 = 86 bytes
 - remove other rokay-dom stuff
+- shorten property names?
+- shorten strings?
+- inline/trim css?
+- color paint debug stuff
 
 total: 14934

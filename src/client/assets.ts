@@ -97,14 +97,11 @@ const
       (ctx) => {
         ctx.drawImage(image, 0, 0)
       },
-      paint(
-        {
-          "255,0,0,255": [color],
-          "224,0,0,255": [color, "rgba(0,0,0,.1)"],
-          "196,0,0,255": [color, "rgba(0,0,0,.2)"],
-        },
-        true,
-      ),
+      paint({
+        "255,0,0,255": [color],
+        "224,0,0,255": [color, "rgba(0,0,0,.1)"],
+        "196,0,0,255": [color, "rgba(0,0,0,.2)"],
+      }),
       fills("#000"),
       outline(1),
     )),
