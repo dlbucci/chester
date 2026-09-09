@@ -22,8 +22,6 @@
 - make Tucker and Chester grow horns
 - white board BG for final scene
 - spawn crystal from dead unicorn
-- boss defeat screen gradient
-- death message screen gradient
 - boss defeat autoplay
 
 ## TOSLIM
@@ -36,5 +34,6 @@
 - shorten strings?
 - inline/trim css?
 - color paint debug stuff
+- reduce animations used
 
 total: 14934

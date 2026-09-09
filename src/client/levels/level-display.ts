@@ -93,6 +93,7 @@ export const
       }
       prevGameState = _gameState
     })
+
     return div(
       $(gameState, (_gameState) =>
         $rainbowBackground(VB(35), _gameState.t === "title" ? 0 : _gameState.level.index)

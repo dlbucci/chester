@@ -1,8 +1,8 @@
 import { apd } from "rokay/browser/core"
 import { div, span } from "rokay/browser/elt"
 import { onPointerdown } from "rokay/browser/on"
-import { animation, backgroundColor, color, flexDirection, gap, height, left, position, textAlign, top,
-  userSelect, whiteSpace, width } from "rokay/browser/style"
+import { animation, background, backgroundColor, color, flexDirection, gap, height, left, position, textAlign,
+  top, userSelect, whiteSpace, width } from "rokay/browser/style"
 import { MixArgs } from "rokay/mix"
 
 import { Level } from "../../shared/levels/types.gen"
@@ -36,7 +36,9 @@ export const
   DeadOverlay = (app: AppClient) =>
     Overlay(
       animation("1s fade-in"),
-      backgroundColor("hsla(0, 0%, 20%, .75)"),
+      background(
+        "linear-gradient(to bottom, rgba(0,0,0,.25) 20%, rgba(0,0,0,.75) 50%, rgba(0,0,0,.25) 80%",
+      ),
       color("hsl(352,78%,45%)"),
       apd(div($messageEnter, apd("YOU DIED"))),
       onPointerdown(() => {
@@ -66,7 +68,9 @@ export const
 
   LevelWinOverlay = (level: Level, { onClick }: { onClick(): void }) =>
     Overlay(
-      backgroundColor("hsla(0, 0%, 20%, .75)"),
+      background(
+        "linear-gradient(to bottom, rgba(0,0,0,.25) 20%, rgba(0,0,0,.75) 50%, rgba(0,0,0,.25) 80%",
+      ),
       color("hsl(352,78%,45%)"),
       flexDirection("column"),
       gap(".5em"),
