@@ -3,7 +3,6 @@
 - pony wakeup
 - Make chester change colors
 - fix the camera
-- fixup rainbow
 - Shops after beating boss
 - Better world color changes
 - water
@@ -22,7 +21,10 @@
 - make Tucker and Chester move closer
 - make Tucker and Chester grow horns
 - white board BG for final scene
-- spawn crystal fro dead unicorn
+- spawn crystal from dead unicorn
+- boss defeat screen gradient
+- death message screen gradient
+- boss defeat autoplay
 
 ## TOSLIM
 
