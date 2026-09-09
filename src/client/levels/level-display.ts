@@ -2,12 +2,12 @@ import { size as sizeAttr } from "rokay/browser/attr"
 import { apd } from "rokay/browser/core"
 import { canvas, div } from "rokay/browser/elt"
 import { withCtx } from "rokay/browser/game/danvas"
-import { match, matchIf } from "rokay/browser/match"
-import { onClick, onPointerdown } from "rokay/browser/on"
+import { matchIf } from "rokay/browser/match"
+import { onPointerdown } from "rokay/browser/on"
 import { $ } from "rokay/browser/prop"
-import { backgroundColor, border, height, imageRendering, position } from "rokay/browser/style"
+import { backgroundColor, border, imageRendering, position } from "rokay/browser/style"
 import { rafLoop } from "rokay/browser/visible"
-import { last, remove, tab } from "rokay/data/array"
+import { last, tab } from "rokay/data/array"
 import { float, pick } from "rokay/math/random"
 import { divide, eq, floor, iter, len, minus, plus, round, scale, scaleComponents, T, unit, unitOfAng,
   V, VB, VZ } from "rokay/math/v"
@@ -25,8 +25,9 @@ import { cameraPos, cameraStep } from "../camera/model"
 import { Camera, CameraStateEaseTo, CameraStateFollow, CameraStateMobius } from "../camera/types.gen"
 import { cellToPos, posToCell } from "../cells/utils"
 import { GRAVITY, SIZE_BOARD, SIZE_BOARD_PIXELS, SIZE_CELL } from "../const"
+import { CapturedBar } from "../elts/captured-bar"
 import { $rainbowBackground } from "../elts/rainbow-background"
-import { $flexCenter, $flexRow, $s100 } from "../style/utils.gen"
+import { $flexCenter, $s100 } from "../style/utils.gen"
 
 import { bossIntro } from "./animes/boss-intro"
 import { dead } from "./animes/dead"
@@ -376,33 +377,7 @@ export const
             }),
           ),
 
-          div(backgroundColor("gray"), height("16px"), apd(match(captured, (_captured) =>
-            div($flexRow, apd(..._captured.map((thing) =>
-              canvas(
-                sizeAttr(16, 16),
-                withCtx((ctx) => {
-                  ctx.drawImage(getSprite(app.assets, thing), 0, 0)
-                }),
-                onClick(() => {
-                  const _gameState = gameState.get()
-                  const _anime = animes.get()[0]
-                  if (_gameState.t === "level" && _anime == null) {
-                    const { world } = _gameState
-                    const cell = minus(world.unicorn.cell, V(0, 1))
-                    world.things.push(Thing(
-                      "good",
-                      cell,
-                      cellToPos(cell),
-                      V(1, 1),
-                      ThingStateIdle(1.5, []),
-                      thing.type,
-                    ))
-                    captured.set((_captured) => remove(_captured, thing))
-                  }
-                }),
-              )
-            )))
-          ))),
+          CapturedBar(app, animes, captured, gameState),
 
           matchIf(gameState, (_gameState) =>
             _gameState.t === "title" ?

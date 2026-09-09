@@ -23,6 +23,7 @@
 - white board BG for final scene
 - spawn crystal from dead unicorn
 - boss defeat autoplay
+- kill other enemies on boss death
 
 ## TOSLIM
 
