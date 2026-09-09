@@ -26,12 +26,14 @@ import { Camera, CameraStateEaseTo, CameraStateFollow, CameraStateMobius } from 
 import { cellToPos, posToCell } from "../cells/utils"
 import { GRAVITY, SIZE_BOARD, SIZE_BOARD_PIXELS, SIZE_CELL } from "../const"
 import { CapturedBar } from "../elts/captured-bar"
+import { LifeBar } from "../elts/life-bar"
 import { $rainbowBackground } from "../elts/rainbow-background"
 import { $flexCenter, $s100 } from "../style/utils.gen"
+import { worldNew } from "../worlds/model"
 
 import { bossIntro } from "./animes/boss-intro"
 import { dead } from "./animes/dead"
-import { Anime, AnimeGloverlay } from "./animes/model"
+import { Anime, AnimeGloverlay, AnimeStep } from "./animes/model"
 import { postLevelWin } from "./animes/post-level-win"
 import { preLevel } from "./animes/pre-level"
 import { win } from "./animes/win"
@@ -59,6 +61,7 @@ export const
       ),
       animes = Prop<Anime[]>(() => []),
       captured = Prop<Thing[]>(() => []),
+      lives = Prop(() => 3),
       prevGameState = gameState.get()
 
     gameState.listenAndCall((_gameState) => {
@@ -66,6 +69,7 @@ export const
         animes.set(() => [])
         camera.state = CameraStateMobius(V(0, SIZE_CELL.y), scale(SIZE_CELL, 2))
         captured.set(() => [])
+        lives.set(() => 3)
       } else if (_gameState.t === "level") {
         camera.bounds.se = scaleComponents(_gameState.level.size, SIZE_CELL)
         const _prev = prevGameState
@@ -104,6 +108,8 @@ export const
       $s100,
       apd(
         div(border("1px solid #000"), position("relative"), apd(
+          LifeBar(app, lives),
+
           canvas(
             $(gameState, (_gameState) => backgroundColor(
               BG_COLORS_BY_LEVEL[_gameState.t === "title" ? 0 : _gameState.level.index] ?? "gray",
@@ -362,7 +368,28 @@ export const
                       })
                     }
                     if (!world.things.includes(unicorn) && _anime == null) {
-                      animes.set(() => dead(app))
+                      animes.set(() => dead(() => {
+                        const _lives = lives.get()
+                        if (_lives === 0) {
+                          app.router.replace(pgIndex())
+                          return
+                        }
+                        lives.set((_lives) => _lives - 1)
+                        _gameState.world = worldNew(_gameState.level)
+                        camera.state = CameraStateEaseTo(
+                          cameraPos(camera, _gameState.world.unicorn.pos),
+                          1,
+                          camera.pos,
+                          0,
+                        )
+                        animes.set(() => [
+                          AnimeStep(() => {
+                            if (camera.state.t !== "idle") { return }
+                            camera.state = CameraStateFollow(_gameState.world.unicorn)
+                            return true
+                          }),
+                        ])
+                      }))
                     }
                   }
 

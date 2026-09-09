@@ -24,8 +24,8 @@ export const
     animes: Prop<Anime[]>,
     captured: Prop<Thing[]>,
     gameState: Prop<GameState>,
-  ) => {
-    return div(backgroundColor("gray"), height("16px"), apd(match(captured, (_captured) =>
+  ) =>
+    div(backgroundColor("gray"), height("16px"), apd(match(captured, (_captured) =>
       div($flexRow, apd(..._captured.map((thing) =>
         canvas(
           sizeAttr(16, 16),
@@ -52,4 +52,3 @@ export const
         )
       )))
     )))
-  }

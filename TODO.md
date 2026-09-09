@@ -9,7 +9,6 @@
 - apples
 - bananas
 - terrain
-- lives
 - more fades
 - music
 - sfx
@@ -24,6 +23,7 @@
 - spawn crystal from dead unicorn
 - boss defeat autoplay
 - kill other enemies on boss death
+- color boss name in preamble
 
 ## TOSLIM
 
