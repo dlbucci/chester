@@ -1,5 +1,5 @@
 import { apd } from "rokay/browser/core"
-import { div } from "rokay/browser/elt"
+import { div, span } from "rokay/browser/elt"
 import { onPointerdown } from "rokay/browser/on"
 import { animation, backgroundColor, color, flexDirection, gap, height, left, position, textAlign, top,
   userSelect, whiteSpace, width } from "rokay/browser/style"
@@ -71,7 +71,11 @@ export const
       flexDirection("column"),
       gap(".5em"),
       whiteSpace("pre"),
-      apd(div($messageEnter, textAlign("center"), apd(level.bossName + "\nDEFEATED"))),
+      apd(div(
+        $messageEnter,
+        textAlign("center"),
+        apd(span(color(level.color), apd(level.bossName)), "\nDEFEATED"),
+      )),
       onPointerdown(onClick),
     ),
 

@@ -18,9 +18,9 @@ import { AppClient, GameSize } from "./app.js"
 import { load } from "./assets.js"
 import { SIZE_BOARD_PIXELS } from "./const.js"
 import { matchLoader } from "./elts/loader.syn.js"
+import { LevelDisplay } from "./levels/level-display.js"
 import { IndexPages } from "./pages.gen.js"
 import { $s100 } from "./style/utils.gen.js"
-import { WorldDisplay } from "./worlds/world-display.js"
 
 
 mount(document.body, () => {
@@ -59,7 +59,7 @@ mount(document.body, () => {
         })
       const gameState = Prop(() => routedGameState.get())
 
-      return div($s100, apd(WorldDisplay(app, gameState)))
+      return div($s100, apd(LevelDisplay(app, gameState)))
     })),
   ))
 })

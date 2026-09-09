@@ -1,10 +1,8 @@
 # TODO
 
-- a real ending
 - pony wakeup
 - Make chester change colors
 - fix the camera
-- global flashes
 - fixup rainbow
 - Shops after beating boss
 - Better world color changes
@@ -21,6 +19,10 @@
 - path backtracking
 - pathfinding?
 - Fill in README.md
+- make Tucker and Chester move closer
+- make Tucker and Chester grow horns
+- white board BG for final scene
+- spawn crystal fro dead unicorn
 
 ## TOSLIM
 

@@ -7,7 +7,7 @@ import { Camera, CameraShake } from "../../camera/types.gen"
 import { SIZE_BOARD_PIXELS } from "../../const"
 import { FlashInOverlay, LevelWinOverlay } from "../overlays"
 
-import { Anime, AnimeOverlay, AnimeStep } from "./model"
+import { Anime, AnimeGloverlay, AnimeOverlay, AnimeStep } from "./model"
 import { stepper } from "./win"
 
 
@@ -49,6 +49,6 @@ export const
         if (done) { camera.shake = undefined }
         return done
       }),
-      AnimeOverlay(() => FlashInOverlay(2.5, level.color, onEnd)),
+      AnimeGloverlay(() => FlashInOverlay(2.5, level.color, onEnd)),
     ]
   }

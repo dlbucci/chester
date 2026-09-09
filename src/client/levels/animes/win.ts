@@ -17,7 +17,7 @@ import { $messageEnter } from "../../style/utils.gen"
 import { LEVELS } from "../model"
 import { FlashInOverlay, FlashOutOverlay, Overlay } from "../overlays"
 
-import { Anime, AnimeOverlay, AnimeStep } from "./model"
+import { Anime, AnimeGloverlay, AnimeOverlay, AnimeStep } from "./model"
 
 
 export const
@@ -64,7 +64,7 @@ export const
         })
         return done
       }),
-      AnimeOverlay(() =>
+      AnimeGloverlay(() =>
         FlashInOverlay(2.5, "#fff", () => {
           const cell = V(SIZE_BOARD.x - 2, 3)
           world.tucker = Thing(

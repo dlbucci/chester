@@ -5,12 +5,12 @@ import { withCtx } from "rokay/browser/game/danvas"
 import { match, matchIf } from "rokay/browser/match"
 import { onClick, onPointerdown } from "rokay/browser/on"
 import { $ } from "rokay/browser/prop"
-import { backgroundColor, border, height, position } from "rokay/browser/style"
+import { backgroundColor, border, height, imageRendering, position } from "rokay/browser/style"
 import { rafLoop } from "rokay/browser/visible"
 import { last, remove, tab } from "rokay/data/array"
 import { float, pick } from "rokay/math/random"
 import { divide, eq, floor, iter, len, minus, plus, round, scale, scaleComponents, T, unit, unitOfAng,
-  V, VZ } from "rokay/math/v"
+  V, VB, VZ } from "rokay/math/v"
 import { Prop } from "rokay/prop/prop"
 
 import { GameState, GameStateLevel } from "../../shared/games/types.gen"
@@ -25,11 +25,12 @@ import { cameraPos, cameraStep } from "../camera/model"
 import { Camera, CameraStateEaseTo, CameraStateFollow, CameraStateMobius } from "../camera/types.gen"
 import { cellToPos, posToCell } from "../cells/utils"
 import { GRAVITY, SIZE_BOARD, SIZE_BOARD_PIXELS, SIZE_CELL } from "../const"
-import { $flexRow } from "../style/utils.gen"
+import { $rainbowBackground } from "../elts/rainbow-background"
+import { $flexCenter, $flexRow, $s100 } from "../style/utils.gen"
 
 import { bossIntro } from "./animes/boss-intro"
 import { dead } from "./animes/dead"
-import { Anime, AnimeOverlay } from "./animes/model"
+import { Anime, AnimeGloverlay } from "./animes/model"
 import { postLevelWin } from "./animes/post-level-win"
 import { preLevel } from "./animes/pre-level"
 import { win } from "./animes/win"
@@ -71,7 +72,7 @@ export const
           ..._prev.t === "title" || _prev === _gameState ?
             []
           :
-            [AnimeOverlay(() => FlashOutOverlay(2.5, _prev.level.color, animeEnd))],
+            [AnimeGloverlay(() => FlashOutOverlay(2.5, _prev.level.color, animeEnd))],
           ...preLevel(
             _gameState.level,
             () => {
@@ -92,312 +93,338 @@ export const
       }
       prevGameState = _gameState
     })
+    return div(
+      $(gameState, (_gameState) =>
+        $rainbowBackground(
+          VB(32),
+          8,
+          (_gameState.t === "title" ? 0 : _gameState.level.index) / (LEVELS.length - 1),
+        )
+      ),
+      imageRendering("pixelated"),
+      $flexCenter,
+      $s100,
+      apd(
+        div(border("1px solid #000"), position("relative"), apd(
+          canvas(
+            $(gameState, (_gameState) => backgroundColor(
+              BG_COLORS_BY_LEVEL[_gameState.t === "title" ? 0 : _gameState.level.index] ?? "gray",
+            )),
+            sizeAttr(...T(SIZE_BOARD_PIXELS)),
 
-    return div(border("1px solid #000"), position("relative"), apd(
-      canvas(
-        $(gameState, (_gameState) => backgroundColor(
-          BG_COLORS_BY_LEVEL[_gameState.t === "title" ? 0 : _gameState.level.index] ?? "gray",
-        )),
-        sizeAttr(...T(SIZE_BOARD_PIXELS)),
-
-        onPointerdown((el, ev) => {
-          const _gameState = gameState.get()
-          const _anime = animes.get()[0]
-          if (_gameState.t !== "level" || _anime != null) { return }
-
-          const { unicorn } = _gameState.world
-          if (unicorn.state.t !== "idle" || unicorn.state.cooldown > 0) { return }
-
-          const _size = app.size.get()
-          const src = floor(divide(
-            minus(V(ev.clientX, ev.clientY), el.getBoundingClientRect()),
-            _size.zoom,
-          ))
-          const pos = plus(src, camera.pos)
-          const cell = posToCell(pos)
-          const path = unicorn.state.moves.find((path) => eq(last(path), cell))
-          if (path == null) { return }
-
-          unicorn.state = ThingStateMoveTo(path.map((cell) => cellToPos(cell)), 1)
-          if (last(unicorn.state.path).x < unicorn.pos.x) {
-            unicorn.scale.x = -1
-          } else if (last(unicorn.state.path).x > unicorn.pos.x) {
-            unicorn.scale.x = 1
-          }
-        }),
-
-        withCtx((ctx) => {
-          const
-            draw = () => {
-              const _gameState = gameState.get()
-
-              ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
-              ctx.save()
-              ctx.translate(...T(scale(
-                camera.shake == null ? camera.pos : plus(camera.pos, camera.shake.offset),
-                -1,
-              )))
-              ctx.fillStyle = "rgba(0, 0, 0, .125)"
-              const start = posToCell(
-                camera.shake != null ? plus(camera.pos, camera.shake.offset) : camera.pos,
-              )
-              iter(start, plus(start, SIZE_BOARD), (pos) => {
-                if ((pos.x + pos.y) % 2 === 0) {
-                  ctx.fillRect(...T(scaleComponents(pos, SIZE_CELL)), ...T(SIZE_CELL))
-                }
-              })
-
-              if (_gameState.t !== "title") {
-                const { crystals, things, unicorn } = _gameState.world
-                const _anime = animes.get()[0]
-                if (_gameState.t === "level" && _anime == null) {
-                  if (unicorn.state.t === "idle") {
-                    const COOLDOWN_OFFSET = Math.ceil(
-                      unicorn.state.cooldown / THING_STATS.unicorn.cooldown * SIZE_CELL.y,
-                    )
-                    ctx.fillStyle = `rgba(255,255,255,${unicorn.state.cooldown > 0 ? ".25" : ".5"})`
-                    unicorn.state.moves.forEach((path) => {
-                      const move = last(path)
-                      ctx.fillRect(
-                        move.x * SIZE_CELL.x,
-                        move.y * SIZE_CELL.y + COOLDOWN_OFFSET,
-                        SIZE_CELL.x,
-                        SIZE_CELL.y - COOLDOWN_OFFSET,
-                      )
-                    })
-                  }
-                }
-
-                things.sort((a, b) => a.pos.y - b.pos.y).forEach((thing) => {
-                  ctx.save()
-                  ctx.translate(Math.round(thing.pos.x), Math.round(thing.pos.y))
-                  if (thing.state.t === "dying") { ctx.rotate(thing.state.ang) }
-                  ctx.scale(...T(thing.scale))
-                  ctx.drawImage(getSprite(app.assets, thing), ...T(THING_STATS[thing.type].offset))
-                  ctx.restore()
-                })
-
-                crystals.sort((a, b) => a.pos.y - b.pos.y).forEach((crystal) => {
-                  ctx.drawImage(crystal.sprite, ...T(round(crystal.pos)))
-                })
-              }
-
-              ctx.restore()
-            },
-
-            spawnBoss = ({ level, world }: GameStateLevel) => {
-              const bossCell = V(Math.floor(SIZE_BOARD.x / 2), 0)
-              world.boss = Thing(
-                "bad",
-                bossCell,
-                cellToPos(bossCell),
-                V(1, 1),
-                ThingStateIdle(THING_STATS[level.bossName].cooldown, []),
-                level.bossName,
-              )
-              world.things = [...world.things, world.boss]
-            },
-
-            spawnEnemies = (dt: number, level: Level, { unicorn, things }: World) => {
-              const y = unicorn.cell.y - SIZE_BOARD.y / 2 - 1
-              if (y < SIZE_BOARD.y) { return }
-              for (let i = 0; i < SIZE_BOARD.x; ++i) {
-                for (const thing in level.spawnRates) {
-                  const
-                    type = thing as ThingType,
-                    spawnTime = level.spawnRates[type],
-                    odds = spawnTime === 0 ? 0 : 1 / spawnTime * dt / SIZE_BOARD.x
-                  if (Math.random() > odds) { continue }
-                  const cell = V(i, y)
-                  things.push(Thing(
-                    "bad",
-                    cell,
-                    cellToPos(cell),
-                    V(1, 1),
-                    ThingStateIdle(THING_STATS[type].cooldown, []),
-                    type,
-                  ))
-                }
-              }
-            },
-
-            step = (dt: number) => {
+            onPointerdown((el, ev) => {
               const _gameState = gameState.get()
               const _anime = animes.get()[0]
-              if (_anime != null) {
-                if (_anime.t === "step") { if (_anime.step(dt)) { animeEnd() } }
+              if (_gameState.t !== "level" || _anime != null) { return }
+
+              const { unicorn } = _gameState.world
+              if (unicorn.state.t !== "idle" || unicorn.state.cooldown > 0) { return }
+
+              const _size = app.size.get()
+              const src = floor(divide(
+                minus(V(ev.clientX, ev.clientY), el.getBoundingClientRect()),
+                _size.zoom,
+              ))
+              const pos = plus(src, camera.pos)
+              const cell = posToCell(pos)
+              const path = unicorn.state.moves.find((path) => eq(last(path), cell))
+              if (path == null) { return }
+
+              unicorn.state = ThingStateMoveTo(path.map((cell) => cellToPos(cell)), 1)
+              if (last(unicorn.state.path).x < unicorn.pos.x) {
+                unicorn.scale.x = -1
+              } else if (last(unicorn.state.path).x > unicorn.pos.x) {
+                unicorn.scale.x = 1
               }
-              if (_gameState.t !== "title") {
-                const { level, world } = _gameState
-                const { boss, things, unicorn } = world
-                if (_anime == null && boss == null) { spawnEnemies(dt, level, world) }
-                things.forEach((thing) => {
-                  // keep the player animating
-                  if (_anime != null && thing !== unicorn) { return }
-                  if (thing.state.t === "dying") {
-                    if (thing.state.lifetime > 0) {
-                      thing.state.lifetime -= dt
-                      thing.state.vel = plus(thing.state.vel, scale(GRAVITY, dt))
-                      thing.pos = plus(thing.pos, scale(thing.state.vel, dt))
-                      thing.state.ang += thing.state.velAng * dt
+            }),
+
+            withCtx((ctx) => {
+              const
+                draw = () => {
+                  const _gameState = gameState.get()
+
+                  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+                  ctx.save()
+                  ctx.translate(...T(scale(
+                    camera.shake == null ? camera.pos : plus(camera.pos, camera.shake.offset),
+                    -1,
+                  )))
+                  ctx.fillStyle = "rgba(0, 0, 0, .125)"
+                  const start = posToCell(
+                    camera.shake != null ? plus(camera.pos, camera.shake.offset) : camera.pos,
+                  )
+                  iter(start, plus(start, SIZE_BOARD), (pos) => {
+                    if ((pos.x + pos.y) % 2 === 0) {
+                      ctx.fillRect(...T(scaleComponents(pos, SIZE_CELL)), ...T(SIZE_CELL))
                     }
-                  } else if (thing.state.t === "idle") {
-                    if (thing.state.cooldown > 0) {
-                      thing.state.cooldown -= 1 / 60
-                    } else if (thing !== unicorn) {
-                      const getNextMove = (thing: Thing) => {
-                        const moves = getMoves(thing, boss != null ? SIZE_BOARD : level.size)
+                  })
 
-                        return (
-                            thing.alignment === "bad" ?
-                              moves.find((move) => eq(last(move), unicorn.cell))
-                            :
-                              undefined
-                          )
-                          ?? moves.find((move) =>
-                            things.some((enemy) =>
-                              enemy.alignment !== thing.alignment && eq(last(move), enemy.cell)
-                            )
-                          )
-                          ?? pick(moves.filter((move) =>
-                            things.every((enemy) =>
-                              enemy.alignment !== thing.alignment || !eq(last(move), enemy.cell)
-                            )
-                          ))
-                          ?? pick(moves)
-                      }
-
-                      const move = getNextMove(thing)
-                      if (move != null) {
-                        thing.state = ThingStateMoveTo(
-                          move.map((cell) => cellToPos(cell)),
-                          THING_STATS[thing.type].speed,
+                  if (_gameState.t !== "title") {
+                    const { crystals, things, unicorn } = _gameState.world
+                    const _anime = animes.get()[0]
+                    if (_gameState.t === "level" && _anime == null) {
+                      if (unicorn.state.t === "idle") {
+                        const COOLDOWN_OFFSET = Math.ceil(
+                          unicorn.state.cooldown / THING_STATS.unicorn.cooldown * SIZE_CELL.y,
                         )
-                      }
-                    }
-                  } else if (thing.state.t === "moveTo") {
-                    let next = thing.state.path[0]
-                    thing.pos = plus(thing.pos, scale(
-                      unit(minus(next, thing.pos)),
-                      thing.state.speed,
-                    ))
-                    const newCell = posToCell(thing.pos)
-                    if (!eq(thing.cell, newCell)) {
-                      thing.cell = newCell
-                      // we've entered the final square of the move, make the attack
-                      if (thing.state.path.length === 1) {
-                        things.forEach((otherThing) => {
-                          if (thing === otherThing || otherThing.state.t === "dying") { return }
-                          const thingCell = posToCell(otherThing.pos)
-                          if (eq(newCell, thingCell)) {
-                            otherThing.state = ThingStateDying(
-                              0,
-                              1,
-                              scale(unitOfAng(float(-Math.PI * 3 / 8, -Math.PI * 5 / 8)), 100),
-                              1,
-                            )
-                            if (thing === unicorn) {
-                              captured.set((_captured) =>
-                                _captured.concat({ ...otherThing, alignment: "good" })
-                              )
-                            }
-                          }
+                        ctx.fillStyle = `rgba(255,255,255,${
+                          unicorn.state.cooldown > 0 ? ".25" : ".5"
+                        })`
+                        unicorn.state.moves.forEach((path) => {
+                          const move = last(path)
+                          ctx.fillRect(
+                            move.x * SIZE_CELL.x,
+                            move.y * SIZE_CELL.y + COOLDOWN_OFFSET,
+                            SIZE_CELL.x,
+                            SIZE_CELL.y - COOLDOWN_OFFSET,
+                          )
                         })
                       }
-                      if (boss == null && thing === unicorn && thing.cell.y < SIZE_BOARD.y) {
-                        spawnBoss(_gameState)
-                        animes.set(() =>
-                          bossIntro(app, camera, level, () => {
-                            animeEnd()
-                          })
-                        )
-                      }
                     }
-                    if (len(minus(next, thing.pos)) < .5) {
-                      thing.pos = next
-                      thing.state.path = thing.state.path.slice(1)
-                      if (thing.state.path.length === 0) {
-                        thing.state = ThingStateIdle(
-                          THING_STATS[thing.type].cooldown,
-                          thing === unicorn ? getMoves(thing, level.size) : [],
-                        )
-                      }
+
+                    things.sort((a, b) => a.pos.y - b.pos.y).forEach((thing) => {
+                      ctx.save()
+                      ctx.translate(Math.round(thing.pos.x), Math.round(thing.pos.y))
+                      if (thing.state.t === "dying") { ctx.rotate(thing.state.ang) }
+                      ctx.scale(...T(thing.scale))
+                      ctx.drawImage(
+                        getSprite(app.assets, thing),
+                        ...T(THING_STATS[thing.type].offset)
+                      )
+                      ctx.restore()
+                    })
+
+                    crystals.sort((a, b) => a.pos.y - b.pos.y).forEach((crystal) => {
+                      ctx.drawImage(crystal.sprite, ...T(round(crystal.pos)))
+                    })
+                  }
+
+                  ctx.restore()
+                },
+
+                spawnBoss = ({ level, world }: GameStateLevel) => {
+                  const bossCell = V(Math.floor(SIZE_BOARD.x / 2), 0)
+                  world.boss = Thing(
+                    "bad",
+                    bossCell,
+                    cellToPos(bossCell),
+                    V(1, 1),
+                    ThingStateIdle(THING_STATS[level.bossName].cooldown, []),
+                    level.bossName,
+                  )
+                  world.things = [...world.things, world.boss]
+                },
+
+                spawnEnemies = (dt: number, level: Level, { unicorn, things }: World) => {
+                  const y = unicorn.cell.y - SIZE_BOARD.y / 2 - 1
+                  if (y < SIZE_BOARD.y) { return }
+                  for (let i = 0; i < SIZE_BOARD.x; ++i) {
+                    for (const thing in level.spawnRates) {
+                      const
+                        type = thing as ThingType,
+                        spawnTime = level.spawnRates[type],
+                        odds = spawnTime === 0 ? 0 : 1 / spawnTime * dt / SIZE_BOARD.x
+                      if (Math.random() > odds) { continue }
+                      const cell = V(i, y)
+                      things.push(Thing(
+                        "bad",
+                        cell,
+                        cellToPos(cell),
+                        V(1, 1),
+                        ThingStateIdle(THING_STATS[type].cooldown, []),
+                        type,
+                      ))
                     }
                   }
-                })
+                },
 
-                world.things = world.things.filter((thing) =>
-                  thing.state.t !== "dying" || thing.state.lifetime > 0
-                )
+                step = (dt: number) => {
+                  const _gameState = gameState.get()
+                  const _anime = animes.get()[0]
+                  if (_anime != null) {
+                    if (_anime.t === "step") { if (_anime.step(dt)) { animeEnd() } }
+                  }
+                  if (_gameState.t !== "title") {
+                    const { level, world } = _gameState
+                    const { boss, things, unicorn } = world
+                    if (_anime == null && boss == null) { spawnEnemies(dt, level, world) }
+                    things.forEach((thing) => {
+                      // keep the player animating
+                      if (_anime != null && thing !== unicorn) { return }
+                      if (thing.state.t === "dying") {
+                        if (thing.state.lifetime > 0) {
+                          thing.state.lifetime -= dt
+                          thing.state.vel = plus(thing.state.vel, scale(GRAVITY, dt))
+                          thing.pos = plus(thing.pos, scale(thing.state.vel, dt))
+                          thing.state.ang += thing.state.velAng * dt
+                        }
+                      } else if (thing.state.t === "idle") {
+                        if (thing.state.cooldown > 0) {
+                          thing.state.cooldown -= 1 / 60
+                        } else if (thing !== unicorn) {
+                          const getNextMove = (thing: Thing) => {
+                            const moves = getMoves(thing, boss != null ? SIZE_BOARD : level.size)
 
-                if (_anime == null && boss != null && !world.things.includes(boss)) {
-                  animes.set((_animes) => {
-                    if (level.index + 1 < LEVELS.length) {
-                      return postLevelWin(app, camera, _gameState, animeEnd, () => {
-                        app.router.replace(
-                          level.index + 1 < LEVELS.length ? pgLevel(level.index + 1) : pgIndex(),
-                        )
+                            return (
+                                thing.alignment === "bad" ?
+                                  moves.find((move) => eq(last(move), unicorn.cell))
+                                :
+                                  undefined
+                              )
+                              ?? moves.find((move) =>
+                                things.some((enemy) =>
+                                  enemy.alignment !== thing.alignment && eq(last(move), enemy.cell)
+                                )
+                              )
+                              ?? pick(moves.filter((move) =>
+                                things.every((enemy) =>
+                                  enemy.alignment !== thing.alignment || !eq(last(move), enemy.cell)
+                                )
+                              ))
+                              ?? pick(moves)
+                          }
+
+                          const move = getNextMove(thing)
+                          if (move != null) {
+                            thing.state = ThingStateMoveTo(
+                              move.map((cell) => cellToPos(cell)),
+                              THING_STATS[thing.type].speed,
+                            )
+                          }
+                        }
+                      } else if (thing.state.t === "moveTo") {
+                        let next = thing.state.path[0]
+                        thing.pos = plus(thing.pos, scale(
+                          unit(minus(next, thing.pos)),
+                          thing.state.speed,
+                        ))
+                        const newCell = posToCell(thing.pos)
+                        if (!eq(thing.cell, newCell)) {
+                          thing.cell = newCell
+                          // we've entered the final square of the move, make the attack
+                          if (thing.state.path.length === 1) {
+                            things.forEach((otherThing) => {
+                              if (thing === otherThing || otherThing.state.t === "dying") { return }
+                              const thingCell = posToCell(otherThing.pos)
+                              if (eq(newCell, thingCell)) {
+                                otherThing.state = ThingStateDying(
+                                  0,
+                                  1,
+                                  scale(unitOfAng(float(-Math.PI * 3 / 8, -Math.PI * 5 / 8)), 100),
+                                  1,
+                                )
+                                if (thing === unicorn) {
+                                  captured.set((_captured) =>
+                                    _captured.concat({ ...otherThing, alignment: "good" })
+                                  )
+                                }
+                              }
+                            })
+                          }
+                          if (boss == null && thing === unicorn && thing.cell.y < SIZE_BOARD.y) {
+                            spawnBoss(_gameState)
+                            animes.set(() =>
+                              bossIntro(app, camera, level, () => {
+                                animeEnd()
+                              })
+                            )
+                          }
+                        }
+                        if (len(minus(next, thing.pos)) < .5) {
+                          thing.pos = next
+                          thing.state.path = thing.state.path.slice(1)
+                          if (thing.state.path.length === 0) {
+                            thing.state = ThingStateIdle(
+                              THING_STATS[thing.type].cooldown,
+                              thing === unicorn ? getMoves(thing, level.size) : [],
+                            )
+                          }
+                        }
+                      }
+                    })
+
+                    world.things = world.things.filter((thing) =>
+                      thing.state.t !== "dying" || thing.state.lifetime > 0
+                    )
+
+                    if (_anime == null && boss != null && !world.things.includes(boss)) {
+                      animes.set((_animes) => {
+                        if (level.index + 1 < LEVELS.length) {
+                          return postLevelWin(app, camera, _gameState, animeEnd, () => {
+                            app.router
+                              .replace(
+                                level.index + 1 < LEVELS.length ?
+                                  pgLevel(level.index + 1)
+                                :
+                                  pgIndex(),
+                              )
+                          })
+                        }
+                        return win(app, world, animeEnd)
                       })
                     }
-                    return win(app, world, animeEnd)
-                  })
-                }
-                if (!world.things.includes(unicorn) && _anime == null) {
-                  animes.set(() => dead(app))
-                }
-              }
+                    if (!world.things.includes(unicorn) && _anime == null) {
+                      animes.set(() => dead(app))
+                    }
+                  }
 
-              cameraStep(dt, camera)
-            }
+                  cameraStep(dt, camera)
+                }
 
-          rafLoop(app.visible, (n) => {
-            step(Math.min((n - now) / 1000, 1 / 30))
-            now = n
-            draw()
-          })
+              rafLoop(app.visible, (n) => {
+                step(Math.min((n - now) / 1000, 1 / 30))
+                now = n
+                draw()
+              })
+            }),
+          ),
+
+          div(backgroundColor("gray"), height("16px"), apd(match(captured, (_captured) =>
+            div($flexRow, apd(..._captured.map((thing) =>
+              canvas(
+                sizeAttr(16, 16),
+                withCtx((ctx) => {
+                  ctx.drawImage(getSprite(app.assets, thing), 0, 0)
+                }),
+                onClick(() => {
+                  const _gameState = gameState.get()
+                  const _anime = animes.get()[0]
+                  if (_gameState.t === "level" && _anime == null) {
+                    const { world } = _gameState
+                    const cell = minus(world.unicorn.cell, V(0, 1))
+                    world.things.push(Thing(
+                      "good",
+                      cell,
+                      cellToPos(cell),
+                      V(1, 1),
+                      ThingStateIdle(1.5, []),
+                      thing.type,
+                    ))
+                    captured.set((_captured) => remove(_captured, thing))
+                  }
+                }),
+              )
+            )))
+          ))),
+
+          matchIf(gameState, (_gameState) =>
+            _gameState.t === "title" ?
+              TitleOverlay(() => {
+                app.router.replace(pgLevel(0))
+              })
+            :
+              undefined
+          ),
+
+          matchIf(animes, (_animes) => {
+            const _anime = _animes[0]
+            return _anime?.t === "overlay" ? _anime.elt() : undefined
+          }),
+        )),
+        matchIf(animes, (_animes) => {
+          const _anime = _animes[0]
+          return _anime?.t === "gloverlay" ? _anime.elt() : undefined
         }),
       ),
-
-      div(backgroundColor("gray"), height("16px"), apd(match(captured, (_captured) =>
-        div($flexRow, apd(..._captured.map((thing) =>
-          canvas(
-            sizeAttr(16, 16),
-            withCtx((ctx) => {
-              ctx.drawImage(getSprite(app.assets, thing), 0, 0)
-            }),
-            onClick(() => {
-              const _gameState = gameState.get()
-              const _anime = animes.get()[0]
-              if (_gameState.t === "level" && _anime == null) {
-                const { world } = _gameState
-                const cell = minus(world.unicorn.cell, V(0, 1))
-                world.things.push(Thing(
-                  "good",
-                  cell,
-                  cellToPos(cell),
-                  V(1, 1),
-                  ThingStateIdle(1.5, []),
-                  thing.type,
-                ))
-                captured.set((_captured) => remove(_captured, thing))
-              }
-            }),
-          )
-        )))
-      ))),
-
-      matchIf(gameState, (_gameState) =>
-        _gameState.t === "title" ?
-          TitleOverlay(() => {
-            app.router.replace(pgLevel(0))
-          })
-        :
-          undefined
-      ),
-
-      matchIf(animes, (_animes) => {
-        const _anime = _animes[0]
-        return _anime?.t === "overlay" ? _anime.elt() : undefined
-      }),
-    ))
+    )
   }
