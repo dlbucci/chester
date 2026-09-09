@@ -18,6 +18,7 @@ export type Assets =
     font16: Map<string, HTMLCanvasElement>
     font16cursive: Map<string, HTMLCanvasElement>
     font16italic: Map<string, HTMLCanvasElement>
+    paintedUnicorn: (color: string) => HTMLCanvasElement
   }
   & Record<ChessPiece, Record<"bad" | "good", HTMLCanvasElement>>
   & Record<BossName | "unicorn", HTMLCanvasElement>
@@ -29,25 +30,7 @@ export const
   load = () =>
     Promise.all([
       loadImage("/art/crystal.png"),
-      loadImage("/art/sprites.png").then((image) => ({
-        bishop: sprite(image, 4),
-        king: sprite(image, 6),
-        knight: sprite(image, 2),
-        pawn: sprite(image, 1),
-        queen: sprite(image, 5),
-        rook: sprite(image, 3),
-        unicorn: sprite(image, 0),
-        Rebu: paintUnicorn(image, "red"),
-        Barbin: paintUnicorn(image, "orange"),
-        Halsik: paintUnicorn(image, "yellow"),
-        Sicafant: paintUnicorn(image, "green"),
-        Peanio: paintUnicorn(image, "blue"),
-        Dinkus: paintUnicorn(image, "indigo"),
-        "Boof Cake": paintUnicorn(image, "violet"),
-        "Evernut Clapati": paintUnicorn(image, "black"),
-      })),
-      // loadImage("/art/items.png"),
-      // loadImage("/art/work.png"),
+      loadImage("/art/sprites.png"), // loadImage("/art/items.png"),
       loadFont("9px var(--font-monospace)"),
       loadFont("12px var(--font-monospace)", 4),
       loadFont("16px var(--font-monospace)", 6),
@@ -56,22 +39,34 @@ export const
       // sfxKikisCafeButton(new AudioContext()),
       // songKikisCafeBGMusic(new AudioContext()),
     ])
-      .then(
-        ([crystal, chessPieces, font9, font12, font16, font16italic, font16cursive]): Assets => ({
-          // cached: {
-          //   bgs: new Map<string, HTMLCanvasElement>(),
-          //   cats: new Map<CatFM, HTMLCanvasElement>(),
-          // },
-          crystal: cached((color) => Crystal(crystal, color)),
-          font9,
-          font12,
-          font16,
-          font16cursive,
-          font16italic,
-          ...chessPieces,
-          unicorn: chessPieces.unicorn.good,
-        }),
-      ),
+      .then(([crystal, sprites, font9, font12, font16, font16italic, font16cursive]): Assets => ({
+        // cached: {
+        //   bgs: new Map<string, HTMLCanvasElement>(),
+        //   cats: new Map<CatFM, HTMLCanvasElement>(),
+        // },
+        crystal: cached((color) => Crystal(crystal, color)),
+        font9,
+        font12,
+        font16,
+        font16cursive,
+        font16italic,
+        bishop: sprite(sprites, 4),
+        king: sprite(sprites, 6),
+        knight: sprite(sprites, 2),
+        pawn: sprite(sprites, 1),
+        queen: sprite(sprites, 5),
+        rook: sprite(sprites, 3),
+        unicorn: sprite(sprites, 0).good,
+        Rebu: paintUnicorn(sprites, "red"),
+        Barbin: paintUnicorn(sprites, "orange"),
+        Halsik: paintUnicorn(sprites, "yellow"),
+        Sicafant: paintUnicorn(sprites, "green"),
+        Peanio: paintUnicorn(sprites, "blue"),
+        Dinkus: paintUnicorn(sprites, "indigo"),
+        "Boof Cake": paintUnicorn(sprites, "violet"),
+        "Evernut Clapati": paintUnicorn(sprites, "black"),
+        paintedUnicorn: cached((color) => paintUnicorn(sprites, color)),
+      })),
 
   getSprite = (assets: Assets, thing: Thing) => {
     if (

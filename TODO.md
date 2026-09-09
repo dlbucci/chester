@@ -4,6 +4,8 @@
 - pony wakeup
 - Make chester change colors
 - fix the camera
+- global flashes
+- fixup rainbow
 - Shops after beating boss
 - Better world color changes
 - water

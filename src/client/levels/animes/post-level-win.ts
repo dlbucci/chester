@@ -22,7 +22,7 @@ export const
     const crystalStart = V(SIZE_BOARD_PIXELS.x / 2 - 8, -16)
     const crystalEnd = minus(divide(SIZE_BOARD_PIXELS, 2), V(8, 8))
     const attrs = stepper(5, (frac) => ({
-      magnitude: linear(0, 2, frac),
+      magnitude: linear(0, 2, Math.pow(frac, 3)),
       pos: interpolateLinear(crystalStart, crystalEnd, ease(frac)),
     }))
     const crystal = {

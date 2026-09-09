@@ -76,17 +76,4 @@ export const
     ),
 
   TitleOverlay = (onClick: () => void) =>
-    Overlay(apd("Chester"), onPointerdown(onClick)),
-
-  WinOverlay = (app: AppClient) =>
-    Overlay(
-      backgroundColor("#fff"),
-      color("hsl(352,78%,45%)"),
-      flexDirection("column"),
-      gap(".5em"),
-      whiteSpace("pre"),
-      apd(div($messageEnter, textAlign("center"), apd("YOU WIN\nTHE END"))),
-      onPointerdown(() => {
-        app.router.replace(pgIndex())
-      }),
-    )
+    Overlay(apd("Chester"), onPointerdown(onClick))

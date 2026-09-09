@@ -16,5 +16,6 @@ export const
     captured: TypeArray(Thing),
     crystals: TypeArray(Crystal),
     things: TypeArray(Thing),
+    tucker: opt(Thing),
     unicorn: Thing,
   })

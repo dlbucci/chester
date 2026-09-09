@@ -1,4 +1,4 @@
-import { TypeADT, TypeArray, TypeNumber, TypeObject, TypeStringLiteral, TypeStringUnion } from "rokay/data/type"
+import { TypeADT, TypeArray, TypeNumber, TypeObject, TypeStringUnion } from "rokay/data/type"
 
 import { V } from "../maths/types"
 
