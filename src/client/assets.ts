@@ -13,6 +13,7 @@ import { CRYSTAL, PIECES, UNICORN } from "./packed-images"
 
 export type Assets =
   & {
+    chester: (level: number) => HTMLCanvasElement
     crystal: (color: string) => HTMLCanvasElement
     font9: Map<string, HTMLCanvasElement>
     font12: Map<string, HTMLCanvasElement>
@@ -45,6 +46,29 @@ export const
         (
           [crystal, font9, font12, font16, font16italic, font16cursive, pieces, unicorn],
         ): Assets => ({
+          chester: cached((_level) => {
+            const
+              colorV = 0x33, //Math.round(linear(0x33, 0xff, level / 8)),
+              color = `rgb(${colorV},${colorV},${colorV})`
+            return paintAndOutline(
+              unicorn,
+              {
+                // main colors
+                "255,255,255,255": [color],
+                "224,224,224,255": [color, "rgba(0,0,0,.1)"],
+                // mane colors
+                "204,204,221,255": [color, "rgba(255,255,255,.4)"],
+                "179,179,194,255": [color, "rgba(255,255,255,.3)"],
+                // horn tip
+                "255,255,0,255": ["transparent"],
+                // horn base
+                "224,224,0,255": [color, "rgba(255,255,255,.4)"],
+                // hoof
+                // "0,0,0,255": []
+              },
+              true,
+            )
+          }),
           crystal: cached((color) => Crystal(crystal, color)),
           font9,
           font12,
@@ -72,38 +96,35 @@ export const
         }),
       ),
 
-  getSprite = (assets: Assets, thing: Thing) => {
-    if (
+  getSprite = (assets: Assets, thing: Thing, level: number) => {
+    if (thing.type === "unicorn") {
+      return assets.chester(level)
+    } else if (
       thing.type === "bishop"
       || thing.type === "king"
       || thing.type === "knight"
       || thing.type === "pawn"
       || thing.type === "queen"
       || thing.type === "rook"
-    ) { return assets.paintedPieces(thing.alignment === "good" ? "hsl(58,9%,93%)" : undefined) }
+    ) {
+      return assets.paintedPieces(thing.alignment === "good" ? "hsl(58,9%,93%)" : undefined)
+    }
     return assets[thing.type]
   }
 
 
 const
-  cached = <T extends string | undefined>(cb: (...args: T[]) => HTMLCanvasElement) => {
+  cached = <T extends number | string | undefined>(cb: (...args: T[]) => HTMLCanvasElement) => {
     const cache: Record<string, HTMLCanvasElement> = {}
     return (...args: T[]) => getOrPut(cache, args.join(","), () => cb(...args))
   },
 
   Crystal = (image: HTMLCanvasElement, color: string) =>
-    canvas(size(image.width, image.height), withCtx(
-      (ctx) => {
-        ctx.drawImage(image, 0, 0)
-      },
-      paint({
-        "255,0,0,255": [color],
-        "224,0,0,255": [color, "rgba(0,0,0,.1)"],
-        "196,0,0,255": [color, "rgba(0,0,0,.2)"],
-      }),
-      fills("#000"),
-      outline(1),
-    )),
+    paintAndOutline(image, {
+      "255,0,0,255": [color],
+      "224,0,0,255": [color, "rgba(0,0,0,.1)"],
+      "196,0,0,255": [color, "rgba(0,0,0,.2)"],
+    }),
 
   loadFont = (font: string, minWidth = 3, fill = "#fff") =>
     new Promise<Map<string, HTMLCanvasElement>>((res) => {
@@ -145,12 +166,16 @@ const
       if (debug) { console.log("colors:", colorSet) }
     },
 
-  paintAndOutline = (image: HTMLCanvasElement, paintArgs?: Record<string, string[]>) =>
+  paintAndOutline = (
+    image: HTMLCanvasElement,
+    paintArgs?: Record<string, string[]>,
+    debug = false,
+  ) =>
     canvas(size(image.width, image.height), withCtx(
       (ctx) => {
         ctx.drawImage(image, 0, 0)
       },
-      paintArgs != null ? paint(paintArgs) : undefined,
+      paintArgs != null ? paint(paintArgs, debug) : undefined,
       fills("#000"),
       outline(1),
     )),

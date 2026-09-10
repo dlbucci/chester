@@ -109,7 +109,7 @@ export const
       $s100,
       apd(
         div(border("1px solid #000"), position("relative"), apd(
-          LifeBar(app, lives),
+          LifeBar(app, lives, gameState),
 
           canvas(
             $(gameState, (_gameState) => backgroundColor(
@@ -193,7 +193,7 @@ export const
                       if (thing.state.t === "dying") { ctx.rotate(thing.state.ang) }
                       ctx.scale(...T(thing.scale))
                       ctx.drawImage(
-                        getSprite(app.assets, thing),
+                        getSprite(app.assets, thing, _gameState.level.index),
                         16 * thing.frame,
                         0,
                         16,
