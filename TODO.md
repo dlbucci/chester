@@ -37,5 +37,6 @@
 - color paint debug stuff
 - reduce animations used
 - drop font loading
+- pack images (remove margins)
 
 total: 14848
