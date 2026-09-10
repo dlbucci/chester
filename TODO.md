@@ -24,17 +24,18 @@
 - boss defeat autoplay
 - kill other enemies on boss death
 - color boss name in preamble
+- pawn attacks
 
 ## TOSLIM
 
 - remove router => 13334 - 12189 = 1145 bytes
 - remove icons/16.png => 12189 - 11798 = 391 bytes
-- use packed images? => (for crystal) 11798 - 11712 = 86 bytes
 - remove other rokay-dom stuff
 - shorten property names?
 - shorten strings?
 - inline/trim css?
 - color paint debug stuff
 - reduce animations used
+- drop font loading
 
-total: 14934
+total: 14848

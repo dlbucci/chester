@@ -8,6 +8,7 @@ import { T, V } from "rokay/math/v"
 import { BossName, ChessPiece, Thing } from "../shared/things/types.gen"
 
 import { TextCanvas } from "./elts/text-canvas"
+import { CRYSTAL, PIECES, UNICORN } from "./packed-images"
 
 
 export type Assets =
@@ -24,49 +25,50 @@ export type Assets =
   & Record<BossName | "unicorn", HTMLCanvasElement>
 
 
-// music: { bg: AudioBuffer }
-// sfx: { button: AudioBuffer }
 export const
   load = () =>
     Promise.all([
-      loadImage("/art/crystal.png"),
-      loadImage("/art/sprites.png"), // loadImage("/art/items.png"),
+      CRYSTAL,
       loadFont("9px var(--font-monospace)"),
       loadFont("12px var(--font-monospace)", 4),
       loadFont("16px var(--font-monospace)", 6),
       loadFont("italic 16px var(--font-monospace)", 6),
       loadFont("bold 16px cursive", 6),
+      PIECES,
+      UNICORN,
+      // music: { bg: AudioBuffer }
+      // sfx: { button: AudioBuffer }
       // sfxKikisCafeButton(new AudioContext()),
       // songKikisCafeBGMusic(new AudioContext()),
     ])
-      .then(([crystal, sprites, font9, font12, font16, font16italic, font16cursive]): Assets => ({
-        // cached: {
-        //   bgs: new Map<string, HTMLCanvasElement>(),
-        //   cats: new Map<CatFM, HTMLCanvasElement>(),
-        // },
-        crystal: cached((color) => Crystal(crystal, color)),
-        font9,
-        font12,
-        font16,
-        font16cursive,
-        font16italic,
-        bishop: sprite(sprites, 4),
-        king: sprite(sprites, 6),
-        knight: sprite(sprites, 2),
-        pawn: sprite(sprites, 1),
-        queen: sprite(sprites, 5),
-        rook: sprite(sprites, 3),
-        unicorn: sprite(sprites, 0).good,
-        Rebu: paintUnicorn(sprites, "red"),
-        Barbin: paintUnicorn(sprites, "orange"),
-        Halsik: paintUnicorn(sprites, "yellow"),
-        Sicafant: paintUnicorn(sprites, "green"),
-        Peanio: paintUnicorn(sprites, "blue"),
-        Dinkus: paintUnicorn(sprites, "indigo"),
-        "Boof Cake": paintUnicorn(sprites, "violet"),
-        "Evernut Clapati": paintUnicorn(sprites, "black"),
-        paintedUnicorn: cached((color) => paintUnicorn(sprites, color)),
-      })),
+      .then(
+        (
+          [crystal, font9, font12, font16, font16italic, font16cursive, pieces, unicorn],
+        ): Assets => ({
+          crystal: cached((color) => Crystal(crystal, color)),
+          font9,
+          font12,
+          font16,
+          font16cursive,
+          font16italic,
+          bishop: sprite(pieces, 4),
+          king: sprite(pieces, 6),
+          knight: sprite(pieces, 2),
+          pawn: sprite(pieces, 1),
+          queen: sprite(pieces, 5),
+          rook: sprite(pieces, 3),
+          unicorn: sprite(pieces, 0).good,
+          Rebu: paintUnicorn(unicorn, "red"),
+          Barbin: paintUnicorn(unicorn, "orange"),
+          Halsik: paintUnicorn(unicorn, "yellow"),
+          Sicafant: paintUnicorn(unicorn, "green"),
+          Peanio: paintUnicorn(unicorn, "blue"),
+          Dinkus: paintUnicorn(unicorn, "indigo"),
+          "Boof Cake": paintUnicorn(unicorn, "violet"),
+          "Evernut Clapati": paintUnicorn(unicorn, "black"),
+          paintedUnicorn: cached((color) => paintUnicorn(unicorn, color)),
+        }),
+      ),
 
   getSprite = (assets: Assets, thing: Thing) => {
     if (
@@ -87,7 +89,7 @@ const
     return (...args: string[]) => getOrPut(cache, args.join(","), () => cb(...args))
   },
 
-  Crystal = (image: HTMLImageElement, color: string) =>
+  Crystal = (image: HTMLCanvasElement, color: string) =>
     canvas(size(image.width, image.height), withCtx(
       (ctx) => {
         ctx.drawImage(image, 0, 0)
@@ -117,18 +119,6 @@ const
       )
     }),
 
-  loadImage = (src: string) =>
-    new Promise<HTMLImageElement>((res, rej) => {
-      const img = new Image()
-      img.src = src
-      img.onload = () => {
-        res(img)
-      }
-      img.onerror = (e) => {
-        rej(e)
-      }
-    }),
-
   paint = (colors: Record<string, string[]>, debug = false) =>
     (ctx: CanvasRenderingContext2D) => {
       const { data } = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height)
@@ -153,7 +143,7 @@ const
       if (debug) { console.log("colors:", colorSet) }
     },
 
-  paintUnicorn = (image: HTMLImageElement, color: string) =>
+  paintUnicorn = (image: HTMLCanvasElement, color: string) =>
     canvas(size(16, 16), withCtx(
       (ctx) => {
         ctx.drawImage(image, 0, 0, 16, 16, 0, 0, 16, 16)
@@ -171,7 +161,7 @@ const
       outline(1),
     )),
 
-  sprite = (image: HTMLImageElement, index: number) => {
+  sprite = (image: HTMLCanvasElement, index: number) => {
     const bad = canvas(size(16, 16), withCtx(
       (ctx) => {
         ctx.drawImage(image, 16 * index, 0, 16, 16, 0, 0, 16, 16)
