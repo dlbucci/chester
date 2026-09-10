@@ -12,7 +12,7 @@ export const
   worldNew = (level: Level): World => {
     const
       cell = V(pick([2, level.size.x - 3]), level.size.y - 2),
-      unicorn = Thing("good", cell, cellToPos(cell), V(1, 1), ThingStateIdle(0, []), "unicorn"),
+      unicorn = Thing("good", cell, 1, cellToPos(cell), V(1, 1), ThingStateIdle(0, []), "unicorn"),
       things: Thing[] = [unicorn]
     unicorn.state = ThingStateIdle(0, getMoves(unicorn, level.size))
     return World([], [], things, unicorn)

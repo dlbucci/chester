@@ -70,6 +70,7 @@ export const
           world.tucker = Thing(
             "good",
             cell,
+            0,
             cellToPos(cell),
             V(-1, 1),
             ThingStateIdle(0, []),
@@ -79,6 +80,7 @@ export const
           world.unicorn = Thing(
             "good",
             otherCell,
+            0,
             cellToPos(otherCell),
             V(1, 1),
             ThingStateIdle(0, []),

@@ -1,6 +1,5 @@
 # TODO
 
-- pony wakeup
 - Make chester change colors
 - fix the camera
 - Shops after beating boss
@@ -25,6 +24,7 @@
 - kill other enemies on boss death
 - color boss name in preamble
 - pawn attacks
+- stop spawning on screen
 
 ## TOSLIM
 

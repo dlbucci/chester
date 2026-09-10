@@ -5,7 +5,7 @@ import { tab } from "rokay/data/array"
 import { getOrPut } from "rokay/data/object"
 import { T, V } from "rokay/math/v"
 
-import { BossName, ChessPiece, Thing } from "../shared/things/types.gen"
+import { BossName, Thing } from "../shared/things/types.gen"
 
 import { TextCanvas } from "./elts/text-canvas"
 import { CRYSTAL, PIECES, UNICORN } from "./packed-images"
@@ -19,9 +19,9 @@ export type Assets =
     font16: Map<string, HTMLCanvasElement>
     font16cursive: Map<string, HTMLCanvasElement>
     font16italic: Map<string, HTMLCanvasElement>
+    paintedPieces: (color: string | undefined) => HTMLCanvasElement
     paintedUnicorn: (color: string) => HTMLCanvasElement
   }
-  & Record<ChessPiece, Record<"bad" | "good", HTMLCanvasElement>>
   & Record<BossName | "unicorn", HTMLCanvasElement>
 
 
@@ -51,13 +51,15 @@ export const
           font16,
           font16cursive,
           font16italic,
-          bishop: sprite(pieces, 4),
-          king: sprite(pieces, 6),
-          knight: sprite(pieces, 2),
-          pawn: sprite(pieces, 1),
-          queen: sprite(pieces, 5),
-          rook: sprite(pieces, 3),
-          unicorn: sprite(pieces, 0).good,
+          paintedPieces: cached((color) =>
+            paintAndOutline(pieces, color != null ?
+              {
+                "34,34,34,255": [color],
+              }
+            :
+              undefined)
+          ),
+          unicorn: paintAndOutline(unicorn),
           Rebu: paintUnicorn(unicorn, "red"),
           Barbin: paintUnicorn(unicorn, "orange"),
           Halsik: paintUnicorn(unicorn, "yellow"),
@@ -78,15 +80,15 @@ export const
       || thing.type === "pawn"
       || thing.type === "queen"
       || thing.type === "rook"
-    ) { return assets[thing.type][thing.alignment] }
+    ) { return assets.paintedPieces(thing.alignment === "good" ? "hsl(58,9%,93%)" : undefined) }
     return assets[thing.type]
   }
 
 
 const
-  cached = (cb: (...args: string[]) => HTMLCanvasElement) => {
+  cached = <T extends string | undefined>(cb: (...args: T[]) => HTMLCanvasElement) => {
     const cache: Record<string, HTMLCanvasElement> = {}
-    return (...args: string[]) => getOrPut(cache, args.join(","), () => cb(...args))
+    return (...args: T[]) => getOrPut(cache, args.join(","), () => cb(...args))
   },
 
   Crystal = (image: HTMLCanvasElement, color: string) =>
@@ -143,42 +145,23 @@ const
       if (debug) { console.log("colors:", colorSet) }
     },
 
-  paintUnicorn = (image: HTMLCanvasElement, color: string) =>
-    canvas(size(16, 16), withCtx(
+  paintAndOutline = (image: HTMLCanvasElement, paintArgs?: Record<string, string[]>) =>
+    canvas(size(image.width, image.height), withCtx(
       (ctx) => {
-        ctx.drawImage(image, 0, 0, 16, 16, 0, 0, 16, 16)
+        ctx.drawImage(image, 0, 0)
       },
-      paint({
-        // main colors
-        "255,255,255,255": [color],
-        "224,224,224,255": [color, "rgba(0,0,0,.1)"],
-        // mane colors
-        "204,204,221,255": [color, "rgba(0,0,0,.2)"],
-        "179,179,194,255": [color, "rgba(0,0,0,.3)"],
-        // "0,0,0,0", "255,255,0,255", "0,0,0,255"
-      }),
+      paintArgs != null ? paint(paintArgs) : undefined,
       fills("#000"),
       outline(1),
     )),
 
-  sprite = (image: HTMLCanvasElement, index: number) => {
-    const bad = canvas(size(16, 16), withCtx(
-      (ctx) => {
-        ctx.drawImage(image, 16 * index, 0, 16, 16, 0, 0, 16, 16)
-      },
-      outline(1),
-    ))
-    return {
-      bad,
-      good: canvas(size(16, 16), withCtx(
-        (ctx) => {
-          ctx.drawImage(image, 16 * index, 0, 16, 16, 0, 0, 16, 16)
-        },
-        paint({
-          "34,34,34,255": ["hsl(58,9%,93%)"],
-        }),
-        fills("#000"),
-        outline(1),
-      )),
-    }
-  }
+  paintUnicorn = (image: HTMLCanvasElement, color: string) =>
+    paintAndOutline(image, {
+      // main colors
+      "255,255,255,255": [color],
+      "224,224,224,255": [color, "rgba(0,0,0,.1)"],
+      // mane colors
+      "204,204,221,255": [color, "rgba(0,0,0,.2)"],
+      "179,179,194,255": [color, "rgba(0,0,0,.3)"],
+      // "0,0,0,0", "255,255,0,255", "0,0,0,255"
+    })

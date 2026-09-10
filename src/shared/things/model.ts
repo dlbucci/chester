@@ -27,6 +27,7 @@ const
 
 type ThingStats = {
   cooldown: number
+  frame: number
   movements: V[]
   offset: V
   speed: number
@@ -34,22 +35,29 @@ type ThingStats = {
 
 
 const
-  ThingStats = (cooldown: number, speed: number, offset: V, movements: V[]): ThingStats => ({
+  ThingStats = (
+    cooldown: number,
+    speed: number,
+    offset: V,
+    movements: V[],
+    frame = 0,
+  ): ThingStats => ({
     cooldown,
-    speed,
+    frame,
     offset,
     movements,
+    speed,
   })
 
 
 export const
   THING_STATS: Record<Thing["type"], ThingStats> = {
-    bishop: ThingStats(2, .5, V(-8, -12), BISHOP_MOVEMENTS),
-    king: ThingStats(2, .5, V(-8, -12), KING_MOVEMENTS),
-    knight: ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS),
+    bishop: ThingStats(2, .5, V(-8, -12), BISHOP_MOVEMENTS, 3),
+    king: ThingStats(2, .5, V(-8, -12), KING_MOVEMENTS, 5),
+    knight: ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS, 1),
     pawn: ThingStats(2, .5, V(-8, -12), [V(0, 1)]),
-    queen: ThingStats(2, .5, V(-8, -12), QUEEN_MOVEMENTS),
-    rook: ThingStats(2, .5, V(-8, -12), ROOK_MOVEMENTS),
+    queen: ThingStats(2, .5, V(-8, -12), QUEEN_MOVEMENTS, 4),
+    rook: ThingStats(2, .5, V(-8, -12), ROOK_MOVEMENTS, 2),
     unicorn: ThingStats(1, 1, V(-8, -12), KNIGHT_MOVEMENTS),
 
     Rebu: ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS),

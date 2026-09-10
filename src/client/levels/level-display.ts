@@ -92,6 +92,7 @@ export const
               animeEnd()
               camera.state = CameraStateFollow(_gameState.world.unicorn)
               camera.bounds.se = scaleComponents(_gameState.level.size, SIZE_CELL)
+              _gameState.world.unicorn.frame = 0
             },
           ),
         ])
@@ -193,7 +194,13 @@ export const
                       ctx.scale(...T(thing.scale))
                       ctx.drawImage(
                         getSprite(app.assets, thing),
-                        ...T(THING_STATS[thing.type].offset)
+                        16 * thing.frame,
+                        0,
+                        16,
+                        16,
+                        ...T(THING_STATS[thing.type].offset),
+                        16,
+                        16,
                       )
                       ctx.restore()
                     })
@@ -211,6 +218,7 @@ export const
                   world.boss = Thing(
                     "bad",
                     bossCell,
+                    0,
                     cellToPos(bossCell),
                     V(1, 1),
                     ThingStateIdle(THING_STATS[level.bossName].cooldown, []),
@@ -233,6 +241,7 @@ export const
                       things.push(Thing(
                         "bad",
                         cell,
+                        THING_STATS[type].frame,
                         cellToPos(cell),
                         V(1, 1),
                         ThingStateIdle(THING_STATS[type].cooldown, []),
@@ -376,6 +385,7 @@ export const
                         }
                         lives.set((_lives) => _lives - 1)
                         _gameState.world = worldNew(_gameState.level)
+                        _gameState.world.unicorn.frame = 0
                         camera.state = CameraStateEaseTo(
                           cameraPos(camera, _gameState.world.unicorn.pos),
                           1,

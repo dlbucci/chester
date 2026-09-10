@@ -1,4 +1,4 @@
-import { TypeADT, TypeArray, TypeNumber, TypeObject, TypeStringUnion } from "rokay/data/type"
+import { TypeADT, TypeArray, TypeInt, TypeNumber, TypeObject, TypeStringUnion } from "rokay/data/type"
 
 import { V } from "../maths/types"
 
@@ -38,6 +38,7 @@ export const
   Thing = TypeObject({
     alignment: TypeStringUnion(["good", "bad"]),
     cell: V,
+    frame: TypeInt(),
     pos: V,
     scale: V,
     state: ThingState,

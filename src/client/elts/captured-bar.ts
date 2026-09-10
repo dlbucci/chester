@@ -41,6 +41,7 @@ export const
               world.things.push(Thing(
                 "good",
                 cell,
+                thing.frame,
                 cellToPos(cell),
                 V(1, 1),
                 ThingStateIdle(1.5, []),
