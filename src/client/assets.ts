@@ -3,16 +3,21 @@ import { canvas } from "rokay/browser/elt"
 import { fills, outline, withCtx } from "rokay/browser/game/danvas"
 import { tab } from "rokay/data/array"
 import { getOrPut } from "rokay/data/object"
+import { int } from "rokay/math/random"
 import { T, V } from "rokay/math/v"
 
 import { BossName, Thing } from "../shared/things/types.gen"
 
+import { SIZE_BOARD_PIXELS } from "./const"
 import { TextCanvas } from "./elts/text-canvas"
 import { CRYSTAL, FRUIT, PIECES, UNICORN } from "./packed-images"
 
 
 export type Assets =
   & {
+    bgGrass: HTMLCanvasElement
+    bgIce: HTMLCanvasElement
+    bgWater: HTMLCanvasElement
     chester: (level: number) => HTMLCanvasElement
     crystal: (color: string) => HTMLCanvasElement
     font9: Map<string, HTMLCanvasElement>
@@ -47,6 +52,38 @@ export const
         (
           [crystal, font9, font12, font16, font16italic, font16cursive, pieces, unicorn],
         ): Assets => ({
+          bgGrass: canvas(size(...T(SIZE_BOARD_PIXELS)), withCtx((ctx) => {
+            ctx.fillStyle = "rgba(0,0,0,.125)"
+            for (let y = 0; y < SIZE_BOARD_PIXELS.y; y += 4) {
+              for (let x = 0; x < SIZE_BOARD_PIXELS.x; x += 8) {
+                if (int(0, 8) > 0) { continue }
+                const blades = int(1, 4)
+                const start = int(0, 4 - blades)
+                for (let j = 0; j < blades; ++j) {
+                  const height = int(2, 3)
+                  ctx.fillRect(x + (start + j) * 2, y - height, 1, height)
+                }
+              }
+            }
+          })),
+          bgIce: canvas(size(...T(SIZE_BOARD_PIXELS)), withCtx((ctx) => {
+            ctx.fillStyle = "rgba(0,0,0,.125)"
+            for (let x = 0; x < 2 * SIZE_BOARD_PIXELS.x; x += 4) {
+              if (int(0, 1)) { continue }
+              for (let y = 0; y < SIZE_BOARD_PIXELS.y; ++y) {
+                ctx.fillRect(x - y, y, 2, 1)
+              }
+            }
+          })),
+          bgWater: canvas(size(...T(SIZE_BOARD_PIXELS)), withCtx((ctx) => {
+            ctx.fillStyle = "rgba(0,0,0,.125)"
+            for (let y = 0; y < SIZE_BOARD_PIXELS.y; y += 4) {
+              const offset = 4 * Math.sin(y) - y / 4
+              for (let x = 0; x < SIZE_BOARD_PIXELS.x; ++x) {
+                ctx.fillRect(x, y + 2 + Math.round(1.5 * Math.cos(x / 2 - offset)), 1, 2)
+              }
+            }
+          })),
           chester: cached((_level) => {
             const
               colorV = 0x33, //Math.round(linear(0x33, 0xff, level / 8)),

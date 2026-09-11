@@ -2,9 +2,7 @@
 
 - fix the camera
 - Shops after beating boss
-- Better world color changes
-- water
-- terrain
+- Better world color changes (violet)
 - more fades
 - music
 - sfx
@@ -24,6 +22,7 @@
 - Fill in README.md
 - attack flash
 - 1up flash on full inventory
+- more margin on preamble text
 
 ## TOSLIM
 

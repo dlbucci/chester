@@ -9,7 +9,7 @@ import { backgroundColor, border, imageRendering, position } from "rokay/browser
 import { rafLoop } from "rokay/browser/visible"
 import { last } from "rokay/data/array"
 import { float, pick } from "rokay/math/random"
-import { divide, eq, floor, iter, len, minus, plus, round, scale, scaleComponents, T, unit, unitOfAng,
+import { divide, eq, floor, iter, len, minus, modulo, plus, round, scale, scaleComponents, T, unit, unitOfAng,
   V, VB, VZ } from "rokay/math/v"
 import { Prop } from "rokay/prop/prop"
 
@@ -29,7 +29,7 @@ import { CapturedBar } from "../elts/captured-bar"
 import { LifeBar } from "../elts/life-bar"
 import { $rainbowBackground } from "../elts/rainbow-background"
 import { $flexCenter, $s100 } from "../style/utils.gen"
-import { worldNew } from "../worlds/model"
+import { getTerrain, worldNew } from "../worlds/model"
 
 import { bossIntro } from "./animes/boss-intro"
 import { dead } from "./animes/dead"
@@ -132,7 +132,10 @@ export const
               const path = unicorn.state.moves.find((path) => eq(last(path), cell))
               if (path == null) { return }
 
-              unicorn.state = ThingStateMoveTo(path.map((cell) => cellToPos(cell)), 1)
+              unicorn.state = ThingStateMoveTo(
+                path.map((cell) => cellToPos(cell)),
+                THING_STATS.unicorn.speed,
+              )
               if (last(unicorn.state.path).x < unicorn.pos.x) {
                 unicorn.scale.x = -1
               } else if (last(unicorn.state.path).x > unicorn.pos.x) {
@@ -169,13 +172,45 @@ export const
                     camera.shake == null ? camera.pos : plus(camera.pos, camera.shake.offset),
                     -1,
                   )))
-                  ctx.fillStyle = "rgba(0, 0, 0, .125)"
                   const start = posToCell(
                     camera.shake != null ? plus(camera.pos, camera.shake.offset) : camera.pos,
                   )
                   iter(start, plus(start, SIZE_BOARD), (pos) => {
+                    const
+                      p = scaleComponents(pos, SIZE_CELL),
+                      tp = T(p),
+                      t = _gameState.t === "title" ? "grass" : getTerrain(_gameState.world, pos)
+                    if (t === "water") {
+                      ctx.fillStyle = _gameState.t === "level" && _gameState.level.index > 4 ?
+                          "blue"
+                        :
+                          "#555"
+                      ctx.fillRect(...tp, ...T(SIZE_CELL))
+                    }
+                    if (t === "ice") {
+                      ctx.fillStyle = _gameState.t === "level" && _gameState.level.index > 6 ?
+                          "violet"
+                        :
+                          "#555"
+                      ctx.fillRect(...tp, ...T(SIZE_CELL))
+                    }
+                    ctx.drawImage(
+                      t === "grass" ?
+                        app.assets.bgGrass
+                      : t === "water" ?
+                        app.assets.bgWater
+                      :
+                        app.assets.bgIce,
+                      ...T(modulo(p, SIZE_BOARD_PIXELS)),
+                      16,
+                      16,
+                      ...tp,
+                      16,
+                      16,
+                    )
                     if ((pos.x + pos.y) % 2 === 0) {
-                      ctx.fillRect(...T(scaleComponents(pos, SIZE_CELL)), ...T(SIZE_CELL))
+                      ctx.fillStyle = "rgba(0,0,0,.125)"
+                      ctx.fillRect(...tp, ...T(SIZE_CELL))
                     }
                   })
 
@@ -185,7 +220,7 @@ export const
                     if (_gameState.t === "level" && _anime == null) {
                       if (unicorn.state.t === "idle") {
                         const COOLDOWN_OFFSET = Math.ceil(
-                          unicorn.state.cooldown / THING_STATS.unicorn.cooldown * SIZE_CELL.y,
+                          unicorn.state.cooldown / THING_STATS.unicorn.cooldown * (SIZE_CELL.y - 4),
                         )
                         ctx.fillStyle = `rgba(255,255,255,${
                           unicorn.state.cooldown > 0 ? ".25" : ".5"
@@ -193,10 +228,10 @@ export const
                         unicorn.state.moves.forEach((path) => {
                           const move = last(path)
                           ctx.fillRect(
-                            move.x * SIZE_CELL.x,
-                            move.y * SIZE_CELL.y + COOLDOWN_OFFSET,
-                            SIZE_CELL.x,
-                            SIZE_CELL.y - COOLDOWN_OFFSET,
+                            move.x * SIZE_CELL.x + 2,
+                            move.y * SIZE_CELL.y + COOLDOWN_OFFSET + 2,
+                            SIZE_CELL.x - 4,
+                            SIZE_CELL.y - COOLDOWN_OFFSET - 4,
                           )
                         })
                       }
@@ -328,10 +363,18 @@ export const
                         }
                       } else if (thing.state.t === "moveTo") {
                         let next = thing.state.path[0]
-                        thing.pos = plus(thing.pos, scale(
-                          unit(minus(next, thing.pos)),
-                          thing.state.speed,
-                        ))
+                        const terrain = getTerrain(world, thing.cell)
+                        const d = minus(next, thing.pos)
+                        console.log("thing.state.speed:", thing.state.speed)
+                        const incr = dt * thing.state.speed * (
+                          terrain === "water" ?
+                            .5
+                          : terrain === "ice" ?
+                            2
+                          :
+                            1
+                        )
+                        thing.pos = len(d) < incr ? next : plus(thing.pos, scale(unit(d), incr))
                         const newCell = posToCell(thing.pos)
                         if (!eq(thing.cell, newCell)) {
                           thing.cell = newCell
@@ -365,7 +408,7 @@ export const
                             )
                           }
                         }
-                        if (len(minus(next, thing.pos)) < .5) {
+                        if (eq(next, thing.pos)) {
                           thing.pos = next
                           thing.state.path = thing.state.path.slice(1)
                           if (thing.state.path.length === 0) {

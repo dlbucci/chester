@@ -44,22 +44,22 @@ const
 
 export const
   THING_STATS: Record<BossName | ChessPiece | "unicorn", ThingStats> = {
-    bishop: ThingStats(2, .5, BISHOP_MOVEMENTS, 3),
-    king: ThingStats(2, .5, KING_MOVEMENTS, 5),
-    knight: ThingStats(2, .5, KNIGHT_MOVEMENTS, 1),
-    pawn: ThingStats(2, .5, [V(0, 1)]),
-    queen: ThingStats(2, .5, QUEEN_MOVEMENTS, 4),
-    rook: ThingStats(2, .5, ROOK_MOVEMENTS, 2),
-    unicorn: ThingStats(1, 1, KNIGHT_MOVEMENTS),
+    bishop: ThingStats(2, 50, BISHOP_MOVEMENTS, 3),
+    king: ThingStats(2, 50, KING_MOVEMENTS, 5),
+    knight: ThingStats(2, 50, KNIGHT_MOVEMENTS, 1),
+    pawn: ThingStats(2, 50, [V(0, 1)]),
+    queen: ThingStats(2, 50, QUEEN_MOVEMENTS, 4),
+    rook: ThingStats(2, 50, ROOK_MOVEMENTS, 2),
+    unicorn: ThingStats(1, 100, KNIGHT_MOVEMENTS),
 
-    Rebu: ThingStats(2, .5, KNIGHT_MOVEMENTS),
-    Barbin: ThingStats(2, .5, KNIGHT_MOVEMENTS),
-    Halsik: ThingStats(2, .5, KNIGHT_MOVEMENTS),
-    Sicafant: ThingStats(2, .5, KNIGHT_MOVEMENTS),
-    Peanio: ThingStats(2, .5, KNIGHT_MOVEMENTS),
-    Dinkus: ThingStats(2, .5, KNIGHT_MOVEMENTS),
-    "Boof Cake": ThingStats(2, .5, KNIGHT_MOVEMENTS),
-    "Evernut Clapati": ThingStats(2, .5, KNIGHT_MOVEMENTS),
+    Rebu: ThingStats(2, 50, KNIGHT_MOVEMENTS),
+    Barbin: ThingStats(2, 50, KNIGHT_MOVEMENTS),
+    Halsik: ThingStats(2, 50, KNIGHT_MOVEMENTS),
+    Sicafant: ThingStats(2, 50, KNIGHT_MOVEMENTS),
+    Peanio: ThingStats(2, 50, KNIGHT_MOVEMENTS),
+    Dinkus: ThingStats(2, 50, KNIGHT_MOVEMENTS),
+    "Boof Cake": ThingStats(2, 50, KNIGHT_MOVEMENTS),
+    "Evernut Clapati": ThingStats(2, 50, KNIGHT_MOVEMENTS),
   },
 
   getMoves = (thing: Thing, levelSize: V): V[][] => {
