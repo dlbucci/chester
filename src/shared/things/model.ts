@@ -29,22 +29,14 @@ type ThingStats = {
   cooldown: number
   frame: number
   movements: V[]
-  offset: V
   speed: number
 }
 
 
 const
-  ThingStats = (
-    cooldown: number,
-    speed: number,
-    offset: V,
-    movements: V[],
-    frame = 0,
-  ): ThingStats => ({
+  ThingStats = (cooldown: number, speed: number, movements: V[], frame = 0): ThingStats => ({
     cooldown,
     frame,
-    offset,
     movements,
     speed,
   })
@@ -52,22 +44,22 @@ const
 
 export const
   THING_STATS: Record<BossName | ChessPiece | "unicorn", ThingStats> = {
-    bishop: ThingStats(2, .5, V(-8, -12), BISHOP_MOVEMENTS, 3),
-    king: ThingStats(2, .5, V(-8, -12), KING_MOVEMENTS, 5),
-    knight: ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS, 1),
-    pawn: ThingStats(2, .5, V(-8, -12), [V(0, 1)]),
-    queen: ThingStats(2, .5, V(-8, -12), QUEEN_MOVEMENTS, 4),
-    rook: ThingStats(2, .5, V(-8, -12), ROOK_MOVEMENTS, 2),
-    unicorn: ThingStats(1, 1, V(-8, -12), KNIGHT_MOVEMENTS),
+    bishop: ThingStats(2, .5, BISHOP_MOVEMENTS, 3),
+    king: ThingStats(2, .5, KING_MOVEMENTS, 5),
+    knight: ThingStats(2, .5, KNIGHT_MOVEMENTS, 1),
+    pawn: ThingStats(2, .5, [V(0, 1)]),
+    queen: ThingStats(2, .5, QUEEN_MOVEMENTS, 4),
+    rook: ThingStats(2, .5, ROOK_MOVEMENTS, 2),
+    unicorn: ThingStats(1, 1, KNIGHT_MOVEMENTS),
 
-    Rebu: ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS),
-    Barbin: ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS),
-    Halsik: ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS),
-    Sicafant: ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS),
-    Peanio: ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS),
-    Dinkus: ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS),
-    "Boof Cake": ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS),
-    "Evernut Clapati": ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS),
+    Rebu: ThingStats(2, .5, KNIGHT_MOVEMENTS),
+    Barbin: ThingStats(2, .5, KNIGHT_MOVEMENTS),
+    Halsik: ThingStats(2, .5, KNIGHT_MOVEMENTS),
+    Sicafant: ThingStats(2, .5, KNIGHT_MOVEMENTS),
+    Peanio: ThingStats(2, .5, KNIGHT_MOVEMENTS),
+    Dinkus: ThingStats(2, .5, KNIGHT_MOVEMENTS),
+    "Boof Cake": ThingStats(2, .5, KNIGHT_MOVEMENTS),
+    "Evernut Clapati": ThingStats(2, .5, KNIGHT_MOVEMENTS),
   },
 
   getMoves = (thing: Thing, levelSize: V): V[][] => {

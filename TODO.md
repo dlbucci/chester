@@ -22,6 +22,7 @@
 - pawn attacks
 - stop spawning on screen
 - Fill in README.md
+- attack flash
 
 ## TOSLIM
 

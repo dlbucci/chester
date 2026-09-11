@@ -216,7 +216,8 @@ export const
                         0,
                         16,
                         16,
-                        ...T(THING_STATS[thing.type as ChessPiece]?.offset ?? V(-8, -8)),
+                        -8,
+                        -8,
                         16,
                         16,
                       )
