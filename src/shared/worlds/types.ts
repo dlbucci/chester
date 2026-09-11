@@ -15,6 +15,7 @@ export const
     boss: opt(Thing),
     captured: TypeArray(Thing),
     crystals: TypeArray(Crystal),
+    fruit: TypeArray(Thing),
     things: TypeArray(Thing),
     tucker: opt(Thing),
     unicorn: Thing,

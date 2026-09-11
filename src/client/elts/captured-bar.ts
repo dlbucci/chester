@@ -30,7 +30,19 @@ export const
         canvas(
           sizeAttr(16, 16),
           withCtx((ctx) => {
-            ctx.drawImage(getSprite(app.assets, thing), 0, 0)
+            gameState.listenAndCall((_gameState) => {
+              ctx.drawImage(
+                getSprite(app.assets, thing, _gameState.t === "title" ? 0 : _gameState.level.index),
+                16 * thing.frame,
+                0,
+                16,
+                16,
+                0,
+                0,
+                16,
+                16,
+              )
+            })
           }),
           onClick(() => {
             const _gameState = gameState.get()

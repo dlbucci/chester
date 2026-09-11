@@ -8,7 +8,7 @@ import { T, V } from "rokay/math/v"
 import { BossName, Thing } from "../shared/things/types.gen"
 
 import { TextCanvas } from "./elts/text-canvas"
-import { CRYSTAL, PIECES, UNICORN } from "./packed-images"
+import { CRYSTAL, FRUIT, PIECES, UNICORN } from "./packed-images"
 
 
 export type Assets =
@@ -20,6 +20,7 @@ export type Assets =
     font16: Map<string, HTMLCanvasElement>
     font16cursive: Map<string, HTMLCanvasElement>
     font16italic: Map<string, HTMLCanvasElement>
+    fruit: HTMLCanvasElement
     paintedPieces: (color: string | undefined) => HTMLCanvasElement
     paintedUnicorn: (color: string) => HTMLCanvasElement
   }
@@ -75,6 +76,7 @@ export const
           font16,
           font16cursive,
           font16italic,
+          fruit: paintAndOutline(FRUIT),
           paintedPieces: cached((color) =>
             paintAndOutline(pieces, color != null ?
               {
@@ -99,6 +101,8 @@ export const
   getSprite = (assets: Assets, thing: Thing, level: number) => {
     if (thing.type === "unicorn") {
       return assets.chester(level)
+    } else if (thing.type === "apple" || thing.type === "banana" || thing.type === "orange") {
+      return assets.fruit
     } else if (
       thing.type === "bishop"
       || thing.type === "king"

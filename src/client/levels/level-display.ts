@@ -17,7 +17,7 @@ import { GameState, GameStateLevel } from "../../shared/games/types.gen"
 import { Level } from "../../shared/levels/types.gen"
 import { pgIndex, pgLevel } from "../../shared/pages.gen"
 import { getMoves, THING_STATS } from "../../shared/things/model"
-import { Thing, ThingStateDying, ThingStateIdle, ThingStateMoveTo, ThingType } from "../../shared/things/types.gen"
+import { ChessPiece, Thing, ThingStateDying, ThingStateIdle, ThingStateMoveTo } from "../../shared/things/types.gen"
 import { World } from "../../shared/worlds/types.gen"
 import { AppClient } from "../app"
 import { getSprite } from "../assets"
@@ -145,6 +145,24 @@ export const
 
             withCtx((ctx) => {
               const
+                collectFruit = (unicorn: Thing, world: World) => {
+                  world.fruit.forEach((otherThing) => {
+                    const thingCell = posToCell(otherThing.pos)
+                    if (eq(unicorn.cell, thingCell)) {
+                      otherThing.state = ThingStateDying(
+                        0,
+                        1,
+                        scale(unitOfAng(float(-Math.PI * 3 / 8, -Math.PI * 5 / 8)), 100),
+                        1,
+                      )
+                      captured.set((_captured) =>
+                        _captured.concat({ ...otherThing, alignment: "good" })
+                      )
+                    }
+                  })
+                  world.fruit = world.fruit.filter((fruit) => fruit.state.t !== "dying")
+                },
+
                 draw = () => {
                   const _gameState = gameState.get()
 
@@ -165,7 +183,7 @@ export const
                   })
 
                   if (_gameState.t !== "title") {
-                    const { crystals, things, unicorn } = _gameState.world
+                    const { crystals, fruit, things, unicorn } = _gameState.world
                     const _anime = animes.get()[0]
                     if (_gameState.t === "level" && _anime == null) {
                       if (unicorn.state.t === "idle") {
@@ -187,7 +205,7 @@ export const
                       }
                     }
 
-                    things.sort((a, b) => a.pos.y - b.pos.y).forEach((thing) => {
+                    [...fruit, ...things].sort((a, b) => a.pos.y - b.pos.y).forEach((thing) => {
                       ctx.save()
                       ctx.translate(Math.round(thing.pos.x), Math.round(thing.pos.y))
                       if (thing.state.t === "dying") { ctx.rotate(thing.state.ang) }
@@ -198,7 +216,7 @@ export const
                         0,
                         16,
                         16,
-                        ...T(THING_STATS[thing.type].offset),
+                        ...T(THING_STATS[thing.type as ChessPiece]?.offset ?? V(-8, -8)),
                         16,
                         16,
                       )
@@ -233,7 +251,7 @@ export const
                   for (let i = 0; i < SIZE_BOARD.x; ++i) {
                     for (const thing in level.spawnRates) {
                       const
-                        type = thing as ThingType,
+                        type = thing as ChessPiece,
                         spawnTime = level.spawnRates[type],
                         odds = spawnTime === 0 ? 0 : 1 / spawnTime * dt / SIZE_BOARD.x
                       if (Math.random() > odds) { continue }
@@ -272,6 +290,11 @@ export const
                           thing.state.ang += thing.state.velAng * dt
                         }
                       } else if (thing.state.t === "idle") {
+                        if (
+                          thing.type === "apple"
+                          || thing.type === "banana"
+                          || thing.type === "orange"
+                        ) { return }
                         if (thing.state.cooldown > 0) {
                           thing.state.cooldown -= 1 / 60
                         } else if (thing !== unicorn) {
@@ -316,6 +339,7 @@ export const
                           thing.cell = newCell
                           // we've entered the final square of the move, make the attack
                           if (thing.state.path.length === 1) {
+                            if (thing === unicorn) { collectFruit(unicorn, world) }
                             things.forEach((otherThing) => {
                               if (thing === otherThing || otherThing.state.t === "dying") { return }
                               const thingCell = posToCell(otherThing.pos)
@@ -348,7 +372,7 @@ export const
                           thing.state.path = thing.state.path.slice(1)
                           if (thing.state.path.length === 0) {
                             thing.state = ThingStateIdle(
-                              THING_STATS[thing.type].cooldown,
+                              THING_STATS[thing.type as ChessPiece]?.cooldown ?? 0,
                               thing === unicorn ? getMoves(thing, level.size) : [],
                             )
                           }

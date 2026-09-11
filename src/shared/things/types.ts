@@ -14,7 +14,8 @@ const
     "Boof Cake",
     "Evernut Clapati",
   ],
-  CHESS_PIECES = ["bishop", "king", "knight", "pawn", "queen", "rook"]
+  CHESS_PIECES = ["bishop", "king", "knight", "pawn", "queen", "rook"],
+  FRUIT = ["apple", "banana", "orange"]
 
 
 export const
@@ -32,8 +33,9 @@ export const
 export const
   BossName = TypeStringUnion(BOSS_NAMES),
   ChessPiece = TypeStringUnion(CHESS_PIECES),
+  Fruit = TypeStringUnion(FRUIT),
 
-  ThingType = TypeStringUnion([...CHESS_PIECES, ...BOSS_NAMES, "unicorn"]),
+  ThingType = TypeStringUnion([...CHESS_PIECES, ...BOSS_NAMES, "unicorn", ...FRUIT]),
 
   Thing = TypeObject({
     alignment: TypeStringUnion(["good", "bad"]),

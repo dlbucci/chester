@@ -3,7 +3,7 @@ import { plus, scale, V } from "rokay/math/v"
 
 import { getDiagonalPath, getPath } from "../paths/model"
 
-import { Thing } from "./types.gen"
+import { BossName, ChessPiece, Thing } from "./types.gen"
 
 
 const
@@ -51,7 +51,7 @@ const
 
 
 export const
-  THING_STATS: Record<Thing["type"], ThingStats> = {
+  THING_STATS: Record<BossName | ChessPiece | "unicorn", ThingStats> = {
     bishop: ThingStats(2, .5, V(-8, -12), BISHOP_MOVEMENTS, 3),
     king: ThingStats(2, .5, V(-8, -12), KING_MOVEMENTS, 5),
     knight: ThingStats(2, .5, V(-8, -12), KNIGHT_MOVEMENTS, 1),
@@ -71,6 +71,7 @@ export const
   },
 
   getMoves = (thing: Thing, levelSize: V): V[][] => {
+    if (thing.type === "apple" || thing.type === "banana" || thing.type === "orange") { return [] }
     const { movements } = THING_STATS[thing.type]
     return mapNotNil(movements, (movement) => {
       const pos = plus(thing.cell, movement)

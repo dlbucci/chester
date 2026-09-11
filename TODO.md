@@ -1,12 +1,9 @@
 # TODO
 
-- Make chester change colors
 - fix the camera
 - Shops after beating boss
 - Better world color changes
 - water
-- apples
-- bananas
 - terrain
 - more fades
 - music
@@ -15,7 +12,6 @@
 - collisions
 - path backtracking
 - pathfinding?
-- Fill in README.md
 - make Tucker and Chester move closer
 - make Tucker and Chester grow horns
 - white board BG for final scene
@@ -25,6 +21,7 @@
 - color boss name in preamble
 - pawn attacks
 - stop spawning on screen
+- Fill in README.md
 
 ## TOSLIM
 
