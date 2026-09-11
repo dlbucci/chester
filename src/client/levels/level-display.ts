@@ -7,7 +7,7 @@ import { onPointerdown } from "rokay/browser/on"
 import { $ } from "rokay/browser/prop"
 import { backgroundColor, border, imageRendering, position } from "rokay/browser/style"
 import { rafLoop } from "rokay/browser/visible"
-import { last, tab } from "rokay/data/array"
+import { last } from "rokay/data/array"
 import { float, pick } from "rokay/math/random"
 import { divide, eq, floor, iter, len, minus, plus, round, scale, scaleComponents, T, unit, unitOfAng,
   V, VB, VZ } from "rokay/math/v"
@@ -42,9 +42,6 @@ import { FlashOutOverlay, TitleOverlay } from "./overlays"
 
 
 export const
-  BG_COLORS_BY_LEVEL = tab(LEVELS.length, (i) => `hsl(123, ${i / (LEVELS.length - 1) * 78}%, 34%)`),
-  LEVEL_PRE_LIFETIME = 5,
-
   LevelDisplay = (app: AppClient, gameState: Prop<GameState>) => {
     const animeEnd = () => {
       animes.set((_animes) => _animes.slice(1))
@@ -113,7 +110,7 @@ export const
 
           canvas(
             $(gameState, (_gameState) => backgroundColor(
-              BG_COLORS_BY_LEVEL[_gameState.t === "title" ? 0 : _gameState.level.index] ?? "gray",
+              _gameState.t === "level" && _gameState.level.index > 3 ? "green" : "#555",
             )),
             sizeAttr(...T(SIZE_BOARD_PIXELS)),
 

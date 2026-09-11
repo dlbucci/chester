@@ -23,6 +23,7 @@
 - stop spawning on screen
 - Fill in README.md
 - attack flash
+- 1up flash on full inventory
 
 ## TOSLIM
 
@@ -36,5 +37,6 @@
 - reduce animations used
 - drop font loading
 - pack images (remove margins)
+- drop Loader
 
 total: 14848
