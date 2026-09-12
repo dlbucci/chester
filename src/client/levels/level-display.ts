@@ -58,6 +58,7 @@ export const
       ),
       animes = Prop<Anime[]>(() => []),
       captured = Prop<Thing[]>(() => []),
+      lifeUp = Prop(() => false),
       lives = Prop(() => 3),
       prevGameState = gameState.get()
 
@@ -105,8 +106,8 @@ export const
       $flexCenter,
       $s100,
       apd(
-        div(border("1px solid #000"), position("relative"), apd(
-          LifeBar(app, lives, gameState),
+        div(border("1px solid #333"), position("relative"), apd(
+          LifeBar(app, lifeUp, lives, gameState),
 
           canvas(
             $(gameState, (_gameState) => backgroundColor(
@@ -155,9 +156,22 @@ export const
                         scale(unitOfAng(float(-Math.PI * 3 / 8, -Math.PI * 5 / 8)), 100),
                         1,
                       )
-                      captured.set((_captured) =>
-                        _captured.concat({ ...otherThing, alignment: "good" })
-                      )
+                      captured.set((_captured) => {
+                        const next = _captured.concat({ ...otherThing, alignment: "good" })
+                        const _lifeUp = lifeUp.get()
+                        if (next.length >= 8 && !_lifeUp) {
+                          lives.set((_lives) => _lives + 1)
+                          lifeUp.set(() => true)
+                          setTimeout(
+                            () => {
+                              captured.set((_captured) => _captured.slice(8))
+                              lifeUp.set(() => false)
+                            },
+                            5000,
+                          )
+                        }
+                        return next
+                      })
                     }
                   })
                   world.fruit = world.fruit.filter((fruit) => fruit.state.t !== "dying")
@@ -482,7 +496,7 @@ export const
             }),
           ),
 
-          CapturedBar(app, animes, captured, gameState),
+          CapturedBar(app, captured, gameState, lifeUp),
 
           matchIf(gameState, (_gameState) =>
             _gameState.t === "title" ?

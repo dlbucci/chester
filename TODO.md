@@ -12,9 +12,7 @@
 - white board BG for final scene
 - pawn attacks
 - stop spawning on screen
-- Fill in README.md
 - attack flash
-- 1up flash on full inventory
 - more margin on preamble text
 - differentiate levels/pieces/bosses
 - pre-spawn levels
@@ -24,6 +22,7 @@
 - collisions
 - path backtracking
 - pathfinding?
+- Fill in README.md
 
 ## TOSLIM
 

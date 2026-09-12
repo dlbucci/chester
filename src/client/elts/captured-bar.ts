@@ -3,65 +3,41 @@ import { apd } from "rokay/browser/core"
 import { canvas, div } from "rokay/browser/elt"
 import { withCtx } from "rokay/browser/game/danvas"
 import { match } from "rokay/browser/match"
-import { onClick } from "rokay/browser/on"
-import { backgroundColor, height } from "rokay/browser/style"
-import { remove } from "rokay/data/array"
-import { minus, V } from "rokay/math/v"
+import { borderTop } from "rokay/browser/style"
 import { Prop } from "rokay/prop/prop"
 
 import { GameState } from "../../shared/games/types.gen"
-import { Thing, ThingStateIdle } from "../../shared/things/types.gen"
+import { Thing } from "../../shared/things/types.gen"
 import { AppClient } from "../app"
 import { getSprite } from "../assets"
-import { cellToPos } from "../cells/utils"
-import { Anime } from "../levels/animes/model"
 import { $flexRow } from "../style/utils.gen"
+
+import { Bar } from "./life-bar"
 
 
 export const
   CapturedBar = (
     app: AppClient,
-    animes: Prop<Anime[]>,
     captured: Prop<Thing[]>,
     gameState: Prop<GameState>,
+    lifeUp: Prop<boolean>,
   ) =>
-    div(backgroundColor("gray"), height("16px"), apd(match(captured, (_captured) =>
-      div($flexRow, apd(..._captured.map((thing) =>
-        canvas(
-          sizeAttr(16, 16),
-          withCtx((ctx) => {
-            gameState.listenAndCall((_gameState) => {
-              ctx.drawImage(
-                getSprite(app.assets, thing, _gameState.t === "title" ? 0 : _gameState.level.index),
-                16 * thing.frame,
-                0,
-                16,
-                16,
-                0,
-                0,
-                16,
-                16,
-              )
-            })
-          }),
-          onClick(() => {
-            const _gameState = gameState.get()
-            const _anime = animes.get()[0]
-            if (_gameState.t === "level" && _anime == null) {
-              const { world } = _gameState
-              const cell = minus(world.unicorn.cell, V(0, 1))
-              world.things.push(Thing(
-                "good",
-                cell,
-                thing.frame,
-                cellToPos(cell),
-                V(1, 1),
-                ThingStateIdle(1.5, []),
-                thing.type,
-              ))
-              captured.set((_captured) => remove(_captured, thing))
-            }
-          }),
-        )
+    Bar(lifeUp, borderTop("1px solid #333"), apd(match(captured, (_captured) =>
+      div($flexRow, apd(..._captured.slice(0, 8).map((thing) =>
+        canvas(sizeAttr(16, 16), withCtx((ctx) => {
+          gameState.listenAndCall((_gameState) => {
+            ctx.drawImage(
+              getSprite(app.assets, thing, _gameState.t === "title" ? 0 : _gameState.level.index),
+              16 * thing.frame,
+              0,
+              16,
+              16,
+              0,
+              0,
+              16,
+              16,
+            )
+          })
+        }))
       )))
     )))
