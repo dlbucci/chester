@@ -313,8 +313,6 @@ export const
                     const { boss, things, unicorn } = world
                     if (_anime == null && boss == null) { spawnEnemies(dt, level, world) }
                     things.forEach((thing) => {
-                      // keep the player animating
-                      if (_anime != null && thing !== unicorn) { return }
                       if (thing.state.t === "dying") {
                         if (thing.state.lifetime > 0) {
                           thing.state.lifetime -= dt
@@ -322,7 +320,13 @@ export const
                           thing.pos = plus(thing.pos, scale(thing.state.vel, dt))
                           thing.state.ang += thing.state.velAng * dt
                         }
-                      } else if (thing.state.t === "idle") {
+                      }
+                      // keep the player animating
+                      if (_anime != null && thing !== unicorn) { return }
+                      if (
+                        thing.alignment === "bad" && thing !== boss && boss?.state.t === "dying"
+                      ) { return }
+                      if (thing.state.t === "idle") {
                         if (
                           thing.type === "apple"
                           || thing.type === "banana"
@@ -365,12 +369,11 @@ export const
                         let next = thing.state.path[0]
                         const terrain = getTerrain(world, thing.cell)
                         const d = minus(next, thing.pos)
-                        console.log("thing.state.speed:", thing.state.speed)
                         const incr = dt * thing.state.speed * (
                           terrain === "water" ?
                             .5
                           : terrain === "ice" ?
-                            2
+                            1.5
                           :
                             1
                         )

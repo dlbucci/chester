@@ -23,9 +23,9 @@ export const
       ]),
       terrain: Terrain[][] = tab(level.size.y, () =>
         tab(level.size.x, () =>
-          int(0, 10) === 0 ?
+          level.index > 5 && int(0, 10) === 0 ?
             "ice"
-          : int(0, 10) === 0 ?
+          : level.index > 3 && int(0, 10) === 0 ?
             "water"
           :
             "grass"

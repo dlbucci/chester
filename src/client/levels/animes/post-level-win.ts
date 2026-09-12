@@ -1,11 +1,17 @@
-import { divide, interpolateLinear, minus, V, VZ } from "rokay/math/v"
+import { apd } from "rokay/browser/core"
+import { div, span } from "rokay/browser/elt"
+import { background, color, flexDirection, gap, textAlign, whiteSpace } from "rokay/browser/style"
+import { float } from "rokay/math/random"
+import { divide, interpolateLinear, minus, scale, unitOfAng, V, VZ } from "rokay/math/v"
 
 import { GameStateLevel } from "../../../shared/games/types.gen"
+import { ThingStateDying } from "../../../shared/things/types.gen"
 import { AppClient } from "../../app"
 import { ease, linear } from "../../camera/model"
 import { Camera, CameraShake } from "../../camera/types.gen"
 import { SIZE_BOARD_PIXELS } from "../../const"
-import { FlashInOverlay, LevelWinOverlay } from "../overlays"
+import { $messageEnter } from "../../style/utils.gen"
+import { FlashInOverlay, Overlay } from "../overlays"
 
 import { Anime, AnimeGloverlay, AnimeOverlay, AnimeStep } from "./model"
 import { stepper } from "./win"
@@ -33,14 +39,46 @@ export const
     const shake = CameraShake(0, VZ, 0)
 
     return [
-      AnimeOverlay(() =>
-        LevelWinOverlay(level, {
-          onClick() {
-            world.crystals = [crystal]
-            camera.shake = shake
-            animeEnd()
-          },
+      AnimeStep(() => {
+        if (world.boss != null && world.things.includes(world.boss)) { return }
+        world.things.forEach((thing) => {
+          if (thing.state.t === "dying") { return }
+          if (thing.alignment === "bad") {
+            thing.state = ThingStateDying(
+              0,
+              1,
+              scale(unitOfAng(float(-Math.PI * 3 / 8, -Math.PI * 5 / 8)), 100),
+              1,
+            )
+          }
         })
+        return world.things.every((thing) => thing.alignment === "good")
+      }),
+      AnimeOverlay(
+        () => {
+          setTimeout(
+            () => {
+              world.crystals = [crystal]
+              camera.shake = shake
+              animeEnd()
+            },
+            5 * 1000,
+          )
+          return Overlay(
+            background(
+              "linear-gradient(to bottom, rgba(0,0,0,.25) 20%, rgba(0,0,0,.75) 50%, rgba(0,0,0,.25) 80%",
+            ),
+            color("hsl(352,78%,45%)"),
+            flexDirection("column"),
+            gap(".5em"),
+            whiteSpace("pre"),
+            apd(div(
+              $messageEnter,
+              textAlign("center"),
+              apd(span(color(level.color), apd(level.bossName)), "\nDEFEATED"),
+            )),
+          )
+        },
       ),
       AnimeStep((dt) => {
         const [{ magnitude, pos }, done] = attrs(dt)

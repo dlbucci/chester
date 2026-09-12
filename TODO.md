@@ -3,19 +3,14 @@
 - fix the camera
 - Shops after beating boss
 - Better world color changes (violet)
-- more fades
+- more fades ? (boss defeated message)
 - music
 - sfx
 - pixel text
-- collisions
-- path backtracking
-- pathfinding?
 - make Tucker and Chester move closer
 - make Tucker and Chester grow horns
 - white board BG for final scene
 - spawn crystal from dead unicorn
-- boss defeat autoplay
-- kill other enemies on boss death
 - color boss name in preamble
 - pawn attacks
 - stop spawning on screen
@@ -23,6 +18,14 @@
 - attack flash
 - 1up flash on full inventory
 - more margin on preamble text
+- differentiate levels/pieces/bosses
+- pre-spawn levels
+
+## probably not
+
+- collisions
+- path backtracking
+- pathfinding?
 
 ## TOSLIM
 
