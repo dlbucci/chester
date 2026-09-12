@@ -3,15 +3,13 @@
 - fix the camera
 - Shops after beating boss
 - Better world color changes (violet)
-- more fades ? (boss defeated message)
+- more fades ? (dead overlay out, have preamble ready to go as flash fades)
 - music
 - sfx
 - pixel text
 - make Tucker and Chester move closer
 - make Tucker and Chester grow horns
 - white board BG for final scene
-- spawn crystal from dead unicorn
-- color boss name in preamble
 - pawn attacks
 - stop spawning on screen
 - Fill in README.md

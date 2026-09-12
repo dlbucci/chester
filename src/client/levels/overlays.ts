@@ -1,8 +1,7 @@
 import { apd } from "rokay/browser/core"
-import { div, span } from "rokay/browser/elt"
+import { div } from "rokay/browser/elt"
 import { onPointerdown } from "rokay/browser/on"
-import { animation, background, backgroundColor, color, flexDirection, gap, height, left, position, textAlign,
-  top, userSelect, whiteSpace, width } from "rokay/browser/style"
+import { animation, background, backgroundColor, color, height, left, position, top, userSelect, width } from "rokay/browser/style"
 import { MixArgs } from "rokay/mix"
 
 import { Level } from "../../shared/levels/types.gen"
@@ -12,6 +11,10 @@ import { $flexCenter, $messageEnter } from "../style/utils.gen"
 
 
 export const
+  $gradientOverlay = background(
+    "linear-gradient(to bottom, rgba(0,0,0,.25) 20%, rgba(0,0,0,.75) 50%, rgba(0,0,0,.25) 80%",
+  ),
+
   Overlay = (...args: MixArgs<HTMLDivElement>) =>
     div(
       backgroundColor("hsla(0, 0%, 20%, .5)"),
@@ -28,7 +31,7 @@ export const
 
   BossIntroOverlay = (level: Level, timeSec: number, onDone: () => void) => {
     setTimeout(onDone, timeSec * 1000)
-    return Overlay(animation(`${timeSec}s boss-intro-overlay forwards`), apd(
+    return Overlay(animation(`${timeSec}s boss-intro-overlay forwards`), $gradientOverlay, apd(
       div(color(level.color), $messageEnter, apd(level.bossName)),
     ))
   },
@@ -36,9 +39,7 @@ export const
   DeadOverlay = (app: AppClient) =>
     Overlay(
       animation("1s fade-in"),
-      background(
-        "linear-gradient(to bottom, rgba(0,0,0,.25) 20%, rgba(0,0,0,.75) 50%, rgba(0,0,0,.25) 80%",
-      ),
+      $gradientOverlay,
       color("hsl(352,78%,45%)"),
       apd(div($messageEnter, apd("YOU DIED"))),
       onPointerdown(() => {
@@ -65,23 +66,6 @@ export const
     setTimeout(onDone, timeSec * 1000)
     return Overlay(animation(`${timeSec}s flash-out forwards`), backgroundColor(color))
   },
-
-  LevelWinOverlay = (level: Level, { onClick }: { onClick(): void }) =>
-    Overlay(
-      background(
-        "linear-gradient(to bottom, rgba(0,0,0,.25) 20%, rgba(0,0,0,.75) 50%, rgba(0,0,0,.25) 80%",
-      ),
-      color("hsl(352,78%,45%)"),
-      flexDirection("column"),
-      gap(".5em"),
-      whiteSpace("pre"),
-      apd(div(
-        $messageEnter,
-        textAlign("center"),
-        apd(span(color(level.color), apd(level.bossName)), "\nDEFEATED"),
-      )),
-      onPointerdown(onClick),
-    ),
 
   TitleOverlay = (onClick: () => void) =>
     Overlay(apd("Chester"), onPointerdown(onClick))

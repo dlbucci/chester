@@ -1,6 +1,6 @@
 import { apd } from "rokay/browser/core"
 import { div, span } from "rokay/browser/elt"
-import { background, color, flexDirection, gap, textAlign, whiteSpace } from "rokay/browser/style"
+import { animation, background, color, flexDirection, gap, textAlign, whiteSpace } from "rokay/browser/style"
 import { float } from "rokay/math/random"
 import { divide, interpolateLinear, minus, scale, unitOfAng, V, VZ } from "rokay/math/v"
 
@@ -11,7 +11,7 @@ import { ease, linear } from "../../camera/model"
 import { Camera, CameraShake } from "../../camera/types.gen"
 import { SIZE_BOARD_PIXELS } from "../../const"
 import { $messageEnter } from "../../style/utils.gen"
-import { FlashInOverlay, Overlay } from "../overlays"
+import { $gradientOverlay, FlashInOverlay, Overlay } from "../overlays"
 
 import { Anime, AnimeGloverlay, AnimeOverlay, AnimeStep } from "./model"
 import { stepper } from "./win"
@@ -25,7 +25,7 @@ export const
     animeEnd: () => void,
     onEnd: () => void,
   ): Anime[] => {
-    const crystalStart = V(SIZE_BOARD_PIXELS.x / 2 - 8, -16)
+    let crystalStart = V(SIZE_BOARD_PIXELS.x / 2 - 8, -16)
     const crystalEnd = minus(divide(SIZE_BOARD_PIXELS, 2), V(8, 8))
     const attrs = stepper(5, (frac) => ({
       magnitude: linear(0, 2, Math.pow(frac, 2)),
@@ -37,10 +37,21 @@ export const
       sprite: app.assets.crystal(level.color),
     }
     const shake = CameraShake(0, VZ, 0)
+    let first = true
 
     return [
       AnimeStep(() => {
-        if (world.boss != null && world.things.includes(world.boss)) { return }
+        if (world.boss != null) {
+          if (world.things.includes(world.boss)) { return }
+          if (first) {
+            first = false
+            const pos = minus(world.boss.pos, V(8, 8))
+            crystalStart = pos
+            crystal.pos = pos
+            world.crystals = [crystal]
+            camera.shake = shake
+          }
+        }
         world.things.forEach((thing) => {
           if (thing.state.t === "dying") { return }
           if (thing.alignment === "bad") {
@@ -54,32 +65,22 @@ export const
         })
         return world.things.every((thing) => thing.alignment === "good")
       }),
-      AnimeOverlay(
-        () => {
-          setTimeout(
-            () => {
-              world.crystals = [crystal]
-              camera.shake = shake
-              animeEnd()
-            },
-            5 * 1000,
-          )
-          return Overlay(
-            background(
-              "linear-gradient(to bottom, rgba(0,0,0,.25) 20%, rgba(0,0,0,.75) 50%, rgba(0,0,0,.25) 80%",
-            ),
-            color("hsl(352,78%,45%)"),
-            flexDirection("column"),
-            gap(".5em"),
-            whiteSpace("pre"),
-            apd(div(
-              $messageEnter,
-              textAlign("center"),
-              apd(span(color(level.color), apd(level.bossName)), "\nDEFEATED"),
-            )),
-          )
-        },
-      ),
+      AnimeOverlay(() => {
+        setTimeout(animeEnd, 5 * 1000)
+        return Overlay(
+          animation(`${5}s boss-intro-overlay forwards`),
+          color("hsl(352,78%,45%)"),
+          flexDirection("column"),
+          gap(".5em"),
+          $gradientOverlay,
+          whiteSpace("pre"),
+          apd(div(
+            $messageEnter,
+            textAlign("center"),
+            apd(span(color(level.color), apd(level.bossName)), "\nDEFEATED"),
+          )),
+        )
+      }),
       AnimeStep((dt) => {
         const [{ magnitude, pos }, done] = attrs(dt)
         crystal.pos = pos
