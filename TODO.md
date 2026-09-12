@@ -1,21 +1,19 @@
 # TODO
 
-- fix the camera
-- Shops after beating boss
+- fix the camera (mobius, fruit on screen, scroll to wake up)
 - Better world color changes (violet)
 - more fades ? (dead overlay out, have preamble ready to go as flash fades)
-- music
-- sfx
-- pixel text
-- make Tucker and Chester move closer
 - make Tucker and Chester grow horns
-- white board BG for final scene
 - pawn attacks
 - stop spawning on screen
-- attack flash
-- more margin on preamble text
-- differentiate levels/pieces/bosses
 - pre-spawn levels
+- differentiate levels/pieces/bosses
+- pixel text
+- sfx
+- music
+- Shops after beating boss
+- more margin on preamble text
+- attack flash
 
 ## probably not
 

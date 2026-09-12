@@ -1,4 +1,4 @@
-import { TypeADT, TypeArray, TypeInt, TypeNumber, TypeObject, TypeStringUnion } from "rokay/data/type"
+import { opt, TypeADT, TypeArray, TypeInt, TypeNumber, TypeObject, TypeStringUnion, TypeWord } from "rokay/data/type"
 
 import { V } from "../maths/types"
 
@@ -43,6 +43,7 @@ export const
     frame: TypeInt(),
     pos: V,
     scale: V,
+    sprite: opt(TypeWord("HTMLCanvasElement")),
     state: ThingState,
     type: ThingType,
   })

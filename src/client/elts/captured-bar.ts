@@ -26,17 +26,7 @@ export const
       div($flexRow, apd(..._captured.slice(0, 8).map((thing) =>
         canvas(sizeAttr(16, 16), withCtx((ctx) => {
           gameState.listenAndCall((_gameState) => {
-            ctx.drawImage(
-              getSprite(app.assets, thing, _gameState.t === "title" ? 0 : _gameState.level.index),
-              16 * thing.frame,
-              0,
-              16,
-              16,
-              0,
-              0,
-              16,
-              16,
-            )
+            ctx.drawImage(getSprite(app.assets, thing), 16 * thing.frame, 0, 16, 16, 0, 0, 16, 16)
           })
         }))
       )))

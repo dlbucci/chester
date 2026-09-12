@@ -2,22 +2,24 @@ import { apd } from "rokay/browser/core"
 import { div } from "rokay/browser/elt"
 import { match } from "rokay/browser/match"
 import { onPointerdown } from "rokay/browser/on"
-import { backgroundColor, flexDirection, gap, textAlign, whiteSpace } from "rokay/browser/style"
+import { backgroundColor, color, flexDirection, gap, position, textAlign, top } from "rokay/browser/style"
 import { divide, minus, plus, scale, unitOfAng, V } from "rokay/math/v"
 import { Prop } from "rokay/prop/prop"
 
 import { pgIndex } from "../../../shared/pages.gen"
-import { Thing, ThingStateIdle } from "../../../shared/things/types.gen"
+import { THING_STATS } from "../../../shared/things/model"
+import { ThingStateMoveTo } from "../../../shared/things/types.gen"
 import { Crystal, World } from "../../../shared/worlds/types.gen"
 import { AppClient } from "../../app"
 import { ease, linear } from "../../camera/model"
 import { cellToPos } from "../../cells/utils"
-import { SIZE_BOARD, SIZE_BOARD_PIXELS, SIZE_CELL } from "../../const"
+import { SIZE_BOARD_PIXELS, SIZE_CELL } from "../../const"
 import { $messageEnter } from "../../style/utils.gen"
-import { LEVELS } from "../model"
-import { FlashInOverlay, FlashOutOverlay, Overlay } from "../overlays"
+import { LEVELS, TUCKER_WIN_PATH, UNICORN_WIN_PATH } from "../model"
+import { FlashInOverlay, Overlay } from "../overlays"
 
 import { Anime, AnimeGloverlay, AnimeOverlay, AnimeStep } from "./model"
+import { KillAllEnemiesStep } from "./steps"
 
 
 export const
@@ -29,7 +31,7 @@ export const
     }
   },
 
-  win = (app: AppClient, world: World, animeEnd: () => void): Anime[] => {
+  win = (app: AppClient, world: World, onDone: () => void): Anime[] => {
     const attrs = stepper(5, (frac) => ({
       magnitude: linear(SIZE_BOARD_PIXELS.x * .75, SIZE_CELL.x, ease(frac)),
       shake: linear(0, 2, Math.pow(frac, 3)),
@@ -52,6 +54,7 @@ export const
       })
 
     return [
+      KillAllEnemiesStep(world),
       AnimeStep(() => {
         world.crystals = crystals
         return true
@@ -64,33 +67,12 @@ export const
         })
         return done
       }),
-      AnimeGloverlay(() =>
-        FlashInOverlay(2.5, "#fff", () => {
-          const cell = V(SIZE_BOARD.x - 2, 3)
-          world.tucker = Thing(
-            "good",
-            cell,
-            0,
-            cellToPos(cell),
-            V(-1, 1),
-            ThingStateIdle(0, []),
-            "unicorn",
-          )
-          const otherCell = V(1, 3)
-          world.unicorn = Thing(
-            "good",
-            otherCell,
-            0,
-            cellToPos(otherCell),
-            V(1, 1),
-            ThingStateIdle(0, []),
-            "unicorn",
-          )
-          world.crystals = []
-          world.things = [world.unicorn, world.tucker]
-          animeEnd()
-        })
-      ),
+      AnimeGloverlay(() => FlashInOverlay(2.5, "#fff", onDone)),
+    ]
+  },
+
+  wintro = (app: AppClient, world: World) => {
+    return [
       AnimeOverlay(() => {
         const
           messages = `Tucker?
@@ -100,23 +82,35 @@ What took you so long?
 The End`.split(
             "\n",
           ),
-          messageIndex = Prop(() => -1)
+          messageIndex = Prop(() => 0)
 
         return Overlay(
           backgroundColor("transparent"),
+          color("#333"),
           flexDirection("column"),
           gap(".5em"),
-          whiteSpace("pre"),
-          apd(
-            match(messageIndex, (index) =>
-              index >= 0 ? div($messageEnter, textAlign("center"), apd(messages[index])) : undefined
-            ),
-            FlashOutOverlay(2.5, "#fff", () => {
-              messageIndex.set(() => 0)
-            }),
-          ),
+          apd(match(messageIndex, (index) =>
+            index >= 0 ?
+              div($messageEnter, position("relative"), textAlign("center"), top("-16px"), apd(
+                messages[index],
+              ))
+            :
+              undefined
+          )),
           onPointerdown(() => {
             messageIndex.set((_index) => {
+              if (_index + 1 === 2) {
+                world.unicorn.state = ThingStateMoveTo(
+                  UNICORN_WIN_PATH.slice(1).map(cellToPos),
+                  THING_STATS.unicorn.speed,
+                )
+                if (world.tucker) {
+                  world.tucker.state = ThingStateMoveTo(
+                    TUCKER_WIN_PATH.slice(1).map(cellToPos),
+                    THING_STATS.unicorn.speed,
+                  )
+                }
+              }
               if (_index + 1 < messages.length) { return _index + 1 }
               app.router.replace(pgIndex())
               return _index

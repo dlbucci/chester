@@ -8,4 +8,5 @@ export const
   GameState = TypeADT({
     title: {},
     level: { level: Level, world: World },
+    win: { world: World },
   })

@@ -22,6 +22,9 @@ let
 
 
 export const
+  UNICORN_WIN_PATH = [V(1, 4), V(1, 5), V(2, 5), V(3, 5)],
+  TUCKER_WIN_PATH = UNICORN_WIN_PATH.map((v) => V(SIZE_BOARD.x - 1 - v.x, v.y)),
+
   LEVELS = [
     Level(
       "Rebu",

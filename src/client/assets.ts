@@ -135,9 +135,11 @@ export const
         }),
       ),
 
-  getSprite = (assets: Assets, thing: Thing, level: number) => {
-    if (thing.type === "unicorn") {
-      return assets.chester(level)
+  getSprite = (assets: Assets, thing: Thing) => {
+    if (thing.sprite != null) {
+      return thing.sprite
+    } else if (thing.type === "unicorn") {
+      return assets.chester(0)
     } else if (thing.type === "apple" || thing.type === "banana" || thing.type === "orange") {
       return assets.fruit
     } else if (

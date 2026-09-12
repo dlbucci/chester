@@ -1,11 +1,9 @@
 import { apd } from "rokay/browser/core"
 import { div, span } from "rokay/browser/elt"
-import { animation, background, color, flexDirection, gap, textAlign, whiteSpace } from "rokay/browser/style"
-import { float } from "rokay/math/random"
-import { divide, interpolateLinear, minus, scale, unitOfAng, V, VZ } from "rokay/math/v"
+import { animation, color, flexDirection, gap, textAlign, whiteSpace } from "rokay/browser/style"
+import { divide, interpolateLinear, minus, V, VZ } from "rokay/math/v"
 
 import { GameStateLevel } from "../../../shared/games/types.gen"
-import { ThingStateDying } from "../../../shared/things/types.gen"
 import { AppClient } from "../../app"
 import { ease, linear } from "../../camera/model"
 import { Camera, CameraShake } from "../../camera/types.gen"
@@ -14,6 +12,7 @@ import { $messageEnter } from "../../style/utils.gen"
 import { $gradientOverlay, FlashInOverlay, Overlay } from "../overlays"
 
 import { Anime, AnimeGloverlay, AnimeOverlay, AnimeStep } from "./model"
+import { KillAllEnemiesStep } from "./steps"
 import { stepper } from "./win"
 
 
@@ -37,33 +36,14 @@ export const
       sprite: app.assets.crystal(level.color),
     }
     const shake = CameraShake(0, VZ, 0)
-    let first = true
 
     return [
-      AnimeStep(() => {
-        if (world.boss != null) {
-          if (world.things.includes(world.boss)) { return }
-          if (first) {
-            first = false
-            const pos = minus(world.boss.pos, V(8, 8))
-            crystalStart = pos
-            crystal.pos = pos
-            world.crystals = [crystal]
-            camera.shake = shake
-          }
-        }
-        world.things.forEach((thing) => {
-          if (thing.state.t === "dying") { return }
-          if (thing.alignment === "bad") {
-            thing.state = ThingStateDying(
-              0,
-              1,
-              scale(unitOfAng(float(-Math.PI * 3 / 8, -Math.PI * 5 / 8)), 100),
-              1,
-            )
-          }
-        })
-        return world.things.every((thing) => thing.alignment === "good")
+      KillAllEnemiesStep(world, (boss) => {
+        const pos = minus(boss.pos, V(8, 8))
+        crystalStart = pos
+        crystal.pos = pos
+        world.crystals = [crystal]
+        camera.shake = shake
       }),
       AnimeOverlay(() => {
         setTimeout(animeEnd, 5 * 1000)

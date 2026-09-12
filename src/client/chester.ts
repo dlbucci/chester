@@ -53,7 +53,7 @@ mount(document.body, () => {
         visible: VisibleProp(),
       }
       // update after the fact since IndexPages needs app
-      const routedGameState = router.derive<GameState>(IndexPages({}), () => GameStateTitle())
+      const routedGameState = router.derive<GameState>(IndexPages({ app }), () => GameStateTitle())
         .listen((view) => {
           gameState.set(() => view)
         })

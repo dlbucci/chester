@@ -15,14 +15,14 @@ import { Prop } from "rokay/prop/prop"
 
 import { GameState, GameStateLevel } from "../../shared/games/types.gen"
 import { Level } from "../../shared/levels/types.gen"
-import { pgIndex, pgLevel } from "../../shared/pages.gen"
+import { pgIndex, pgLevel, pgWin } from "../../shared/pages.gen"
 import { getMoves, THING_STATS } from "../../shared/things/model"
 import { ChessPiece, Thing, ThingStateDying, ThingStateIdle, ThingStateMoveTo } from "../../shared/things/types.gen"
 import { World } from "../../shared/worlds/types.gen"
 import { AppClient } from "../app"
 import { getSprite } from "../assets"
 import { cameraPos, cameraStep } from "../camera/model"
-import { Camera, CameraStateEaseTo, CameraStateFollow, CameraStateMobius } from "../camera/types.gen"
+import { Camera, CameraStateEaseTo, CameraStateFollow, CameraStateIdle, CameraStateMobius } from "../camera/types.gen"
 import { cellToPos, posToCell } from "../cells/utils"
 import { GRAVITY, SIZE_BOARD, SIZE_BOARD_PIXELS, SIZE_CELL } from "../const"
 import { CapturedBar } from "../elts/captured-bar"
@@ -36,7 +36,7 @@ import { dead } from "./animes/dead"
 import { Anime, AnimeGloverlay, AnimeStep } from "./animes/model"
 import { postLevelWin } from "./animes/post-level-win"
 import { preLevel } from "./animes/pre-level"
-import { win } from "./animes/win"
+import { win, wintro } from "./animes/win"
 import { LEVELS } from "./model"
 import { FlashOutOverlay, TitleOverlay } from "./overlays"
 
@@ -72,7 +72,7 @@ export const
         camera.bounds.se = scaleComponents(_gameState.level.size, SIZE_CELL)
         const _prev = prevGameState
         animes.set(() => [
-          ..._prev.t === "title" || _prev === _gameState ?
+          ..._prev.t !== "level" || _prev === _gameState ?
             []
           :
             [AnimeGloverlay(() => FlashOutOverlay(2.5, _prev.level.color, animeEnd))],
@@ -94,13 +94,29 @@ export const
             },
           ),
         ])
+      } else if (_gameState.t === "win") {
+        camera.bounds.se = SIZE_BOARD_PIXELS
+        camera.state = CameraStateIdle()
+        const _prev = prevGameState
+        animes.set(() => [
+          ..._prev.t === "level" ?
+            [AnimeGloverlay(() => FlashOutOverlay(2.5, _prev.level.color, animeEnd))]
+          :
+            [],
+          ...wintro(app, _gameState.world),
+        ])
       }
       prevGameState = _gameState
     })
 
     return div(
       $(gameState, (_gameState) =>
-        $rainbowBackground(VB(35), _gameState.t === "title" ? 0 : _gameState.level.index)
+        $rainbowBackground(VB(35), _gameState.t === "title" ?
+          0
+        : _gameState.t === "win" ?
+          7
+        :
+          _gameState.level.index)
       ),
       imageRendering("pixelated"),
       $flexCenter,
@@ -110,9 +126,12 @@ export const
           LifeBar(app, lifeUp, lives, gameState),
 
           canvas(
-            $(gameState, (_gameState) => backgroundColor(
-              _gameState.t === "level" && _gameState.level.index > 3 ? "green" : "#555",
-            )),
+            $(gameState, (_gameState) => backgroundColor(_gameState.t === "win" ?
+              "#fff"
+            : _gameState.t === "level" && _gameState.level.index > 3 ?
+              "green"
+            :
+              "#555")),
             sizeAttr(...T(SIZE_BOARD_PIXELS)),
 
             onPointerdown((el, ev) => {
@@ -192,36 +211,41 @@ export const
                   iter(start, plus(start, SIZE_BOARD), (pos) => {
                     const
                       p = scaleComponents(pos, SIZE_CELL),
-                      tp = T(p),
-                      t = _gameState.t === "title" ? "grass" : getTerrain(_gameState.world, pos)
-                    if (t === "water") {
-                      ctx.fillStyle = _gameState.t === "level" && _gameState.level.index > 4 ?
-                          "blue"
+                      tp = T(p)
+                    if (_gameState.t !== "win") {
+                      const t = _gameState.t === "title" ?
+                          "grass"
                         :
-                          "#555"
-                      ctx.fillRect(...tp, ...T(SIZE_CELL))
-                    }
-                    if (t === "ice") {
-                      ctx.fillStyle = _gameState.t === "level" && _gameState.level.index > 6 ?
-                          "violet"
+                          getTerrain(_gameState.world, pos)
+                      if (t === "water") {
+                        ctx.fillStyle = _gameState.t === "level" && _gameState.level.index > 4 ?
+                            "blue"
+                          :
+                            "#555"
+                        ctx.fillRect(...tp, ...T(SIZE_CELL))
+                      }
+                      if (t === "ice") {
+                        ctx.fillStyle = _gameState.t === "level" && _gameState.level.index > 6 ?
+                            "violet"
+                          :
+                            "#555"
+                        ctx.fillRect(...tp, ...T(SIZE_CELL))
+                      }
+                      ctx.drawImage(
+                        t === "grass" ?
+                          app.assets.bgGrass
+                        : t === "water" ?
+                          app.assets.bgWater
                         :
-                          "#555"
-                      ctx.fillRect(...tp, ...T(SIZE_CELL))
+                          app.assets.bgIce,
+                        ...T(modulo(p, SIZE_BOARD_PIXELS)),
+                        16,
+                        16,
+                        ...tp,
+                        16,
+                        16,
+                      )
                     }
-                    ctx.drawImage(
-                      t === "grass" ?
-                        app.assets.bgGrass
-                      : t === "water" ?
-                        app.assets.bgWater
-                      :
-                        app.assets.bgIce,
-                      ...T(modulo(p, SIZE_BOARD_PIXELS)),
-                      16,
-                      16,
-                      ...tp,
-                      16,
-                      16,
-                    )
                     if ((pos.x + pos.y) % 2 === 0) {
                       ctx.fillStyle = "rgba(0,0,0,.125)"
                       ctx.fillRect(...tp, ...T(SIZE_CELL))
@@ -257,7 +281,7 @@ export const
                       if (thing.state.t === "dying") { ctx.rotate(thing.state.ang) }
                       ctx.scale(...T(thing.scale))
                       ctx.drawImage(
-                        getSprite(app.assets, thing, _gameState.level.index),
+                        getSprite(app.assets, thing),
                         16 * thing.frame,
                         0,
                         16,
@@ -323,9 +347,11 @@ export const
                     if (_anime.t === "step") { if (_anime.step(dt)) { animeEnd() } }
                   }
                   if (_gameState.t !== "title") {
-                    const { level, world } = _gameState
+                    const { world } = _gameState
                     const { boss, things, unicorn } = world
-                    if (_anime == null && boss == null) { spawnEnemies(dt, level, world) }
+                    if (_gameState.t === "level" && _anime == null && boss == null) {
+                      spawnEnemies(dt, _gameState.level, world)
+                    }
                     things.forEach((thing) => {
                       if (thing.state.t === "dying") {
                         if (thing.state.lifetime > 0) {
@@ -336,7 +362,7 @@ export const
                         }
                       }
                       // keep the player animating
-                      if (_anime != null && thing !== unicorn) { return }
+                      if (_anime != null && thing !== unicorn && thing !== world.tucker) { return }
                       if (
                         thing.alignment === "bad" && thing !== boss && boss?.state.t === "dying"
                       ) { return }
@@ -345,12 +371,16 @@ export const
                           thing.type === "apple"
                           || thing.type === "banana"
                           || thing.type === "orange"
+                          || thing === world.tucker
                         ) { return }
                         if (thing.state.cooldown > 0) {
                           thing.state.cooldown -= 1 / 60
-                        } else if (thing !== unicorn) {
+                        } else if (_gameState.t === "level" && thing !== unicorn) {
                           const getNextMove = (thing: Thing) => {
-                            const moves = getMoves(thing, boss != null ? SIZE_BOARD : level.size)
+                            const moves = getMoves(
+                              thing,
+                              boss != null ? SIZE_BOARD : _gameState.level.size,
+                            )
 
                             return (
                                 thing.alignment === "bad" ?
@@ -416,10 +446,15 @@ export const
                               }
                             })
                           }
-                          if (boss == null && thing === unicorn && thing.cell.y < SIZE_BOARD.y) {
+                          if (
+                            _gameState.t === "level"
+                            && boss == null
+                            && thing === unicorn
+                            && thing.cell.y < SIZE_BOARD.y
+                          ) {
                             spawnBoss(_gameState)
                             animes.set(() =>
-                              bossIntro(app, camera, level, () => {
+                              bossIntro(app, camera, _gameState.level, () => {
                                 animeEnd()
                               })
                             )
@@ -431,7 +466,10 @@ export const
                           if (thing.state.path.length === 0) {
                             thing.state = ThingStateIdle(
                               THING_STATS[thing.type as ChessPiece]?.cooldown ?? 0,
-                              thing === unicorn ? getMoves(thing, level.size) : [],
+                              _gameState.t === "level" && thing === unicorn ?
+                                getMoves(thing, _gameState.level.size)
+                              :
+                                [],
                             )
                           }
                         }
@@ -442,23 +480,31 @@ export const
                       thing.state.t !== "dying" || thing.state.lifetime > 0
                     )
 
-                    if (_anime == null && boss != null && !world.things.includes(boss)) {
+                    if (
+                      _gameState.t === "level"
+                      && _anime == null
+                      && boss != null
+                      && !world.things.includes(boss)
+                    ) {
                       animes.set((_animes) => {
-                        if (level.index + 1 < LEVELS.length) {
+                        if (_gameState.level.index + 1 < LEVELS.length) {
                           return postLevelWin(app, camera, _gameState, animeEnd, () => {
-                            app.router
-                              .replace(
-                                level.index + 1 < LEVELS.length ?
-                                  pgLevel(level.index + 1)
-                                :
-                                  pgIndex(),
-                              )
+                            app.router.replace(
+                              _gameState.level.index + 1 < LEVELS.length ?
+                                pgLevel(_gameState.level.index + 1)
+                              :
+                                pgIndex(),
+                            )
                           })
                         }
-                        return win(app, world, animeEnd)
+                        return win(app, world, () => {
+                          app.router.replace(pgWin())
+                        })
                       })
                     }
-                    if (!world.things.includes(unicorn) && _anime == null) {
+                    if (
+                      _gameState.t === "level" && !world.things.includes(unicorn) && _anime == null
+                    ) {
                       animes.set(() => dead(() => {
                         const _lives = lives.get()
                         if (_lives === 0) {

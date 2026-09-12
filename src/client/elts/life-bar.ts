@@ -26,7 +26,7 @@ export const
       :
         div($flexRow, height("16px"), apd(
           canvas(sizeAttr(16, 16), withCtx((ctx) => {
-            ctx.drawImage(app.assets.chester(_gameState.level.index), 0, 0)
+            ctx.drawImage(app.assets.chester(0), 0, 0)
           })),
           "x",
           match(lives, (_lives) => span(apd(_lives))),
