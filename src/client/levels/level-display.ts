@@ -8,7 +8,7 @@ import { $ } from "rokay/browser/prop"
 import { backgroundColor, border, imageRendering, position } from "rokay/browser/style"
 import { rafLoop } from "rokay/browser/visible"
 import { last } from "rokay/data/array"
-import { float, pick } from "rokay/math/random"
+import { float, int, pick } from "rokay/math/random"
 import { divide, eq, floor, iter, len, minus, modulo, plus, round, scale, scaleComponents, T, unit, unitOfAng,
   V, VB, VZ } from "rokay/math/v"
 import { Prop } from "rokay/prop/prop"
@@ -43,9 +43,28 @@ import { FlashOutOverlay, TitleOverlay } from "./overlays"
 
 export const
   LevelDisplay = (app: AppClient, gameState: Prop<GameState>) => {
-    const animeEnd = () => {
-      animes.set((_animes) => _animes.slice(1))
-    }
+    const
+      animeEnd = () => {
+        animes.set((_animes) => _animes.slice(1))
+      },
+
+      spawnEnemiesInitial = (level: Level, world: World) => {
+        world.things = world.things.concat(level.spawnAreas.map((area) => {
+          const cell = plus(area.pos, V(
+            int(0, area.size.x - 1),
+            SIZE_BOARD.y + int(0, area.size.y - 1),
+          ))
+          return Thing(
+            "bad",
+            cell,
+            THING_STATS[area.type].frame,
+            cellToPos(cell),
+            V(1, 1),
+            ThingStateIdle(THING_STATS[area.type].cooldown, []),
+            area.type,
+          )
+        }))
+      }
 
     let
       now = performance.now(),
@@ -91,6 +110,7 @@ export const
               camera.state = CameraStateFollow(_gameState.world.unicorn)
               camera.bounds.se = scaleComponents(_gameState.level.size, SIZE_CELL)
               _gameState.world.unicorn.frame = 0
+              spawnEnemiesInitial(_gameState.level, _gameState.world)
             },
           ),
         ])
@@ -316,30 +336,6 @@ export const
                   world.things = [...world.things, world.boss]
                 },
 
-                spawnEnemies = (dt: number, level: Level, { unicorn, things }: World) => {
-                  const y = unicorn.cell.y - SIZE_BOARD.y / 2 - 1
-                  if (y < SIZE_BOARD.y) { return }
-                  for (let i = 0; i < SIZE_BOARD.x; ++i) {
-                    for (const thing in level.spawnRates) {
-                      const
-                        type = thing as ChessPiece,
-                        spawnTime = level.spawnRates[type],
-                        odds = spawnTime === 0 ? 0 : 1 / spawnTime * dt / SIZE_BOARD.x
-                      if (Math.random() > odds) { continue }
-                      const cell = V(i, y)
-                      things.push(Thing(
-                        "bad",
-                        cell,
-                        THING_STATS[type].frame,
-                        cellToPos(cell),
-                        V(1, 1),
-                        ThingStateIdle(THING_STATS[type].cooldown, []),
-                        type,
-                      ))
-                    }
-                  }
-                },
-
                 step = (dt: number) => {
                   const _gameState = gameState.get()
                   const _anime = animes.get()[0]
@@ -349,9 +345,6 @@ export const
                   if (_gameState.t !== "title") {
                     const { world } = _gameState
                     const { boss, things, unicorn } = world
-                    if (_gameState.t === "level" && _anime == null && boss == null) {
-                      spawnEnemies(dt, _gameState.level, world)
-                    }
                     things.forEach((thing) => {
                       if (thing.state.t === "dying") {
                         if (thing.state.lifetime > 0) {
@@ -361,6 +354,14 @@ export const
                           thing.state.ang += thing.state.velAng * dt
                         }
                       }
+
+                      // only update enemies if they are on screen
+                      if (
+                        thing !== unicorn
+                        && thing !== boss
+                        && (thing.cell.y < unicorn.cell.y - 5 || thing.cell.y > unicorn.cell.y + 3)
+                      ) { return }
+
                       // keep the player animating
                       if (_anime != null && thing !== unicorn && thing !== world.tucker) { return }
                       if (
@@ -383,9 +384,9 @@ export const
                             )
                             if (thing.type === "pawn") {
                               return moves.find((move) =>
-                                last(move).x !== 0 && eq(last(move), unicorn.cell)
+                                last(move).x !== thing.cell.x && eq(last(move), unicorn.cell)
                               ) ?? moves.find((move) =>
-                                last(move).x === 0 && things.every((thing) =>
+                                last(move).x === thing.cell.x && things.every((thing) =>
                                   !eq(last(move), thing.cell)
                                 )
                               )
@@ -532,6 +533,7 @@ export const
                           AnimeStep(() => {
                             if (camera.state.t !== "idle") { return }
                             camera.state = CameraStateFollow(_gameState.world.unicorn)
+                            spawnEnemiesInitial(_gameState.level, _gameState.world)
                             return true
                           }),
                         ])
