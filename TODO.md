@@ -4,7 +4,6 @@
 - Better world color changes (violet)
 - more fades ? (dead overlay out, have preamble ready to go as flash fades)
 - make Tucker and Chester grow horns
-- pawn attacks
 - stop spawning on screen
 - pre-spawn levels
 - differentiate levels/pieces/bosses

@@ -47,7 +47,7 @@ export const
     bishop: ThingStats(2, 50, BISHOP_MOVEMENTS, 3),
     king: ThingStats(2, 50, KING_MOVEMENTS, 5),
     knight: ThingStats(2, 50, KNIGHT_MOVEMENTS, 1),
-    pawn: ThingStats(2, 50, [V(0, 1)]),
+    pawn: ThingStats(2, 50, [V(-1, 1), V(0, 1), V(1, 1)]),
     queen: ThingStats(2, 50, QUEEN_MOVEMENTS, 4),
     rook: ThingStats(2, 50, ROOK_MOVEMENTS, 2),
     unicorn: ThingStats(1, 100, KNIGHT_MOVEMENTS),

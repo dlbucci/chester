@@ -381,7 +381,15 @@ export const
                               thing,
                               boss != null ? SIZE_BOARD : _gameState.level.size,
                             )
-
+                            if (thing.type === "pawn") {
+                              return moves.find((move) =>
+                                last(move).x !== 0 && eq(last(move), unicorn.cell)
+                              ) ?? moves.find((move) =>
+                                last(move).x === 0 && things.every((thing) =>
+                                  !eq(last(move), thing.cell)
+                                )
+                              )
+                            }
                             return (
                                 thing.alignment === "bad" ?
                                   moves.find((move) => eq(last(move), unicorn.cell))
