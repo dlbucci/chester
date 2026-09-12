@@ -4,7 +4,6 @@
 - Better world color changes (violet)
 - more fades ? (dead overlay out, have preamble ready to go as flash fades)
 - make Tucker and Chester grow horns
-- stop spawning on screen
 - differentiate levels/pieces/bosses
 - pixel text
 - sfx
@@ -28,7 +27,6 @@
 - shorten property names?
 - shorten strings?
 - inline/trim css?
-- color paint debug stuff
 - reduce animations used
 - drop font loading
 - pack images (remove margins)

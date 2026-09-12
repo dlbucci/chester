@@ -88,24 +88,20 @@ export const
             const
               colorV = 0x33, //Math.round(linear(0x33, 0xff, level / 8)),
               color = `rgb(${colorV},${colorV},${colorV})`
-            return paintAndOutline(
-              unicorn,
-              {
-                // main colors
-                "255,255,255,255": [color],
-                "224,224,224,255": [color, "rgba(0,0,0,.1)"],
-                // mane colors
-                "204,204,221,255": [color, "rgba(255,255,255,.4)"],
-                "179,179,194,255": [color, "rgba(255,255,255,.3)"],
-                // horn tip
-                "255,255,0,255": ["transparent"],
-                // horn base
-                "224,224,0,255": [color, "rgba(255,255,255,.4)"],
-                // hoof
-                // "0,0,0,255": []
-              },
-              true,
-            )
+            return paintAndOutline(unicorn, {
+              // main colors
+              "255,255,255,255": [color],
+              "224,224,224,255": [color, "rgba(0,0,0,.1)"],
+              // mane colors
+              "204,204,221,255": [color, "rgba(255,255,255,.4)"],
+              "179,179,194,255": [color, "rgba(255,255,255,.3)"],
+              // horn tip
+              "255,255,0,255": ["transparent"],
+              // horn base
+              "224,224,0,255": [color, "rgba(255,255,255,.4)"],
+              // hoof
+              // "0,0,0,255": []
+            })
           }),
           crystal: cached((color) => Crystal(crystal, color)),
           font9,
@@ -185,10 +181,9 @@ const
       )
     }),
 
-  paint = (colors: Record<string, string[]>, debug = false) =>
+  paint = (colors: Record<string, string[]>) =>
     (ctx: CanvasRenderingContext2D) => {
       const { data } = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height)
-      const colorSet = new Set<string>()
       for (let i = 0; i < data.length; i += 4) {
         const slice = data.slice(i, i + 4).join(",")
         const fills = colors[slice]
@@ -202,23 +197,16 @@ const
               ctx.fillRect(...pos, 1, 1)
             }
           })
-        } else {
-          colorSet.add(slice)
         }
       }
-      if (debug) { console.log("colors:", colorSet) }
     },
 
-  paintAndOutline = (
-    image: HTMLCanvasElement,
-    paintArgs?: Record<string, string[]>,
-    debug = false,
-  ) =>
+  paintAndOutline = (image: HTMLCanvasElement, paintArgs?: Record<string, string[]>) =>
     canvas(size(image.width, image.height), withCtx(
       (ctx) => {
         ctx.drawImage(image, 0, 0)
       },
-      paintArgs != null ? paint(paintArgs, debug) : undefined,
+      paintArgs != null ? paint(paintArgs) : undefined,
       fills("#000"),
       outline(1),
     )),
