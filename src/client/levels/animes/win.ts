@@ -6,10 +6,10 @@ import { backgroundColor, color, flexDirection, gap, position, textAlign, top } 
 import { divide, minus, plus, scale, unitOfAng, V } from "rokay/math/v"
 import { PropBasic } from "rokay/prop/basic"
 
-import { pgIndex } from "../../../shared/pages.gen"
 import { THING_STATS } from "../../../shared/things/model"
 import { ThingStateMoveTo } from "../../../shared/things/types.gen"
 import { Crystal, World } from "../../../shared/worlds/types.gen"
+import { SentenceDiv } from "../../alphabet"
 import { AppClient } from "../../app"
 import { ease, linear } from "../../camera/model"
 import { cellToPos } from "../../cells/utils"
@@ -71,7 +71,7 @@ export const
     ]
   },
 
-  wintro = (app: AppClient, world: World) => {
+  wintro = (world: World, onDone: () => void) => {
     return [
       AnimeOverlay(() => {
         const
@@ -92,7 +92,7 @@ The End`.split(
           apd(match(messageIndex, (index) =>
             index >= 0 ?
               div($messageEnter, position("relative"), textAlign("center"), top("-16px"), apd(
-                messages[index],
+                SentenceDiv(messages[index].split(/\s+/), { color: "#333" }),
               ))
             :
               undefined
@@ -112,7 +112,7 @@ The End`.split(
                 }
               }
               if (_index + 1 < messages.length) { return _index + 1 }
-              app.router.replace(pgIndex())
+              onDone()
               return _index
             })
           }),

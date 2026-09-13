@@ -15,9 +15,8 @@ import { divide, eq, floor, iter, len, minus, modulo, plus, round, scale, scaleC
 import { PropBasic } from "rokay/prop/basic"
 import { Prop } from "rokay/prop/prop"
 
-import { GameState, GameStateLevel } from "../../shared/games/types.gen"
+import { GameState, GameStateLevel, GameStateTitle } from "../../shared/games/types.gen"
 import { Level } from "../../shared/levels/types.gen"
-import { pgIndex, pgLevel, pgWin } from "../../shared/pages.gen"
 import { getMoves, THING_STATS } from "../../shared/things/model"
 import { ChessPiece, Thing, ThingStateDying, ThingStateIdle, ThingStateMoveTo } from "../../shared/things/types.gen"
 import { World } from "../../shared/worlds/types.gen"
@@ -34,8 +33,10 @@ import { SONGS_BY_LEVEL } from "../sfx/music"
 import { playBuffer } from "../sfx/sfx"
 import { sfxChesterFadeIn, sfxChesterPieceBump, sfxChesterPieceSlide } from "../sfx/slide"
 import { $flexCenter, $s100 } from "../style/utils.gen"
+import { WinPage } from "../win.pag"
 import { getTerrain, worldNew } from "../worlds/model"
 
+import { LevelPage } from "./:id.pag"
 import { bossIntro } from "./animes/boss-intro"
 import { dead } from "./animes/dead"
 import { Anime, AnimeGloverlay, AnimeStep } from "./animes/model"
@@ -141,7 +142,9 @@ export const
         camera.state = CameraStateIdle()
         animes.set(() => [
           AnimeGloverlay(() => FlashOutOverlay(1.5, "#fff", animeEnd)),
-          ...wintro(app, _gameState.world),
+          ...wintro(_gameState.world, () => {
+            gameState.set(() => GameStateTitle())
+          }),
         ])
         onDestroy(playBuffer(SONGS_BY_LEVEL[6], { loop: true }))
       }
@@ -521,16 +524,11 @@ export const
                       animes.set((_animes) => {
                         if (_gameState.level.index + 1 < LEVELS.length) {
                           return postLevelWin(app, camera, _gameState, animeEnd, () => {
-                            app.router.replace(
-                              _gameState.level.index + 1 < LEVELS.length ?
-                                pgLevel(_gameState.level.index + 1)
-                              :
-                                pgIndex(),
-                            )
+                            gameState.set(() => LevelPage(_gameState.level.index + 1))
                           })
                         }
                         return win(app, world, () => {
-                          app.router.replace(pgWin())
+                          gameState.set(() => WinPage(app))
                         })
                       })
                     }
@@ -543,7 +541,7 @@ export const
                           animes.set(() => [
                             AnimeGloverlay(() =>
                               FlashInOverlay(2.5, "#333", () => {
-                                app.router.replace(pgIndex())
+                                gameState.set(() => GameStateTitle())
                               })
                             ),
                           ])
@@ -590,7 +588,7 @@ export const
                   AnimeGloverlay(() => {
                     playBuffer(sfxChesterFadeIn)
                     return FadeInOverlay(1.5, "#333", () => {
-                      app.router.replace(pgLevel(0))
+                      gameState.set(() => LevelPage(0))
                     })
                   }),
                 ])
