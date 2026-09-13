@@ -1,11 +1,12 @@
 import { apd } from "rokay/browser/core"
-import { div, span } from "rokay/browser/elt"
+import { div } from "rokay/browser/elt"
 import { match } from "rokay/browser/match"
 import { onPointerdown } from "rokay/browser/on"
-import { color, fontSize, textAlign } from "rokay/browser/style"
+import { padding, textAlign } from "rokay/browser/style"
 import { Prop } from "rokay/prop/prop"
 
 import { Level } from "../../../shared/levels/types.gen"
+import { SentenceDiv, WordDiv } from "../../alphabet"
 import { $messageEnter } from "../../style/utils.gen"
 import { LEVELS } from "../model"
 import { Overlay } from "../overlays"
@@ -22,17 +23,19 @@ export const
           messageIndex = Prop(() => 0)
 
         return Overlay(
-          fontSize(".8em"),
+          padding("12px"),
           apd(match(messageIndex, (index) => {
             const text = preamble[index]
             const bossLevel = LEVELS.find((l) => text.includes(l.bossName))
-            if (bossLevel == null) { return div($messageEnter, textAlign("center"), apd(text)) }
+            if (bossLevel == null) {
+              return div($messageEnter, textAlign("center"), apd(SentenceDiv(text.split(/\s+/))))
+            }
             const [before, after] = text.split(bossLevel.bossName)
-            return div($messageEnter, textAlign("center"), apd(
-              before,
-              span(color(bossLevel.color), apd(bossLevel.bossName)),
-              after,
-            ))
+            return div($messageEnter, textAlign("center"), apd(SentenceDiv([
+              ...before.trim().split(/\s+/),
+              WordDiv(bossLevel.bossName, { color: bossLevel.color }),
+              ...after.trim().split(/\s+/),
+            ])))
           })),
           onPointerdown(() => {
             messageIndex.set((_index) => {

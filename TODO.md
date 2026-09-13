@@ -5,12 +5,14 @@
 - more fades ? (dead overlay out, have preamble ready to go as flash fades)
 - make Tucker and Chester grow horns
 - differentiate levels/pieces/bosses
-- pixel text
 - sfx
 - music
 - Shops after beating boss
 - more margin on preamble text
 - attack flash
+- smaller fruit
+- better gradient overlay
+- better water & ice spawning
 
 ## probably not
 
@@ -28,8 +30,8 @@
 - shorten strings?
 - inline/trim css?
 - reduce animations used
-- drop font loading
 - pack images (remove margins)
 - drop Loader
+- remove unused characters
 
 total: 14848

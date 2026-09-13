@@ -133,7 +133,7 @@ but uh... well, you get it.`,
       "Boof Cake",
       "violet",
       `Look, this has been a bit of a bust.
-But on the bright side:
+But on the bright side...
 The world?
 Really, where'd all this color come from?
 Go kick Boof Cake's ass, maybe it'll keep coming!`,
@@ -154,7 +154,7 @@ And look at this place!
 Look at all the pretty colors!
 Those asshole unicorns had just hoarded it all for themselves, didn't they?
 Good work, man! Quality stuff!
-That said, there's one final thing to wrap up:
+That said, there's one final thing to wrap up...
 The true source of power for all you've faced...`,
       [
         ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "king")),
@@ -166,3 +166,6 @@ The true source of power for all you've faced...`,
       ],
     ),
   ]
+
+
+// !',.0123456789:?ABCDEGHILMNOPQRSTUWYabcdefghijklmnoprstuvwxy

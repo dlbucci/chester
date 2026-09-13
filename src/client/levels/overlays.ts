@@ -5,8 +5,7 @@ import { animation, background, backgroundColor, color, height, left, position, 
 import { MixArgs } from "rokay/mix"
 
 import { Level } from "../../shared/levels/types.gen"
-import { pgIndex } from "../../shared/pages.gen"
-import { AppClient } from "../app"
+import { WordDiv } from "../alphabet"
 import { $flexCenter, $messageEnter } from "../style/utils.gen"
 
 
@@ -36,17 +35,6 @@ export const
     ))
   },
 
-  DeadOverlay = (app: AppClient) =>
-    Overlay(
-      animation("1s fade-in"),
-      $gradientOverlay,
-      color("hsl(352,78%,45%)"),
-      apd(div($messageEnter, apd("YOU DIED"))),
-      onPointerdown(() => {
-        app.router.replace(pgIndex())
-      }),
-    ),
-
   FlashOverlay = (
     timeSec: number,
     color: string,
@@ -68,4 +56,4 @@ export const
   },
 
   TitleOverlay = (onClick: () => void) =>
-    Overlay(apd("Chester"), onPointerdown(onClick))
+    Overlay(apd(WordDiv("Chester", { outline: "#333", scale: 2 })), onPointerdown(onClick))
