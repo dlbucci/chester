@@ -8,11 +8,11 @@
 - sfx
 - music
 - Shops after beating boss
-- more margin on preamble text
 - attack flash
 - smaller fruit
 - better gradient overlay
 - better water & ice spawning
+- pawns into queens
 
 ## probably not
 

@@ -33,18 +33,16 @@ export const
   BossIntroOverlay = (level: Level, timeSec: number, onDone: () => void) => {
     setTimeout(onDone, timeSec * 1000)
     return Overlay(animation(`${timeSec}s boss-intro-overlay forwards`), $gradientOverlay, apd(
-      div(color(level.color), $messageEnter, apd(level.bossName)),
+      div(color(level.color), $messageEnter, apd(WordDiv(level.bossName, {
+        color: level.color,
+        scale: 2,
+      }))),
     ))
   },
 
-  FlashOverlay = (
-    timeSec: number,
-    color: string,
-    { onDone, onWhite }: { onDone(): void, onWhite(): void },
-  ) => {
-    setTimeout(onWhite, timeSec * 500)
+  FadeInOverlay = (timeSec: number, color: string, onDone: () => void) => {
     setTimeout(onDone, timeSec * 1000)
-    return Overlay(animation(`flash ${timeSec}s`), backgroundColor(color))
+    return Overlay(animation(`${timeSec}s fade-in forwards`), backgroundColor(color))
   },
 
   FlashInOverlay = (timeSec: number, color: string, onDone: () => void) => {

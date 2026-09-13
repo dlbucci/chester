@@ -29,17 +29,6 @@
 }
 
 @keyframes flash {
-  0%,
-  100% {
-    opacity: 0;
-  }
-  5%,
-  50% {
-    opacity: 1;
-  }
-}
-
-@keyframes flash2 {
   50% {
     opacity: 0;
   }

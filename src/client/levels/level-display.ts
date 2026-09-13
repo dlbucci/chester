@@ -38,7 +38,7 @@ import { postLevelWin } from "./animes/post-level-win"
 import { preLevel } from "./animes/pre-level"
 import { win, wintro } from "./animes/win"
 import { LEVELS } from "./model"
-import { FlashOutOverlay, TitleOverlay } from "./overlays"
+import { FadeInOverlay, FlashInOverlay, FlashOutOverlay, TitleOverlay } from "./overlays"
 
 
 export const
@@ -83,7 +83,16 @@ export const
 
     gameState.listenAndCall((_gameState) => {
       if (_gameState.t === "title") {
-        animes.set(() => [])
+        animes.set(() =>
+          prevGameState === _gameState ?
+            []
+          :
+            [
+              AnimeGloverlay(() =>
+                FlashOutOverlay(1.5, prevGameState.t === "level" ? "#333" : "#fff", animeEnd)
+              ),
+            ]
+        )
         camera.state = CameraStateMobius(V(0, SIZE_CELL.y), scale(SIZE_CELL, 2))
         captured.set(() => [])
         lives.set(() => 3)
@@ -92,10 +101,14 @@ export const
         camera.state = CameraStateFollow(_gameState.world.unicorn)
         const _prev = prevGameState
         animes.set(() => [
-          ..._prev.t !== "level" || _prev === _gameState ?
+          ..._prev === _gameState ?
             []
           :
-            [AnimeGloverlay(() => FlashOutOverlay(2.5, _prev.level.color, animeEnd))],
+            [
+              AnimeGloverlay(() =>
+                FlashOutOverlay(1.5, _prev.t === "level" ? _prev.level.color : "#333", animeEnd)
+              ),
+            ],
           ...preLevel(
             _gameState.level,
             () => {
@@ -118,12 +131,8 @@ export const
       } else if (_gameState.t === "win") {
         camera.bounds.se = SIZE_BOARD_PIXELS
         camera.state = CameraStateIdle()
-        const _prev = prevGameState
         animes.set(() => [
-          ..._prev.t === "level" ?
-            [AnimeGloverlay(() => FlashOutOverlay(2.5, _prev.level.color, animeEnd))]
-          :
-            [],
+          AnimeGloverlay(() => FlashOutOverlay(1.5, "#fff", animeEnd)),
           ...wintro(app, _gameState.world),
         ])
       }
@@ -518,7 +527,13 @@ export const
                       animes.set(() => dead(() => {
                         const _lives = lives.get()
                         if (_lives === 0) {
-                          app.router.replace(pgIndex())
+                          animes.set(() => [
+                            AnimeGloverlay(() =>
+                              FlashInOverlay(2.5, "#333", () => {
+                                app.router.replace(pgIndex())
+                              })
+                            ),
+                          ])
                           return
                         }
                         lives.set((_lives) => _lives - 1)
@@ -558,7 +573,13 @@ export const
           matchIf(gameState, (_gameState) =>
             _gameState.t === "title" ?
               TitleOverlay(() => {
-                app.router.replace(pgLevel(0))
+                animes.set(() => [
+                  AnimeGloverlay(() =>
+                    FadeInOverlay(1.5, "#333", () => {
+                      app.router.replace(pgLevel(0))
+                    })
+                  ),
+                ])
               })
             :
               undefined

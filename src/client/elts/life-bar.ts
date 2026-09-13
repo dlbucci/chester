@@ -39,7 +39,7 @@ export const
     div(backgroundColor("gray"), height("17px"), position("relative"), ...args, apd(
       matchIf(lifeUp, () =>
         Overlay(
-          animation("1s step-start infinite flash2"),
+          animation("1s step-start infinite flash"),
           backgroundColor("#333"),
           fontSize("8px"),
           apd(WordDiv("LIFE UP")),
