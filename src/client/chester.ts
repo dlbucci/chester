@@ -3,12 +3,10 @@ import { div } from "rokay/browser/elt"
 import { mount } from "rokay/browser/mount"
 import { $ } from "rokay/browser/prop"
 import { position, size as sizeStyle, transform } from "rokay/browser/style"
-import { VisibleProp } from "rokay/browser/visible"
 import { WindowSize } from "rokay/browser/window"
-import { divide, divideComponents, floor, plus, scale, V } from "rokay/math/v"
+import { divide, divideComponents, floor, plus, scale, V, VZ } from "rokay/math/v"
 import { mix } from "rokay/mix"
 import { PropBasic } from "rokay/prop/basic"
-import { derive } from "rokay/prop/derive"
 
 import { GameStateTitle } from "../shared/games/types.gen.js"
 
@@ -21,23 +19,26 @@ import { $s100 } from "./style/utils.gen.js"
 
 mount(document.body, () => {
   const
-    size = derive(WindowSize(), (window): GameSize => {
-      // 34 = 2*(BAR_HEIGHT+BORDER) = 2*(16+1)
-      const options = floor(divideComponents(window, plus(SIZE_BOARD_PIXELS, V(0, 34))))
-      const zoom = Math.max(1, Math.min(options.x, options.y))
-      return {
-        window,
-        windowUnzoomed: floor(divide(window, zoom)),
-        zoom,
-        zoomedSize: scale(SIZE_BOARD_PIXELS, zoom),
-      }
+    size = PropBasic<GameSize>({
+      window: VZ,
+      windowUnzoomed: VZ,
+      zoom: 1,
+      zoomedSize: VZ,
     }),
-    app: AppClient = {
-      assets: ASSETS,
-      size,
-      visible: VisibleProp(),
-    },
+    app: AppClient = { assets: ASSETS, size },
     gameState = PropBasic(GameStateTitle())
+
+  WindowSize().listenAndCall((window) => {
+    // 34 = 2*(BAR_HEIGHT+BORDER) = 2*(16+1)
+    const options = floor(divideComponents(window, plus(SIZE_BOARD_PIXELS, V(0, 34))))
+    const zoom = Math.max(1, Math.min(options.x, options.y))
+    size.set(() => ({
+      window,
+      windowUnzoomed: floor(divide(window, zoom)),
+      zoom,
+      zoomedSize: scale(SIZE_BOARD_PIXELS, zoom),
+    }))
+  })
 
   return apd(div(
     position("relative"),

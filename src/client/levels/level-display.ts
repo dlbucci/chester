@@ -7,7 +7,6 @@ import { matchIf } from "rokay/browser/match"
 import { onPointerdown } from "rokay/browser/on"
 import { $ } from "rokay/browser/prop"
 import { backgroundColor, border, imageRendering, position } from "rokay/browser/style"
-import { rafLoop } from "rokay/browser/visible"
 import { last } from "rokay/data/array"
 import { float, int, pick } from "rokay/math/random"
 import { divide, eq, floor, iter, len, minus, modulo, plus, round, scale, scaleComponents, T, unit, unitOfAng,
@@ -570,12 +569,16 @@ export const
 
                   cameraStep(dt, camera)
                 }
-
-              rafLoop(app.visible, (n) => {
-                step(Math.min((n - now) / 1000, 1 / 30))
-                now = n
-                draw()
-              })
+              const doit = (n: number): void => {
+                try {
+                  step(Math.min((n - now) / 1000, 1 / 30))
+                  now = n
+                  draw()
+                } finally {
+                  requestAnimationFrame(doit)
+                }
+              }
+              requestAnimationFrame(doit)
             }),
           ),
 

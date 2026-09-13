@@ -26,5 +26,4 @@ export type GameSize = {
 export type AppClient = {
   assets: Assets
   size: PropView<GameSize>
-  visible: PropView<boolean>
 }
