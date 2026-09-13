@@ -1,7 +1,8 @@
 import { apd } from "rokay/browser/core"
 import { div } from "rokay/browser/elt"
 import { onPointerdown } from "rokay/browser/on"
-import { animation, background, backgroundColor, color, height, left, position, top, userSelect, width } from "rokay/browser/style"
+import { animation, background, backgroundColor, color, height, left, position, top, userSelect, width,
+  zIndex } from "rokay/browser/style"
 import { MixArgs } from "rokay/mix"
 
 import { Level } from "../../shared/levels/types.gen"
@@ -25,6 +26,7 @@ export const
       top(0),
       userSelect("none"),
       width("100%"),
+      zIndex(1),
       ...args
     ),
 

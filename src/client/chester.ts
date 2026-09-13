@@ -27,7 +27,8 @@ mount(document.body, () => {
   const
     router = BrowserRouter(),
     size = derive(WindowSize(), (window): GameSize => {
-      const options = floor(divideComponents(window, plus(SIZE_BOARD_PIXELS, V(0, 16))))
+      // 34 = 2*(BAR_HEIGHT+BORDER) = 2*(16+1)
+      const options = floor(divideComponents(window, plus(SIZE_BOARD_PIXELS, V(0, 34))))
       const zoom = Math.max(1, Math.min(options.x, options.y))
       return {
         window,

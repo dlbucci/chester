@@ -89,6 +89,7 @@ export const
         lives.set(() => 3)
       } else if (_gameState.t === "level") {
         camera.bounds.se = scaleComponents(_gameState.level.size, SIZE_CELL)
+        camera.state = CameraStateFollow(_gameState.world.unicorn)
         const _prev = prevGameState
         animes.set(() => [
           ..._prev.t !== "level" || _prev === _gameState ?

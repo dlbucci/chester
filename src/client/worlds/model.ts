@@ -14,7 +14,15 @@ export const
   worldNew = (level: Level): World => {
     const
       cell = V(pick([2, level.size.x - 3]), level.size.y - 2),
-      unicorn = Thing("good", cell, 1, cellToPos(cell), V(1, 1), ThingStateIdle(0, []), "unicorn"),
+      unicorn = Thing(
+        "good",
+        cell,
+        level.index === 0 ? 1 : 0,
+        cellToPos(cell),
+        V(1, 1),
+        ThingStateIdle(0, []),
+        "unicorn",
+      ),
       things: Thing[] = [unicorn],
       fruit = filterNotNil([
         level.index > 0 ? RandomFruit("apple", level.size.y - SIZE_BOARD.y) : undefined,
