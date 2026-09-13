@@ -18,7 +18,6 @@ export const
         meta("theme-color", "#dde"),
         meta("viewport", "initial-scale=1,user-scalable=no,width=device-width"),
 
-        link("manifest", "/manifest.json"),
         link("stylesheet", "/chester.css"),
 
         script(async, src("/chester.js")),
