@@ -1,4 +1,5 @@
 import { size as sizeAttr } from "rokay/browser/attr"
+import { onDestroy } from "rokay/browser/capture"
 import { apd } from "rokay/browser/core"
 import { canvas, div } from "rokay/browser/elt"
 import { withCtx } from "rokay/browser/game/danvas"
@@ -28,6 +29,9 @@ import { GRAVITY, SIZE_BOARD, SIZE_BOARD_PIXELS, SIZE_CELL } from "../const"
 import { CapturedBar } from "../elts/captured-bar"
 import { LifeBar } from "../elts/life-bar"
 import { $rainbowBackground } from "../elts/rainbow-background"
+import { SONGS_BY_LEVEL } from "../sfx/music"
+import { playBuffer } from "../sfx/sfx"
+import { sfxChesterFadeIn, sfxChesterPieceBump, sfxChesterPieceSlide } from "../sfx/slide"
 import { $flexCenter, $s100 } from "../style/utils.gen"
 import { getTerrain, worldNew } from "../worlds/model"
 
@@ -128,6 +132,9 @@ export const
             },
           ),
         ])
+        if (_gameState.level.index > 0) {
+          onDestroy(playBuffer(SONGS_BY_LEVEL[_gameState.level.index - 1], { loop: true }))
+        }
       } else if (_gameState.t === "win") {
         camera.bounds.se = SIZE_BOARD_PIXELS
         camera.state = CameraStateIdle()
@@ -135,6 +142,7 @@ export const
           AnimeGloverlay(() => FlashOutOverlay(1.5, "#fff", animeEnd)),
           ...wintro(app, _gameState.world),
         ])
+        onDestroy(playBuffer(SONGS_BY_LEVEL[6], { loop: true }))
       }
       prevGameState = _gameState
     })
@@ -186,6 +194,7 @@ export const
                 path.map((cell) => cellToPos(cell)),
                 THING_STATS.unicorn.speed,
               )
+              playBuffer(sfxChesterPieceSlide)
               if (last(unicorn.state.path).x < unicorn.pos.x) {
                 unicorn.scale.x = -1
               } else if (last(unicorn.state.path).x > unicorn.pos.x) {
@@ -457,6 +466,7 @@ export const
                                   scale(unitOfAng(float(-Math.PI * 3 / 8, -Math.PI * 5 / 8)), 100),
                                   1,
                                 )
+                                playBuffer(sfxChesterPieceBump)
                                 if (thing === unicorn) {
                                   captured.set((_captured) =>
                                     _captured.concat({ ...otherThing, alignment: "good" })
@@ -490,6 +500,8 @@ export const
                               :
                                 [],
                             )
+                          } else {
+                            //playBuffer(audioCtx, sfxChesterPieceSlide)
                           }
                         }
                       }
@@ -574,11 +586,12 @@ export const
             _gameState.t === "title" ?
               TitleOverlay(() => {
                 animes.set(() => [
-                  AnimeGloverlay(() =>
-                    FadeInOverlay(1.5, "#333", () => {
+                  AnimeGloverlay(() => {
+                    playBuffer(sfxChesterFadeIn)
+                    return FadeInOverlay(1.5, "#333", () => {
                       app.router.replace(pgLevel(0))
                     })
-                  ),
+                  }),
                 ])
               })
             :

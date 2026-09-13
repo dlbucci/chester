@@ -5,8 +5,6 @@
 - more fades ? (dead overlay out, have preamble ready to go as flash fades)
 - make Tucker and Chester grow horns
 - differentiate levels/pieces/bosses
-- sfx
-- music
 - Shops after beating boss
 - attack flash
 - smaller fruit
