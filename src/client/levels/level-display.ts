@@ -381,9 +381,7 @@ export const
 
                       // only update enemies if they are on screen
                       if (
-                        thing !== unicorn
-                        && thing !== boss
-                        && (thing.cell.y < unicorn.cell.y - 5 || thing.cell.y > unicorn.cell.y + 3)
+                        thing !== unicorn && thing !== boss && thing.cell.y < unicorn.cell.y - 5
                       ) { return }
 
                       // keep the player animating

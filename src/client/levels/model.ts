@@ -61,7 +61,7 @@ What a shame.
 Perhaps the mighty Barbin will help instead.`,
       [
         ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "knight")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "pawn")),
+        ...tab(4, (i) => SpawnArea(V(0, 8 + 2 * i), V(SIZE_BOARD.x, 2), "pawn")),
       ],
     ),
     Level2(
@@ -74,8 +74,8 @@ Surely, the cunning Halsik can help your cause.
 I'd bet my life on it.`,
       [
         ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "bishop")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "knight")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "pawn")),
+        ...tab(4, (i) => SpawnArea(V(0, 8 + 2 * i), V(SIZE_BOARD.x, 2), "knight")),
+        ...tab(4, (i) => SpawnArea(V(0, 16 + 2 * i), V(SIZE_BOARD.x, 2), "pawn")),
       ],
     ),
     Level2(
@@ -91,9 +91,9 @@ Maybe just go talk to Sicafant?
 He's a big fan of these guys, he'll know what's up.`,
       [
         ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "rook")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "bishop")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "knight")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "pawn")),
+        ...tab(4, (i) => SpawnArea(V(0, 8 + 2 * i), V(SIZE_BOARD.x, 2), "bishop")),
+        ...tab(4, (i) => SpawnArea(V(0, 16 + 2 * i), V(SIZE_BOARD.x, 2), "knight")),
+        ...tab(4, (i) => SpawnArea(V(0, 24 + 2 * i), V(SIZE_BOARD.x, 2), "pawn")),
       ],
     ),
     Level2(
@@ -106,10 +106,10 @@ They know everything.
 They'll be able to explain what's going on.`,
       [
         ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "queen")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "rook")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "bishop")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "knight")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "pawn")),
+        ...tab(4, (i) => SpawnArea(V(0, 8 + 2 * i), V(SIZE_BOARD.x, 2), "rook")),
+        ...tab(4, (i) => SpawnArea(V(0, 16 + 2 * i), V(SIZE_BOARD.x, 2), "bishop")),
+        ...tab(4, (i) => SpawnArea(V(0, 24 + 2 * i), V(SIZE_BOARD.x, 2), "knight")),
+        ...tab(4, (i) => SpawnArea(V(0, 32 + 2 * i), V(SIZE_BOARD.x, 2), "pawn")),
       ],
     ),
     Level2(
@@ -122,11 +122,11 @@ You could try Dinkus,
 but uh... well, you get it.`,
       [
         ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "king")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "queen")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "rook")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "bishop")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "knight")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "pawn")),
+        ...tab(4, (i) => SpawnArea(V(0, 8 + 2 * i), V(SIZE_BOARD.x, 2), "queen")),
+        ...tab(4, (i) => SpawnArea(V(0, 16 + 2 * i), V(SIZE_BOARD.x, 2), "rook")),
+        ...tab(4, (i) => SpawnArea(V(0, 24 + 2 * i), V(SIZE_BOARD.x, 2), "bishop")),
+        ...tab(4, (i) => SpawnArea(V(0, 32 + 2 * i), V(SIZE_BOARD.x, 2), "knight")),
+        ...tab(4, (i) => SpawnArea(V(0, 40 + 2 * i), V(SIZE_BOARD.x, 2), "pawn")),
       ],
     ),
     Level2(
@@ -139,11 +139,11 @@ Really, where'd all this color come from?
 Go kick Boof Cake's ass, maybe it'll keep coming!`,
       [
         ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "king")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "queen")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "rook")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "bishop")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "knight")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "pawn")),
+        ...tab(4, (i) => SpawnArea(V(0, 8 + 2 * i), V(SIZE_BOARD.x, 2), "queen")),
+        ...tab(4, (i) => SpawnArea(V(0, 16 + 2 * i), V(SIZE_BOARD.x, 2), "rook")),
+        ...tab(4, (i) => SpawnArea(V(0, 24 + 2 * i), V(SIZE_BOARD.x, 2), "bishop")),
+        ...tab(4, (i) => SpawnArea(V(0, 32 + 2 * i), V(SIZE_BOARD.x, 2), "knight")),
+        ...tab(4, (i) => SpawnArea(V(0, 40 + 2 * i), V(SIZE_BOARD.x, 2), "pawn")),
       ],
     ),
     Level2(
@@ -158,11 +158,11 @@ That said, there's one final thing to wrap up:
 The true source of power for all you've faced...`,
       [
         ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "king")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "queen")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "rook")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "bishop")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "knight")),
-        ...tab(4, (i) => SpawnArea(V(0, 2 * i), V(SIZE_BOARD.x, 2), "pawn")),
+        ...tab(4, (i) => SpawnArea(V(0, 8 + 2 * i), V(SIZE_BOARD.x, 2), "queen")),
+        ...tab(4, (i) => SpawnArea(V(0, 16 + 2 * i), V(SIZE_BOARD.x, 2), "rook")),
+        ...tab(4, (i) => SpawnArea(V(0, 24 + 2 * i), V(SIZE_BOARD.x, 2), "bishop")),
+        ...tab(4, (i) => SpawnArea(V(0, 32 + 2 * i), V(SIZE_BOARD.x, 2), "knight")),
+        ...tab(4, (i) => SpawnArea(V(0, 40 + 2 * i), V(SIZE_BOARD.x, 2), "pawn")),
       ],
     ),
   ]
