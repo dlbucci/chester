@@ -28,7 +28,7 @@
     "zip:html": "curl localhost:7024 -H 'Accept: text/html' > static/index.html",
     "zip:rollup": "rollup --input static/chester.js --file static/chester.js --format cjs --plugin terser",
     "zip:size": "ls -al static/build.zip | awk '{print $5}'",
-    "zip:zip": "cd static && rm -f build.zip && zip build.zip art/*.png art/icons/16.png index.html chester.css chester.js manifest.json"
+    "zip:zip": "cd static && rm -f build.zip && zip build.zip art/*.png index.html chester.css chester.js manifest.json"
   },
   "type": "module",
   "version": "1.0.0",

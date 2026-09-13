@@ -21,8 +21,6 @@
 
 ## TOSLIM
 
-- remove router => 13334 - 12189 = 1145 bytes
-- remove icons/16.png => 12189 - 11798 = 391 bytes
 - remove other rokay-dom stuff
 - shorten property names?
 - shorten strings?

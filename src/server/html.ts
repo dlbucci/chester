@@ -18,13 +18,9 @@ export const
         meta("theme-color", "#dde"),
         meta("viewport", "initial-scale=1,user-scalable=no,width=device-width"),
 
-        // ...staticFiles(cspNonce, { user: user.get() }),
-        link("apple-touch-icon", "/art/icons/16.png"),
-        link("icon", "/art/icons/16.png"),
         link("manifest", "/manifest.json"),
         link("stylesheet", "/chester.css"),
 
-        // script(nonce(cspNonce), apd(`const SERVER_DATA = ${JSON.stringify(serverData)}`)),
         script(async, src("/chester.js")),
       )),
       body(...args),
