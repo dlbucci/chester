@@ -4,7 +4,7 @@ import { match } from "rokay/browser/match"
 import { onPointerdown } from "rokay/browser/on"
 import { backgroundColor, color, flexDirection, gap, position, textAlign, top } from "rokay/browser/style"
 import { divide, minus, plus, scale, unitOfAng, V } from "rokay/math/v"
-import { Prop } from "rokay/prop/prop"
+import { PropBasic } from "rokay/prop/basic"
 
 import { pgIndex } from "../../../shared/pages.gen"
 import { THING_STATS } from "../../../shared/things/model"
@@ -82,7 +82,7 @@ What took you so long?
 The End`.split(
             "\n",
           ),
-          messageIndex = Prop(() => 0)
+          messageIndex = PropBasic(0)
 
         return Overlay(
           backgroundColor("transparent"),

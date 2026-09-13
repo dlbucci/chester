@@ -8,8 +8,8 @@ import { VisibleProp } from "rokay/browser/visible"
 import { WindowSize } from "rokay/browser/window"
 import { divide, divideComponents, floor, plus, scale, V } from "rokay/math/v"
 import { mix } from "rokay/mix"
+import { PropBasic } from "rokay/prop/basic"
 import { derive } from "rokay/prop/derive"
-import { Prop } from "rokay/prop/prop"
 
 import { GameState, GameStateTitle } from "../shared/games/types.gen.js"
 
@@ -45,7 +45,7 @@ mount(document.body, () => {
       .listen((view) => {
         gameState.set(() => view)
       }),
-    gameState = Prop(() => routedGameState.get())
+    gameState = PropBasic(routedGameState.get())
 
   return apd(div(
     position("relative"),

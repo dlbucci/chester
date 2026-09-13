@@ -12,6 +12,7 @@ import { last } from "rokay/data/array"
 import { float, int, pick } from "rokay/math/random"
 import { divide, eq, floor, iter, len, minus, modulo, plus, round, scale, scaleComponents, T, unit, unitOfAng,
   V, VB, VZ } from "rokay/math/v"
+import { PropBasic } from "rokay/prop/basic"
 import { Prop } from "rokay/prop/prop"
 
 import { GameState, GameStateLevel } from "../../shared/games/types.gen"
@@ -79,10 +80,10 @@ export const
         SIZE_BOARD_PIXELS,
         CameraStateMobius(V(0, SIZE_CELL.y), scale(SIZE_CELL, 2)),
       ),
-      animes = Prop<Anime[]>(() => []),
-      captured = Prop<Thing[]>(() => []),
-      lifeUp = Prop(() => false),
-      lives = Prop(() => 3),
+      animes = PropBasic<Anime[]>([]),
+      captured = PropBasic<Thing[]>([]),
+      lifeUp = PropBasic(false),
+      lives = PropBasic(3),
       prevGameState = gameState.get()
 
     gameState.listenAndCall((_gameState) => {
