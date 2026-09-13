@@ -8,16 +8,14 @@ import { VisibleProp } from "rokay/browser/visible"
 import { WindowSize } from "rokay/browser/window"
 import { divide, divideComponents, floor, plus, scale, V } from "rokay/math/v"
 import { mix } from "rokay/mix"
-import { Asink } from "rokay/prop/async"
 import { derive } from "rokay/prop/derive"
 import { Prop } from "rokay/prop/prop"
 
 import { GameState, GameStateTitle } from "../shared/games/types.gen.js"
 
 import { AppClient, GameSize } from "./app.js"
-import { load } from "./assets.js"
+import { ASSETS } from "./assets.js"
 import { SIZE_BOARD_PIXELS } from "./const.js"
-import { matchLoader } from "./elts/loader.syn.js"
 import { LevelDisplay } from "./levels/level-display.js"
 import { IndexPages } from "./pages.gen.js"
 import { $s100 } from "./style/utils.gen.js"
@@ -37,30 +35,23 @@ mount(document.body, () => {
         zoomedSize: scale(SIZE_BOARD_PIXELS, zoom),
       }
     }),
-    assets = Asink({
-      gen: () => load(),
-    })
+    app: AppClient = {
+      assets: ASSETS,
+      router,
+      size,
+      visible: VisibleProp(),
+    },
+    routedGameState = router.derive<GameState>(IndexPages({ app }), () => GameStateTitle())
+      .listen((view) => {
+        gameState.set(() => view)
+      }),
+    gameState = Prop(() => routedGameState.get())
 
   return apd(div(
     position("relative"),
     $(size, ({ windowUnzoomed: { x, y }, zoom }) =>
       mix(sizeStyle((x + 2) + "px", (y + 2) + "px"), transform(`scale(${zoom})`))
     ),
-    apd(matchLoader(assets, (assets) => {
-      const app: AppClient = {
-        assets,
-        router,
-        size,
-        visible: VisibleProp(),
-      }
-      // update after the fact since IndexPages needs app
-      const routedGameState = router.derive<GameState>(IndexPages({ app }), () => GameStateTitle())
-        .listen((view) => {
-          gameState.set(() => view)
-        })
-      const gameState = Prop(() => routedGameState.get())
-
-      return div($s100, apd(LevelDisplay(app, gameState)))
-    })),
+    apd(div($s100, apd(LevelDisplay(app, gameState)))),
   ))
 })

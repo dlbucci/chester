@@ -26,90 +26,6 @@ export type Assets =
 
 
 export const
-  load = () =>
-    Promise.all([
-      CRYSTAL,
-      PIECES,
-      UNICORN,
-      // music: { bg: AudioBuffer }
-      // sfx: { button: AudioBuffer }
-      // sfxKikisCafeButton(new AudioContext()),
-      // songKikisCafeBGMusic(new AudioContext()),
-    ])
-      .then(([crystal, pieces, unicorn]): Assets => ({
-        bgGrass: canvas(size(...T(SIZE_BOARD_PIXELS)), withCtx((ctx) => {
-          ctx.fillStyle = "rgba(0,0,0,.125)"
-          for (let y = 0; y < SIZE_BOARD_PIXELS.y; y += 4) {
-            for (let x = 0; x < SIZE_BOARD_PIXELS.x; x += 8) {
-              if (int(0, 8) > 0) { continue }
-              const blades = int(1, 4)
-              const start = int(0, 4 - blades)
-              for (let j = 0; j < blades; ++j) {
-                const height = int(2, 3)
-                ctx.fillRect(x + (start + j) * 2, y - height, 1, height)
-              }
-            }
-          }
-        })),
-        bgIce: canvas(size(...T(SIZE_BOARD_PIXELS)), withCtx((ctx) => {
-          ctx.fillStyle = "rgba(0,0,0,.125)"
-          for (let x = 0; x < 2 * SIZE_BOARD_PIXELS.x; x += 4) {
-            if (int(0, 1)) { continue }
-            for (let y = 0; y < SIZE_BOARD_PIXELS.y; ++y) {
-              ctx.fillRect(x - y, y, 2, 1)
-            }
-          }
-        })),
-        bgWater: canvas(size(...T(SIZE_BOARD_PIXELS)), withCtx((ctx) => {
-          ctx.fillStyle = "rgba(0,0,0,.125)"
-          for (let y = 0; y < SIZE_BOARD_PIXELS.y; y += 4) {
-            const offset = 4 * Math.sin(y) - y / 4
-            for (let x = 0; x < SIZE_BOARD_PIXELS.x; ++x) {
-              ctx.fillRect(x, y + 2 + Math.round(1.5 * Math.cos(x / 2 - offset)), 1, 2)
-            }
-          }
-        })),
-        chester: cached((_level) => {
-          const
-            colorV = 0x33, //Math.round(linear(0x33, 0xff, level / 8)),
-            color = `rgb(${colorV},${colorV},${colorV})`
-          return paintAndOutline(unicorn, {
-            // main colors
-            "255,255,255,255": [color],
-            "224,224,224,255": [color, "rgba(0,0,0,.1)"],
-            // mane colors
-            "204,204,221,255": [color, "rgba(255,255,255,.4)"],
-            "179,179,194,255": [color, "rgba(255,255,255,.3)"],
-            // horn tip
-            "255,255,0,255": ["transparent"],
-            // horn base
-            "224,224,0,255": [color, "rgba(255,255,255,.4)"],
-            // hoof
-            // "0,0,0,255": []
-          })
-        }),
-        crystal: cached((color) => Crystal(crystal, color)),
-        fruit: paintAndOutline(FRUIT),
-        paintedPieces: cached((color) =>
-          paintAndOutline(pieces, color != null ?
-            {
-              "34,34,34,255": [color],
-            }
-          :
-            undefined)
-        ),
-        unicorn: paintAndOutline(unicorn),
-        Rebu: paintUnicorn(unicorn, "red"),
-        Barbin: paintUnicorn(unicorn, "orange"),
-        Halsik: paintUnicorn(unicorn, "yellow"),
-        Sicafant: paintUnicorn(unicorn, "green"),
-        Peanio: paintUnicorn(unicorn, "blue"),
-        Dinkus: paintUnicorn(unicorn, "indigo"),
-        "Boof Cake": paintUnicorn(unicorn, "violet"),
-        "Evernut Clapati": paintUnicorn(unicorn, "black"),
-        paintedUnicorn: cached((color) => paintUnicorn(unicorn, color)),
-      })),
-
   getSprite = (assets: Assets, thing: Thing) => {
     if (thing.sprite != null) {
       return thing.sprite
@@ -181,4 +97,78 @@ export const
       "204,204,221,255": [color, "rgba(0,0,0,.2)"],
       "179,179,194,255": [color, "rgba(0,0,0,.3)"],
       // "0,0,0,0", "255,255,0,255", "0,0,0,255"
-    })
+    }),
+
+  ASSETS: Assets = {
+    bgGrass: canvas(size(...T(SIZE_BOARD_PIXELS)), withCtx((ctx) => {
+      ctx.fillStyle = "rgba(0,0,0,.125)"
+      for (let y = 0; y < SIZE_BOARD_PIXELS.y; y += 4) {
+        for (let x = 0; x < SIZE_BOARD_PIXELS.x; x += 8) {
+          if (int(0, 8) > 0) { continue }
+          const blades = int(1, 4)
+          const start = int(0, 4 - blades)
+          for (let j = 0; j < blades; ++j) {
+            const height = int(2, 3)
+            ctx.fillRect(x + (start + j) * 2, y - height, 1, height)
+          }
+        }
+      }
+    })),
+    bgIce: canvas(size(...T(SIZE_BOARD_PIXELS)), withCtx((ctx) => {
+      ctx.fillStyle = "rgba(0,0,0,.125)"
+      for (let x = 0; x < 2 * SIZE_BOARD_PIXELS.x; x += 4) {
+        if (int(0, 1)) { continue }
+        for (let y = 0; y < SIZE_BOARD_PIXELS.y; ++y) {
+          ctx.fillRect(x - y, y, 2, 1)
+        }
+      }
+    })),
+    bgWater: canvas(size(...T(SIZE_BOARD_PIXELS)), withCtx((ctx) => {
+      ctx.fillStyle = "rgba(0,0,0,.125)"
+      for (let y = 0; y < SIZE_BOARD_PIXELS.y; y += 4) {
+        const offset = 4 * Math.sin(y) - y / 4
+        for (let x = 0; x < SIZE_BOARD_PIXELS.x; ++x) {
+          ctx.fillRect(x, y + 2 + Math.round(1.5 * Math.cos(x / 2 - offset)), 1, 2)
+        }
+      }
+    })),
+    chester: cached((_level) => {
+      const
+        colorV = 0x33, //Math.round(linear(0x33, 0xff, level / 8)),
+        color = `rgb(${colorV},${colorV},${colorV})`
+      return paintAndOutline(UNICORN, {
+        // main colors
+        "255,255,255,255": [color],
+        "224,224,224,255": [color, "rgba(0,0,0,.1)"],
+        // mane colors
+        "204,204,221,255": [color, "rgba(255,255,255,.4)"],
+        "179,179,194,255": [color, "rgba(255,255,255,.3)"],
+        // horn tip
+        "255,255,0,255": ["transparent"],
+        // horn base
+        "224,224,0,255": [color, "rgba(255,255,255,.4)"],
+        // hoof
+        // "0,0,0,255": []
+      })
+    }),
+    crystal: cached((color) => Crystal(CRYSTAL, color)),
+    fruit: paintAndOutline(FRUIT),
+    paintedPieces: cached((color) =>
+      paintAndOutline(PIECES, color != null ?
+        {
+          "34,34,34,255": [color],
+        }
+      :
+        undefined)
+    ),
+    unicorn: paintAndOutline(UNICORN),
+    Rebu: paintUnicorn(UNICORN, "red"),
+    Barbin: paintUnicorn(UNICORN, "orange"),
+    Halsik: paintUnicorn(UNICORN, "yellow"),
+    Sicafant: paintUnicorn(UNICORN, "green"),
+    Peanio: paintUnicorn(UNICORN, "blue"),
+    Dinkus: paintUnicorn(UNICORN, "indigo"),
+    "Boof Cake": paintUnicorn(UNICORN, "violet"),
+    "Evernut Clapati": paintUnicorn(UNICORN, "black"),
+    paintedUnicorn: cached((color) => paintUnicorn(UNICORN, color)),
+  }

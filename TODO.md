@@ -29,7 +29,6 @@
 - inline/trim css?
 - reduce animations used
 - pack images (remove margins)
-- drop Loader
 - remove unused characters
 
 total: 14848
