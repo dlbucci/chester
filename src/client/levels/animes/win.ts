@@ -67,7 +67,7 @@ export const
         })
         return done
       }),
-      AnimeGloverlay(() => FlashInOverlay(2.5, "#fff", onDone)),
+      AnimeGloverlay(() => FlashInOverlay(true, 2.5, "#fff", onDone)),
     ]
   },
 

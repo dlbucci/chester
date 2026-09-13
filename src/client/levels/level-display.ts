@@ -27,7 +27,6 @@ import { GRAVITY, SIZE_BOARD, SIZE_BOARD_PIXELS, SIZE_CELL } from "../const"
 import { CapturedBar } from "../elts/captured-bar"
 import { LifeBar } from "../elts/life-bar"
 import { $rainbowBackground } from "../elts/rainbow-background"
-import { SONGS_BY_LEVEL } from "../sfx/music"
 import { playBuffer } from "../sfx/sfx"
 import { sfxChesterFadeIn, sfxChesterPieceBump, sfxChesterPieceSlide } from "../sfx/slide"
 import { $flexCenter, $s100 } from "../style/utils.gen"
@@ -45,6 +44,7 @@ import { LEVELS } from "./model"
 import { FadeInOverlay, FlashInOverlay, FlashOutOverlay, TitleOverlay } from "./overlays"
 
 
+//import { SONGS_BY_LEVEL } from "../sfx/music"
 export const
   LevelDisplay = (app: AppClient, gameState: Prop<GameState>) => {
     const
@@ -135,9 +135,9 @@ export const
             },
           ),
         ])
-        if (_gameState.level.index > 0) {
-          prevMusic = playBuffer(SONGS_BY_LEVEL[_gameState.level.index - 1], { loop: true })
-        }
+        // if (_gameState.level.index > 0) {
+        //   prevMusic = playBuffer(SONGS_BY_LEVEL[_gameState.level.index - 1], { loop: true })
+        // }
       } else if (_gameState.t === "win") {
         camera.bounds.se = SIZE_BOARD_PIXELS
         camera.state = CameraStateIdle()
@@ -147,7 +147,7 @@ export const
             gameState.set(() => GameStateTitle())
           }),
         ])
-        prevMusic = playBuffer(SONGS_BY_LEVEL[6], { loop: true })
+        //prevMusic = playBuffer(SONGS_BY_LEVEL[6], { loop: true })
       }
       prevGameState = _gameState
     })
@@ -539,7 +539,7 @@ export const
                         if (_lives === 0) {
                           animes.set(() => [
                             AnimeGloverlay(() =>
-                              FlashInOverlay(2.5, "#333", () => {
+                              FlashInOverlay(false, 2.5, "#333", () => {
                                 gameState.set(() => GameStateTitle())
                               })
                             ),

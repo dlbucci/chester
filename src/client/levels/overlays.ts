@@ -8,7 +8,7 @@ import { MixArgs } from "rokay/mix"
 import { Level } from "../../shared/levels/types.gen"
 import { WordDiv } from "../alphabet"
 import { playBuffer } from "../sfx/sfx"
-import { sfxChesterFadeIn } from "../sfx/slide"
+import { sfxChesterFadeIn, sfxChesterFadeUp } from "../sfx/slide"
 import { $flexCenter, $messageEnter } from "../style/utils.gen"
 
 
@@ -33,6 +33,7 @@ export const
     ),
 
   BossIntroOverlay = (level: Level, timeSec: number, onDone: () => void) => {
+    playBuffer(sfxChesterFadeIn)
     setTimeout(onDone, timeSec * 1000)
     return Overlay(animation(`${timeSec}s boss-intro-overlay forwards`), $gradientOverlay, apd(
       div(color(level.color), $messageEnter, apd(WordDiv(level.bossName, {
@@ -48,8 +49,8 @@ export const
     return Overlay(animation(`${timeSec}s fade-in forwards`), backgroundColor(color))
   },
 
-  FlashInOverlay = (timeSec: number, color: string, onDone: () => void) => {
-    playBuffer(sfxChesterFadeIn)
+  FlashInOverlay = (up: boolean, timeSec: number, color: string, onDone: () => void) => {
+    playBuffer(up ? sfxChesterFadeUp : sfxChesterFadeIn)
     setTimeout(onDone, timeSec * 1000)
     return Overlay(animation(`${timeSec}s flash-in forwards`), backgroundColor(color))
   },

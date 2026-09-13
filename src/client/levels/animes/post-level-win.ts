@@ -9,6 +9,8 @@ import { AppClient } from "../../app"
 import { ease, linear } from "../../camera/model"
 import { Camera, CameraShake } from "../../camera/types.gen"
 import { SIZE_BOARD_PIXELS } from "../../const"
+import { playBuffer } from "../../sfx/sfx"
+import { sfxChesterCrystal, sfxChesterFadeUp } from "../../sfx/slide"
 import { $flexCenter, $messageEnter } from "../../style/utils.gen"
 import { $gradientOverlay, FlashInOverlay, Overlay } from "../overlays"
 
@@ -44,9 +46,11 @@ export const
         crystalStart = pos
         crystal.pos = pos
         world.crystals = [crystal]
+        playBuffer(sfxChesterCrystal)
         camera.shake = shake
       }),
       AnimeOverlay(() => {
+        playBuffer(sfxChesterFadeUp)
         setTimeout(animeEnd, 5 * 1000)
         return Overlay(
           animation(`${5}s boss-intro-overlay forwards`),
@@ -73,6 +77,6 @@ export const
         if (done) { camera.shake = undefined }
         return done
       }),
-      AnimeGloverlay(() => FlashInOverlay(2.5, level.color, onEnd)),
+      AnimeGloverlay(() => FlashInOverlay(true, 2.5, level.color, onEnd)),
     ]
   }

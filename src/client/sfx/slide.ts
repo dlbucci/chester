@@ -18,7 +18,21 @@ export const
     p > .5 ? 1 : 2 * (p / .5) - 1
   ),
 
-  sfxChesterFadeIn = generateSFXBuffer(0.11, 0.35, 1, 21, -0.0001, 0.63, 0.54, 0.43, triangleWave)
+  sfxChesterFadeIn = generateSFXBuffer(0.11, 0.35, 1, 21, -0.0001, 0.63, 0.54, 0.43, triangleWave),
+
+  sfxChesterFadeUp = generateSFXBuffer(0.11, 0.35, 1, 21, 0.0001, 0.63, 0.54, 0.43, triangleWave),
+
+  sfxChesterCrystal = generateSFXBuffer(
+    0.03,
+    0.08,
+    0.84,
+    78,
+    0.0003,
+    0.05,
+    0.65,
+    0.13,
+    triangleWave,
+  )
 
 
 // export const
