@@ -41,7 +41,7 @@ export const
       || thing.type === "queen"
       || thing.type === "rook"
     ) {
-      return assets.paintedPieces(thing.alignment === "good" ? "hsl(58,9%,93%)" : undefined)
+      return assets.paintedPieces("hsl(58,9%,93%)")
     }
     return assets[thing.type]
   },
@@ -152,7 +152,11 @@ export const
       })
     }),
     crystal: cached((color) => Crystal(CRYSTAL, color)),
-    fruit: paintAndOutline(FRUIT),
+    fruit: paintAndOutline(canvas(size(48, 16), withCtx((ctx) => {
+      for (let i = 0; i < 3; ++i) {
+        ctx.drawImage(FRUIT, i * 8, 0, 8, 8, 16 * i + 4, 4, 8, 8)
+      }
+    }))),
     paintedPieces: cached((color) =>
       paintAndOutline(PIECES, color != null ?
         {

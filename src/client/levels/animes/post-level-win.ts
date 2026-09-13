@@ -1,14 +1,15 @@
 import { apd } from "rokay/browser/core"
-import { div, span } from "rokay/browser/elt"
-import { animation, color, flexDirection, gap, textAlign, whiteSpace } from "rokay/browser/style"
+import { div } from "rokay/browser/elt"
+import { animation, color, flexDirection, gap, whiteSpace } from "rokay/browser/style"
 import { divide, interpolateLinear, minus, V, VZ } from "rokay/math/v"
 
 import { GameStateLevel } from "../../../shared/games/types.gen"
+import { WordDiv } from "../../alphabet"
 import { AppClient } from "../../app"
 import { ease, linear } from "../../camera/model"
 import { Camera, CameraShake } from "../../camera/types.gen"
 import { SIZE_BOARD_PIXELS } from "../../const"
-import { $messageEnter } from "../../style/utils.gen"
+import { $flexCenter, $messageEnter } from "../../style/utils.gen"
 import { $gradientOverlay, FlashInOverlay, Overlay } from "../overlays"
 
 import { Anime, AnimeGloverlay, AnimeOverlay, AnimeStep } from "./model"
@@ -55,9 +56,13 @@ export const
           $gradientOverlay,
           whiteSpace("pre"),
           apd(div(
+            $flexCenter,
             $messageEnter,
-            textAlign("center"),
-            apd(span(color(level.color), apd(level.bossName)), "\nDEFEATED"),
+            flexDirection("column"),
+            apd(WordDiv(level.bossName, { color: level.color, scale: 2 }), WordDiv("DEFEATED", {
+              color: "red",
+              scale: 2,
+            })),
           )),
         )
       }),

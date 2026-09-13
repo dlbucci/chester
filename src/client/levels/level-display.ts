@@ -1,5 +1,4 @@
 import { size as sizeAttr } from "rokay/browser/attr"
-import { onDestroy } from "rokay/browser/capture"
 import { apd } from "rokay/browser/core"
 import { canvas, div } from "rokay/browser/elt"
 import { withCtx } from "rokay/browser/game/danvas"
@@ -84,9 +83,12 @@ export const
       captured = PropBasic<Thing[]>([]),
       lifeUp = PropBasic(false),
       lives = PropBasic(3),
-      prevGameState = gameState.get()
+      prevGameState = gameState.get(),
+      prevMusic: (() => void) | undefined
 
     gameState.listenAndCall((_gameState) => {
+      prevMusic?.()
+      prevMusic = undefined
       if (_gameState.t === "title") {
         animes.set(() =>
           prevGameState === _gameState ?
@@ -134,7 +136,7 @@ export const
           ),
         ])
         if (_gameState.level.index > 0) {
-          onDestroy(playBuffer(SONGS_BY_LEVEL[_gameState.level.index - 1], { loop: true }))
+          prevMusic = playBuffer(SONGS_BY_LEVEL[_gameState.level.index - 1], { loop: true })
         }
       } else if (_gameState.t === "win") {
         camera.bounds.se = SIZE_BOARD_PIXELS
@@ -145,7 +147,7 @@ export const
             gameState.set(() => GameStateTitle())
           }),
         ])
-        onDestroy(playBuffer(SONGS_BY_LEVEL[6], { loop: true }))
+        prevMusic = playBuffer(SONGS_BY_LEVEL[6], { loop: true })
       }
       prevGameState = _gameState
     })
